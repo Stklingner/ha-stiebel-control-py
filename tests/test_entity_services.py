@@ -6,7 +6,7 @@ import logging
 from unittest.mock import MagicMock
 from stiebel_control.services.entity_registration_service import EntityRegistrationService
 from stiebel_control.services.signal_entity_mapper import SignalEntityMapper
-from stiebel_control.elster_table import ElsterType
+from stiebel_control.heatpump.elster_table import ElsterType
 
 # Configure basic logging
 logging.basicConfig(

@@ -13,13 +13,11 @@ from typing import List, Tuple, Dict, Optional, Callable, Any
 from can import Message
 
 from stiebel_control.can.transport import CanTransport
-from stiebel_control.elster_table import (
-    ElsterIndex, 
+from stiebel_control.heatpump.elster_table import (
     get_elster_index_by_index, 
     get_elster_index_by_name,
     translate_value,
-    translate_string_to_value,
-    ElsterType
+    translate_string_to_value
 )
 
 # Configure logger

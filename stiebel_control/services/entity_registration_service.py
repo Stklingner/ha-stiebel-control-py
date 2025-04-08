@@ -4,7 +4,7 @@ Service for registering entities with Home Assistant via MQTT.
 import logging
 from typing import Dict, Any, Optional, List, Set
 from stiebel_control.mqtt_interface import MqttInterface
-from stiebel_control.elster_table import (
+from stiebel_control.heatpump.elster_table import (
     ElsterType,
     BETRIEBSARTLIST
 )

@@ -25,15 +25,6 @@ class CanInterface:
     while utilizing the new layered architecture internally.
     """
     
-    # CAN member indices - maintaining compatibility with the original interface
-    CM_ESPCLIENT = 0
-    CM_PUMP = 1
-    CM_FE7X = 2
-    CM_FEK = 3
-    CM_MANAGER = 4
-    CM_HEATING = 5
-    CM_FE7 = 6
-    
     def __init__(self, can_interface: str = 'can0', 
                  can_members: List[CanMember] = None, 
                  bitrate: int = 20000, 
@@ -115,16 +106,3 @@ class CanInterface:
             The latest value if available, None otherwise
         """
         return self.signal_handler.get_latest_value(member_index, signal_name, can_member_ids)
-    
-    @property
-    def latest_values(self):
-        """
-        Provide backward compatibility access to latest values.
-        
-        The data structure is different from the original implementation,
-        but this property provides the expected interface.
-        """
-        # The original uses (can_id, index) as keys, but our new implementation uses (can_id, signal_name)
-        # For now, just pass through to signal_handler's latest_values
-        # In a real implementation, we'd need to convert between the two formats
-        return self.signal_handler.latest_values

@@ -2,13 +2,9 @@
 Entity management for the Stiebel Control package.
 """
 import logging
-from typing import Dict, Any, Optional, List, Set, Tuple, Union
+from typing import Dict, Any, Optional, Tuple
 from stiebel_control.mqtt_interface import MqttInterface
-from stiebel_control.elster_table import (
-    get_elster_index_by_english_name, 
-    ElsterIndex, 
-    ElsterType
-)
+from stiebel_control.heatpump.elster_table import get_elster_index_by_english_name
 from stiebel_control.services.entity_registration_service import EntityRegistrationService
 from stiebel_control.services.signal_entity_mapper import SignalEntityMapper
 from stiebel_control.config.config_models import EntityConfig

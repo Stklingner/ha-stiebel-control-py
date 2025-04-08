@@ -6,8 +6,7 @@ import sys
 import time
 import logging
 import signal
-import yaml
-from typing import Dict, Any, Optional, List, Set, Tuple, Union
+from typing import Optional
 
 # Import the new CAN interface from the can package
 from stiebel_control.can.interface import CanInterface
@@ -132,12 +131,9 @@ class StiebelControl:
         Set up callbacks between components.
         """
         # Set the callback for the CAN interface
-        # The CAN interface doesn't have a register_callback method,
-        # so we need to set the callback attribute directly
         self.can_interface.callback = self.signal_processor.process_signal
         
         # Set the MQTT command callback
-        # The MqttInterface uses a direct attribute rather than a setter method
         self.mqtt_interface.command_callback = self.signal_processor.handle_command
         
         logger.debug("Callbacks set up")
