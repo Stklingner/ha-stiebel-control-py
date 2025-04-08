@@ -1,8 +1,8 @@
 """
-CAN Interface module for Stiebel Eltron heat pump communication.
+Stiebel Eltron specific CAN protocol implementation.
 
-This module handles the communication with the heat pump using the CAN bus
-via the python-can library.
+This module implements the protocol-specific logic for communicating
+with Stiebel Eltron heat pumps over the CAN bus.
 """
 
 import time
@@ -10,9 +10,9 @@ import logging
 from dataclasses import dataclass
 from typing import List, Tuple, Dict, Optional, Callable, Any
 
-import can
 from can import Message
 
+from stiebel_control.can.transport import CanTransport
 from stiebel_control.elster_table import (
     ElsterIndex, 
     get_elster_index_by_index, 
@@ -36,15 +36,16 @@ class CanMember:
     confirmation_id: Tuple[int, int] = (0, 0)
 
 
-class CanInterface:
+class StiebelProtocol:
     """
-    Interface for communication with Stiebel Eltron heat pumps via CAN bus.
+    Protocol implementation for Stiebel Eltron heat pumps.
     
     This class handles the protocol details specific to Stiebel Eltron heat pumps,
-    including message formatting and parsing.
+    including message formatting and parsing, while delegating actual transport
+    to the CanTransport layer.
     """
     
-    # Default CAN members definition based on the WPL13E configuration from the C++ code
+    # Default CAN members definition
     DEFAULT_CAN_MEMBERS = [
         # Name,        CAN ID,  Read ID,      Write ID,     Confirmation ID
         CanMember("ESPCLIENT", 0x680, (0x00, 0x00), (0x00, 0x00), (0xE2, 0x00)),  # The ESP Home Client
@@ -65,81 +66,46 @@ class CanInterface:
     CM_HEATING = 5
     CM_FE7 = 6
     
-    def __init__(self, can_interface: str = 'can0', 
-                 can_members: List[CanMember] = None, 
-                 bitrate: int = 20000, 
-                 callback: Optional[Callable[[str, Any, int], None]] = None):
-        """Initialize the CAN interface.
+    def __init__(self, transport: CanTransport, can_members: List[CanMember] = None):
+        """
+        Initialize the protocol layer.
         
         Args:
-            can_interface: Name of the CAN interface (e.g., 'can0')
+            transport: The CAN transport layer to use
             can_members: Optional list of CanMember objects; defaults to DEFAULT_CAN_MEMBERS
-            bitrate: CAN bus bitrate, default is 20000 for Stiebel Eltron heat pumps
-            callback: Optional callback function for value updates
         """
-        self.can_interface = can_interface
+        self.transport = transport
         self.can_members = can_members or self.DEFAULT_CAN_MEMBERS
-        self.bitrate = bitrate
-        self.callback = callback
-        self.bus = None
-        self.running = False
+        
+        # Set up the transport to use our message processor
+        self.transport.message_processor = self._process_can_message
+        
+        # Signal handlers
+        self.signal_handlers = []
         
         # Dictionary of pending requests, keyed by (can_id, index)
         self.pending_requests = {}
         
-        # Dictionary to store latest values, keyed by (can_id, index)
-        self.latest_values = {}
+    def add_signal_handler(self, handler: Callable[[str, Any, int], None]):
+        """
+        Add a signal handler function that will be called when signals are received.
         
-    def start(self):
-        """Start the CAN interface."""
-        try:
-            self.bus = can.interface.Bus(
-                channel=self.can_interface,
-                bustype='socketcan',
-                bitrate=self.bitrate
-            )
-            self.running = True
-            logger.info(f"CAN interface started on {self.can_interface}")
-            
-            # Start the message receiver in a separate thread
-            import threading
-            self.receiver_thread = threading.Thread(
-                target=self._receive_messages,
-                daemon=True  # Allow the thread to exit when the main program exits
-            )
-            self.receiver_thread.start()
-            logger.info("CAN message receiver thread started")
-            
-            return True
-        except Exception as e:
-            logger.error(f"Failed to start CAN interface: {e}")
-            return False
-    
-    def stop(self):
-        """Stop the CAN interface."""
-        self.running = False
-        if self.bus:
-            self.bus.shutdown()
-            self.bus = None
-            logger.info("CAN interface stopped")
-    
-    def _receive_messages(self):
+        Args:
+            handler: Callback function that takes (signal_name, value, can_id)
         """
-        Start receiving CAN messages in a dedicated thread.
-        This is typically run in a separate thread.
-        """
-        if not self.bus:
-            logger.error("CAN bus not initialized")
-            return
-            
-        while self.running:
-            try:
-                msg = self.bus.recv(timeout=1.0)
-                if msg:
-                    self._process_can_message(msg)
-            except Exception as e:
-                logger.error(f"Error receiving CAN message: {e}")
+        if handler not in self.signal_handlers:
+            self.signal_handlers.append(handler)
     
+    def remove_signal_handler(self, handler: Callable[[str, Any, int], None]):
+        """
+        Remove a previously added signal handler.
+        
+        Args:
+            handler: The handler to remove
+        """
+        if handler in self.signal_handlers:
+            self.signal_handlers.remove(handler)
+            
     def _process_can_message(self, msg: Message):
         """
         Process an incoming CAN message.
@@ -180,21 +146,17 @@ class CanInterface:
             # Log the received signal
             logger.debug(f"CAN 0x{can_id:X}: {ei.english_name} = {typed_value}")
             
-            # Store the latest value
-            request_key = (can_id, index)
-            self.latest_values[request_key] = typed_value
-            
             # If this is a response to a pending request, handle it
+            request_key = (can_id, index)
             if request_key in self.pending_requests:
                 request_info = self.pending_requests.pop(request_key)
                 # If there's a callback, invoke it
                 if request_info.get('callback'):
                     request_info['callback'](typed_value)
             
-            # If there's a global callback, invoke it with CAN ID
-            # Pass the CAN ID so the callback can filter by it
-            if self.callback:
-                self.callback(ei.english_name, typed_value, can_id)
+            # Notify all signal handlers
+            for handler in self.signal_handlers:
+                handler(ei.english_name, typed_value, can_id)
                 
         except Exception as e:
             logger.error(f"Error processing CAN message: {e}")
@@ -211,10 +173,6 @@ class CanInterface:
         Returns:
             bool: True if the request was sent successfully, False otherwise
         """
-        if not self.bus:
-            logger.error("CAN bus not initialized")
-            return False
-            
         try:
             # Get the CAN member
             if member_index >= len(self.can_members):
@@ -257,13 +215,6 @@ class CanInterface:
                     0x00
                 ]
                 
-            # Create and send the CAN message
-            msg = Message(
-                arbitration_id=self.can_members[self.CM_ESPCLIENT].can_id,
-                data=data,
-                is_extended_id=False
-            )
-            
             # Register the pending request
             if callback:
                 self.pending_requests[(member.can_id, ei.index)] = {
@@ -271,9 +222,17 @@ class CanInterface:
                     'timestamp': time.time()
                 }
                 
-            self.bus.send(msg)
-            logger.debug(f"Sent read request for {signal_name} to {member.name}")
-            return True
+            # Send the message using the transport layer
+            success = self.transport.send_message(
+                arbitration_id=self.can_members[self.CM_ESPCLIENT].can_id,
+                data=data,
+                is_extended_id=False
+            )
+            
+            if success:
+                logger.debug(f"Sent read request for {signal_name} to {member.name}")
+            
+            return success
             
         except Exception as e:
             logger.error(f"Error sending read request: {e}")
@@ -291,10 +250,6 @@ class CanInterface:
         Returns:
             bool: True if the request was sent successfully, False otherwise
         """
-        if not self.bus:
-            logger.error("CAN bus not initialized")
-            return False
-            
         try:
             # Get the CAN member
             member = self.can_members[member_index]
@@ -339,55 +294,21 @@ class CanInterface:
                     value_byte2
                 ]
                 
-            # Create and send the CAN message
-            msg = Message(
+            # Send the message using the transport layer
+            success = self.transport.send_message(
                 arbitration_id=self.can_members[self.CM_ESPCLIENT].can_id,
                 data=data,
                 is_extended_id=False
             )
             
-            self.bus.send(msg)
-            logger.debug(f"Sent write request for {signal_name}={value} to {member.name}")
+            if success:
+                logger.debug(f"Sent write request for {signal_name}={value} to {member.name}")
+                
+                # After writing, we should read back the value to confirm
+                self.read_signal(member_index, signal_name)
             
-            # After writing, we should read back the value to confirm
-            self.read_signal(member_index, signal_name)
-            
-            return True
+            return success
             
         except Exception as e:
             logger.error(f"Error sending write request: {e}")
             return False
-            
-    def get_latest_value(self, member_index: int, signal_name: str, can_member_ids: List[int] = None) -> Optional[Any]:
-        """
-        Get the latest value for a signal.
-        
-        Args:
-            member_index: Primary index of the CAN member
-            signal_name: Name of the signal
-            can_member_ids: Optional list of specific CAN IDs to check in addition to the primary member
-            
-        Returns:
-            The latest value if available, None otherwise
-        """
-        try:
-            ei = get_elster_index_by_name(signal_name)
-            
-            # First check the primary member
-            member = self.can_members[member_index]
-            value = self.latest_values.get((member.can_id, ei.index))
-            if value is not None:
-                return value
-                
-            # If a list of additional CAN IDs was provided, check those too
-            if can_member_ids:
-                for can_id in can_member_ids:
-                    value = self.latest_values.get((can_id, ei.index))
-                    if value is not None:
-                        return value
-                        
-            # Fall back to primary member's value (which will be None at this point)
-            return value
-        except Exception as e:
-            logger.error(f"Error getting latest value: {e}")
-            return None

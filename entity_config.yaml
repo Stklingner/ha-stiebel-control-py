@@ -1,5 +1,6 @@
 ###############################################
 # Stiebel Eltron Heat Pump Control - Entity Configuration
+# These will override or be added to the dynamically generated entities
 ###############################################
 
 # Entity definitions for sensors, buttons, and selects
