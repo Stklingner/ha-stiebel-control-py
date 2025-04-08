@@ -1,0 +1,220 @@
+###############################################
+# Stiebel Eltron Heat Pump Control - Entity Configuration
+###############################################
+
+# Entity definitions for sensors, buttons, and selects
+entities:
+  # Temperature sensors
+  sensors:
+    # Basic temperature sensors
+    outside_temp:
+      name: Outside Temperature
+      signal: OUTSIDE_TEMP
+      can_member: PUMP
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: °C
+      icon: mdi:thermometer-lines
+    
+    dhw_temp_actual:
+      name: DHW Temperature
+      signal: STORAGE_TANK_INTERNAL_TEMP
+      can_member: PUMP
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: °C
+      icon: mdi:thermometer-lines
+      # Add offset correction if needed
+      transform:
+        type: scale
+        offset: 3.9  # add 3.9°C offset
+    
+    dhw_temp_target:
+      name: DHW Target Temperature
+      signal: STORAGE_TANK_SETPOINT_TEMP
+      can_member: PUMP
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: °C
+      icon: mdi:thermometer-lines
+    
+    flow_temp_actual:
+      name: Flow Temperature
+      signal: FLOW_INTERNAL_TEMP
+      can_member: PUMP
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: °C
+      icon: mdi:thermometer-lines
+    
+    return_temp_actual:
+      name: Return Temperature
+      signal: RETURN_FLOW_INTERNAL_TEMP
+      can_member: PUMP
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: °C
+      icon: mdi:waves-arrow-left
+
+    # Additional temperature sensors from heatingpump.yaml
+    dhw_comfort_target_temp:
+      name: DHW Comfort Target Temperature
+      signal: COMFORT_STORAGE_TANK_SETPOINT
+      can_member: PUMP
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: °C
+      icon: mdi:thermometer-lines
+    
+    dhw_eco_target_temp:
+      name: DHW Eco Target Temperature
+      signal: ECO_STORAGE_TANK_SETPOINT
+      can_member: PUMP
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: °C
+      icon: mdi:thermometer-lines
+    
+    room_temp_actual:
+      name: Room Temperature
+      signal: ROOM_INTERNAL_TEMP
+      can_member: PUMP
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: °C
+      icon: mdi:home-thermometer
+    
+    room_temp_target:
+      name: Room Target Temperature
+      signal: ROOM_SET_TEMP_I
+      can_member: MANAGER
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: °C
+      icon: mdi:thermostat
+    
+    compressor_temp:
+      name: Compressor Temperature
+      signal: COMPRESSOR
+      can_member: PUMP
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: °C
+      icon: mdi:engine
+    
+    # Energy sensors
+    heating_dhw_day:
+      name: Daily DHW Energy
+      signal: HEATING_ENERGY_DAY_KWH
+      can_member: PUMP
+      device_class: energy
+      state_class: total_increasing
+      unit_of_measurement: kWh
+      icon: mdi:water-boiler
+    
+    electricity_intake_dhw_day:
+      name: Daily DHW Electricity Consumption
+      signal: ELECTRICITY_INTAKE_DHW_DAY_KWH
+      can_member: PUMP
+      device_class: energy
+      state_class: total_increasing
+      unit_of_measurement: kWh
+      icon: mdi:flash
+    
+    electricity_intake_heating_day:
+      name: Daily Heating Electricity Consumption
+      signal: ELECTRICITY_INTAKE_HEATING_DAY_KWH
+      can_member: PUMP
+      device_class: energy
+      state_class: total_increasing
+      unit_of_measurement: kWh
+      icon: mdi:flash
+    
+    # Calculated COP (Coefficient of Performance)
+    cop_water:
+      name: DHW COP
+      # This is a virtual sensor, updated through custom logic
+      device_class: power_factor
+      state_class: measurement
+      unit_of_measurement: ""
+      icon: mdi:chart-line
+      # Example of a formula transformation using other sensor values
+      transform:
+        type: formula
+        formula: "self.value_cache.get('heating_dhw_day', 0) / max(self.value_cache.get('electricity_intake_dhw_day', 1), 0.01)"
+    
+    # Operating status sensors
+    operating_status:
+      name: Operating Status
+      signal: OPERATING_STATUS
+      can_member: PUMP
+      state_class: measurement
+      icon: mdi:state-machine
+    
+    error_code:
+      name: Error Code
+      signal: ERROR_MESSAGE
+      can_member: PUMP
+      state_class: measurement
+      icon: mdi:alert-circle
+    
+    software_version:
+      name: Software Version
+      signal: SOFTWARE_NUMBER
+      can_member: PUMP
+      state_class: measurement
+      icon: mdi:numeric
+    
+  # Select controls (for enum values)
+  selects:
+    program_switch:
+      name: Program Switch
+      signal: PROGRAM_SWITCH
+      can_member: MANAGER
+      options:
+        - Emergency
+        - Standby
+        - Automatic
+        - Day mode
+        - Night mode
+        - DHW
+      icon: mdi:tune-vertical
+  
+  # Button controls
+  buttons:
+    refresh_all:
+      name: Refresh Values
+      icon: mdi:refresh
+      action: refresh_all
+    
+    update_time:
+      name: Update Time
+      icon: mdi:clock-outline
+      action: custom
+      custom_action:
+        type: sequence
+        actions:
+          - type: write_signal
+            signal: HOUR
+            can_member: MANAGER
+            value: "${%H}"  # Current hour
+            delay: 0.5
+          - type: write_signal
+            signal: MINUTE
+            can_member: MANAGER
+            value: "${%M}"  # Current minute
+            delay: 0.5
+          - type: write_signal
+            signal: DAY
+            can_member: MANAGER
+            value: "${%d}"  # Current day
+            delay: 0.5
+          - type: write_signal
+            signal: MONTH
+            can_member: MANAGER
+            value: "${%m}"  # Current month
+            delay: 0.5
+          - type: write_signal
+            signal: YEAR
+            can_member: MANAGER
+            value: "${%Y}"  # Current year
