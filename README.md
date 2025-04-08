@@ -4,20 +4,22 @@ A Python implementation of the Stiebel Eltron Heat Pump control system using pyt
 
 This project enables monitoring and controlling Stiebel Eltron Heat Pumps via a CAN interface, with seamless integration to Home Assistant through MQTT.
 
+This is currently a work in progress and is not ready for production use (and may never be).
+
 ## Features
 
 - Connect to Stiebel Eltron Heat Pumps via CAN bus
 - Auto-discovery in Home Assistant via MQTT
 - Monitor temperature, energy consumption, and operation status
 - Control operating modes and settings
-- Calculated efficiency metrics (COP)
 - Configurable sensor mapping and transformations
+- Dynamically assigned entities based on heat pump capabilities
 
 ## Requirements
 
 ### Hardware
 - Raspberry Pi or similar Linux-based computer
-- CAN bus interface (like MCP2515 CAN transceiver)
+- CAN bus interface (like MCP2515 CAN transceiver, PiCAN2 or equivalent)
 - Physical connection to the Heat Pump CAN bus
 
 ### Software
