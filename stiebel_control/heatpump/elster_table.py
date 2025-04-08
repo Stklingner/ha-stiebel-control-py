@@ -82,7 +82,8 @@ def load_elster_signals_from_yaml() -> List[ElsterIndex]:
         ElsterIndex("INDEX_NOT_FOUND", "INDEX_NOT_FOUND", 0, ET_NONE),
     ]
     
-    config_file = Path(__file__).parent.parent / 'config' / 'elster_signals.yaml'
+    # Update the path to account for the heatpump subfolder
+    config_file = Path(__file__).parent / 'elster_signals.yaml'
     
     if not config_file.exists():
         logger.warning(f"Elster signals YAML file not found: {config_file}")
