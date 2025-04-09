@@ -18,45 +18,47 @@ logger = logging.getLogger(__name__)
 class ElsterType(Enum):
     """Enumeration of Elster value types."""
     ET_NONE = auto()        # Unknown/unspecified type (read-only)
-    ET_INTEGER = auto()
-    ET_BOOLEAN = auto()
-    ET_TEMPERATURE = auto()
-    ET_DOUBLE_VALUE = auto()
-    ET_TRIPLE_VALUE = auto()
-    ET_HOUR = auto()
-    ET_HOUR_SHORT = auto()
-    ET_DATE = auto()
-    ET_PERCENT = auto()
-    ET_KELVIN = auto()
-    ET_PRESSURE = auto()
-    ET_MODE = auto()
-    ET_PROGRAM_SWITCH = auto()
-    ET_PROGRAM_TEXT = auto()
+    ET_INTEGER = auto()     # et_default - Plain integer value
+    ET_BOOLEAN = auto()     # et_bool - Boolean value (0/1)
+    ET_DEC_VAL = auto()     # et_dec_val - Value with 1 decimal place (scaled by 10)
+    ET_CENT_VAL = auto()    # et_cent_val - Value with 2 decimal places (scaled by 100)
+    ET_MIL_VAL = auto()     # et_mil_val - Value with 3 decimal places (scaled by 1000)
+    ET_BYTE = auto()        # et_byte - Raw byte value
+    ET_LITTLE_BOOL = auto() # et_little_bool - Boolean in different format (0x0100/0x0000)
+    ET_LITTLE_ENDIAN = auto() # et_little_endian - Byte-swapped integers
+    ET_MODE = auto()        # et_betriebsart - Operation mode enum
+    ET_TIME = auto()        # et_zeit - Time value
+    ET_DATE = auto()        # et_datum - Date value
+    ET_TIME_DOMAIN = auto() # et_time_domain - Time range with special formatting
+    ET_DEV_NR = auto()      # et_dev_nr - Device number
+    ET_ERR_CODE = auto()      # et_err_nr - Error code
+    ET_DEV_ID = auto()      # et_dev_id - Device ID
 
 
 # Import enum values into global namespace for backward compatibility
 ET_NONE = ElsterType.ET_NONE
 ET_INTEGER = ElsterType.ET_INTEGER
 ET_BOOLEAN = ElsterType.ET_BOOLEAN
-ET_TEMPERATURE = ElsterType.ET_TEMPERATURE
-ET_DOUBLE_VALUE = ElsterType.ET_DOUBLE_VALUE
-ET_TRIPLE_VALUE = ElsterType.ET_TRIPLE_VALUE
-ET_HOUR = ElsterType.ET_HOUR
-ET_HOUR_SHORT = ElsterType.ET_HOUR_SHORT
-ET_DATE = ElsterType.ET_DATE
-ET_PERCENT = ElsterType.ET_PERCENT
-ET_KELVIN = ElsterType.ET_KELVIN
-ET_PRESSURE = ElsterType.ET_PRESSURE
+ET_DEC_VAL = ElsterType.ET_DEC_VAL
+ET_CENT_VAL = ElsterType.ET_CENT_VAL
+ET_MIL_VAL = ElsterType.ET_MIL_VAL
+ET_BYTE = ElsterType.ET_BYTE
+ET_LITTLE_BOOL = ElsterType.ET_LITTLE_BOOL
+ET_LITTLE_ENDIAN = ElsterType.ET_LITTLE_ENDIAN
 ET_MODE = ElsterType.ET_MODE
-ET_PROGRAM_SWITCH = ElsterType.ET_PROGRAM_SWITCH
-ET_PROGRAM_TEXT = ElsterType.ET_PROGRAM_TEXT
+ET_TIME = ElsterType.ET_TIME
+ET_DATE = ElsterType.ET_DATE
+ET_TIME_DOMAIN = ElsterType.ET_TIME_DOMAIN
+ET_DEV_NR = ElsterType.ET_DEV_NR
+ET_ERR_CODE = ElsterType.ET_ERR_CODE
+#ET_DEV_ID = ElsterType.ET_DEV_ID
 
 
-class ElsterIndex:
+class ElsterEntry:
     """Class representing an Elster signal index with metadata."""
     
     def __init__(self, name, english_name, index, value_type):
-        """Initialize ElsterIndex.
+        """Initialize ElsterEntry.
         
         Args:
             name (str): Original German name of the signal
@@ -70,16 +72,16 @@ class ElsterIndex:
         self.type = value_type
 
 
-def load_elster_signals_from_yaml() -> List[ElsterIndex]:
+def load_elster_signals_from_yaml() -> List[ElsterEntry]:
     """
     Load Elster signal definitions from YAML file.
     
     Returns:
-        list: List of ElsterIndex objects
+        list: List of ElsterEntry objects
     """
     # Define an emergency fallback in case loading fails
     fallback_signals = [
-        ElsterIndex("INDEX_NOT_FOUND", "INDEX_NOT_FOUND", 0, ET_NONE),
+        ElsterEntry("INDEX_NOT_FOUND", "INDEX_NOT_FOUND", 0, ET_NONE),
     ]
     
     # Update the path to account for the heatpump subfolder
@@ -98,10 +100,6 @@ def load_elster_signals_from_yaml() -> List[ElsterIndex]:
             # Convert string type to ElsterType enum
             type_string = signal_data['type']
             
-            # Handle ElsterType.ET_XXX format
-            if type_string.startswith('ElsterType.'):
-                type_string = type_string[11:]  # Remove 'ElsterType.' prefix
-            
             # Get ElsterType value by name
             if hasattr(ElsterType, type_string):
                 value_type = getattr(ElsterType, type_string)
@@ -110,7 +108,7 @@ def load_elster_signals_from_yaml() -> List[ElsterIndex]:
                 logger.warning(f"Unknown ElsterType '{type_string}' for signal {signal_data['name']}, defaulting to ET_NONE")
                 value_type = ElsterType.ET_NONE
             
-            signal = ElsterIndex(
+            signal = ElsterEntry(
                 signal_data['name'],
                 signal_data['english_name'],
                 signal_data['index'],
@@ -136,192 +134,208 @@ ELSTER_INDEX_BY_INDEX = {signal.index: signal for signal in ELSTER_TABLE}
 
 
 # BetriebsartList from original C++ code
-BETRIEBSARTLIST = {
-    0: "Notbetrieb",
-    1: "Bereitschaft",
-    2: "Programmbetrieb",
-    3: "Tagbetrieb",
-    4: "Absenkbetrieb",
-    5: "Sommer(WW)",
-    6: "Aus"
+# BETRIEBSARTLIST = {
+#     0: "Notbetrieb",
+#     1: "Bereitschaft",
+#     2: "Programmbetrieb",
+#     3: "Tagbetrieb",
+#     4: "Absenkbetrieb",
+#     5: "Sommer(WW)",
+#     6: "Aus"
+# }
+
+MODELIST = {
+    0: "Emergency",
+    1: "Standby",
+    2: "Auto mode",
+    3: "Day mode",
+    4: "Night mode",
+    5: "Warm Water"
 }
 
 # ErrorList from original C++ code
 ERRORLIST = {
-    4: "DS",
-    8: "BWT",
-    12: "EVU",
-    16: "WS",
-    20: "MOT",
-    24: "HD",
-    28: "ND",
-    30: "VD",
-    32: "HG",
-    34: "GG",
-    36: "PD",
-    38: "LMD",
-    40: "TL",
-    42: "VK",
-    44: "HDW",
-    48: "SWT",
-    52: "AGF",
-    56: "TK",
-    58: "LP",
-    60: "OSDK",
-    62: "Geraetefehler",
-    64: "pTKHDG",
-    68: "Frostschutz",
-    72: "Wartung"
+    2: "Contactor stuck",
+    3: "ERR HD sensor",
+    4: "High pressure",
+    5: "Evaporator sensor",
+    6: "Relay driver",
+    7: "Relay level",
+    8: "Hex switch",
+    9: "Fan speed",
+    10: "Fan driver",
+    11: "Reset module",
+    12: "Low pressure (ND)",
+    13: "ROM",
+    14: "Source min. temp",
+    16: "Defrosting",
+    18: "ERR T-HEI IWS",
+    23: "ERR T-FRO IWS",
+    26: "Low pressure",
+    27: "ERR low pressure",
+    28: "ERR high pressure",
+    29: "HD sensor max",
+    30: "Hot gas max",
+    31: "ERR HD sensor",
+    32: "Freeze protection",
+    33: "No output"
 }
 
-
-def get_elster_index_by_name(name):
-    """Get ElsterIndex by German name.
+def get_elster_entry_by_name(name):
+    """Get ElsterEntry by German name.
     
     Args:
         name (str): German name of the signal
         
     Returns:
-        ElsterIndex: Corresponding ElsterIndex or UNKNOWN if not found
+        ElsterEntry: Corresponding ElsterEntry or UNKNOWN if not found
     """
     return ELSTER_INDEX_BY_NAME.get(name, ELSTER_TABLE[0])
 
 
-def get_elster_index_by_english_name(english_name):
-    """Get ElsterIndex by English name.
+def get_elster_entry_by_english_name(english_name):
+    """Get ElsterEntry by English name.
     
     Args:
         english_name (str): English name of the signal
         
     Returns:
-        ElsterIndex: Corresponding ElsterIndex or UNKNOWN if not found
+        ElsterEntry: Corresponding ElsterEntry or UNKNOWN if not found
     """
     return ELSTER_INDEX_BY_ENGLISH_NAME.get(english_name, ELSTER_TABLE[0])
 
 
-def get_elster_index_by_index(index):
-    """Get ElsterIndex by index value.
+def get_elster_entry_by_index(index):
+    """Get ElsterEntry by index value.
     
     Args:
         index (int): Index value of the signal
         
     Returns:
-        ElsterIndex: Corresponding ElsterIndex or UNKNOWN if not found
+        ElsterEntry: Corresponding ElsterEntry or UNKNOWN if not found
     """
     return ELSTER_INDEX_BY_INDEX.get(index, ELSTER_TABLE[0])
 
 
-def translate_value(value, value_type):
-    """Translate a raw value according to its type.
+def value_from_signal(value, value_type):
+    """Convert a raw signal value to a meaningful value based on its type.
     
     Args:
-        value (int): Raw value from CAN message
+        value (int): Raw value from the CAN signal
         value_type (ElsterType): Type of the value
         
     Returns:
-        int, float, bool, or str: Properly typed and scaled value
+        The converted value in the appropriate type (float, int, str)
     """
     if value_type == ElsterType.ET_NONE:
         return value  # Return raw value without conversion for ET_NONE type
-    elif value_type == ElsterType.ET_BOOLEAN:
+    elif    lsterType.ET_INTEGER or value_type == ElsterType.ET_BYTE:
+        return value  # Return integer values as is
+    elif value_type == ElsterType.ET_BOOLEAN or value_type == ElsterType.ET_LITTLE_BOOL:
+        # For ET_LITTLE_BOOL, value is 0x0100 (256) instead of 0x0001 (1)
+        if value_type == ElsterType.ET_LITTLE_BOOL:
+            return bool(value & 0x0100)
         return bool(value)
-    elif value_type == ElsterType.ET_TEMPERATURE:
-        # Handle temperature as signed value (convert to signed 16-bit)
+    elif value_type == ElsterType.ET_DEC_VAL:
+        # Handle values with 1 decimal place (scaled by 10)
         if value > 32767:  # If high bit is set, it's negative
             signed_value = value - 65536
             return signed_value / 10.0
-        return value / 10.0  # Temperature values are scaled by 10
-    elif value_type == ElsterType.ET_DOUBLE_VALUE or value_type == ElsterType.ET_TRIPLE_VALUE:
-        # These may also need signed handling
+        return value / 10.0
+    elif value_type == ElsterType.ET_CENT_VAL:
+        # Handle values with 2 decimal places (scaled by 100)
         if value > 32767:  # If high bit is set, it's negative
             signed_value = value - 65536
-            return signed_value / 10.0
-        return value / 10.0  # Double/triple values are scaled by 10
-    elif value_type == ElsterType.ET_PERCENT:
-        return value / 10.0  # Percent values are scaled by 10
-    elif value_type == ElsterType.ET_PROGRAM_SWITCH:
-        # Use the BetriebsartList if available
-        if 'BETRIEBSARTLIST' in globals():
-            return BETRIEBSARTLIST.get(value, "Unknown")
-        else:
-            program_states = {
-                0: "Emergency",
-                1: "Standby",
-                2: "Automatic",
-                3: "Day mode",
-                4: "Night mode",
-                5: "DHW",
-                6: "Unknown"
-            }
-            return program_states.get(value, "Unknown")
-    elif value_type == ElsterType.ET_HOUR or value_type == ElsterType.ET_HOUR_SHORT:
-        return value / 3600  # Hours are in seconds
+            return signed_value / 100.0
+        return value / 100.0
+    elif value_type == ElsterType.ET_MIL_VAL:
+        # Handle values with 3 decimal places (scaled by 1000)
+        if value > 32767:  # If high bit is set, it's negative
+            signed_value = value - 65536
+            return signed_value / 1000.0
+        return value / 1000.0
+    elif value_type == ElsterType.ET_MODE:
+        # Lookup operation mode in the MODELIST
+        return MODELIST.get(value, "Unknown")
+    elif value_type == ElsterType.ET_ERR_CODE:
+        # Lookup error code in the ERRORLIST
+        return ERRORLIST.get(value, "Unknown")
+    elif value_type == ElsterType.ET_TIME:
+        # Convert time in seconds to hours
+        return value / 3600.0
     elif value_type == ElsterType.ET_DATE:
-        # Format as YYYY-MM-DD (assuming value is in format YYYYMMDD)
+        # Format date as YYYY-MM-DD (assuming format YYYYMMDD)
         year = value // 10000
         month = (value // 100) % 100
         day = value % 100
         return f"{year:04d}-{month:02d}-{day:02d}"
+    elif value_type == ElsterType.ET_LITTLE_ENDIAN:
+        # Byte-swapped integer values
+        high_byte = (value & 0xFF00) >> 8
+        low_byte = (value & 0x00FF) << 8
+        return high_byte | low_byte
+    elif value_type == ElsterType.ET_TIME_DOMAIN:
+        # Time domain format (implementation depends on specific format)
+        return value
+    elif value_type in [ElsterType.ET_DEV_NR, ElsterType.ET_DEV_ID]:
+        # Device-related values are just integers
+        return value
     else:
         return value  # No translation for other types
 
 
-def translate_string_to_value(string_value, value_type):
-    """Translate a string value to the raw integer value according to type.
+def signal_from_value(string_value, value_type):
+    """Convert a meaningful value to a raw signal value based on its type.
     
     Args:
         string_value (str): String representation of value
         value_type (ElsterType): Type of the value
         
     Returns:
-        int: Raw value for CAN message
-        
-    Raises:
-        ValueError: If the string value cannot be converted to the specified type
+        int: The raw integer value to write to the CAN signal
     """
     if value_type == ElsterType.ET_NONE:
         raise ValueError("Cannot write to signals with ET_NONE type")
+    elif value_type == ElsterType.ET_INTEGER or value_type == ElsterType.ET_BYTE:
+        return int(string_value)
     elif value_type == ElsterType.ET_BOOLEAN:
         return 1 if string_value.lower() in ["true", "1", "on", "yes"] else 0
-    elif value_type == ElsterType.ET_TEMPERATURE:
-        # Multiply by 10 to store as fixed-point
-        # If negative, will be properly encoded as 16-bit signed
+    elif value_type == ElsterType.ET_LITTLE_BOOL:
+        # For ET_LITTLE_BOOL, use 0x0100 (256) instead of 0x0001 (1)
+        return 0x0100 if string_value.lower() in ["true", "1", "on", "yes"] else 0
+    elif value_type == ElsterType.ET_DEC_VAL:
+        # Values with 1 decimal place (scaled by 10)
         float_val = float(string_value) * 10
         # Convert to 16-bit signed integer representation if needed
         if float_val < 0:
             return int(float_val) & 0xFFFF  # Convert to 16-bit unsigned representation of signed value
         return int(float_val)
-    elif value_type == ElsterType.ET_DOUBLE_VALUE or value_type == ElsterType.ET_TRIPLE_VALUE:
-        # Multiply by 10 to store as fixed-point
-        float_val = float(string_value) * 10
+    elif value_type == ElsterType.ET_CENT_VAL:
+        # Values with 2 decimal places (scaled by 100)
+        float_val = float(string_value) * 100
         # Convert to 16-bit signed integer representation if needed
         if float_val < 0:
-            return int(float_val) & 0xFFFF  # Convert to 16-bit unsigned representation of signed value
+            return int(float_val) & 0xFFFF
         return int(float_val)
-    elif value_type == ElsterType.ET_PERCENT:
-        # Percent values are scaled by 10
-        float_val = float(string_value) * 10
+    elif value_type == ElsterType.ET_MIL_VAL:
+        # Values with 3 decimal places (scaled by 1000)
+        float_val = float(string_value) * 1000
+        # Convert to 16-bit signed integer representation if needed
+        if float_val < 0:
+            return int(float_val) & 0xFFFF
         return int(float_val)
-    elif value_type == ElsterType.ET_PROGRAM_SWITCH:
-        # Use the BetriebsartList if available
-        if 'BETRIEBSARTLIST' in globals():
-            # Reverse lookup in BETRIEBSARTLIST
-            for code, desc in BETRIEBSARTLIST.items():
-                if desc == string_value:
-                    return code
-            return 0  # Default to first value if not found
-        else:
-            program_states = {
-                "Emergency": 0,
-                "Standby": 1,
-                "Automatic": 2, 
-                "Day mode": 3,
-                "Night mode": 4,
-                "DHW": 5,
-                "Unknown": 6
-            }
-            return program_states.get(string_value, 0)
-    elif value_type == ElsterType.ET_HOUR or value_type == ElsterType.ET_HOUR_SHORT:
+    elif value_type == ElsterType.ET_MODE:
+        # Reverse lookup in MODELIST
+        for code, desc in MODELIST.items():
+            if desc == string_value:
+                return code
+        return 0  # Default to first value if not found
+    elif value_type == ElsterType.ET_ERR_CODE:
+        for code, desc in ERRORLIST.items():
+            if desc == string_value:
+                return code
+        return 0  # Default to first value if not found
+    elif value_type == ElsterType.ET_TIME:
         return int(float(string_value) * 3600)  # Hours to seconds
     elif value_type == ElsterType.ET_DATE:
         # Parse YYYY-MM-DD and convert to YYYYMMDD integer
@@ -333,5 +347,17 @@ def translate_string_to_value(string_value, value_type):
             return year * 10000 + month * 100 + day
         else:
             return 0
+    elif value_type == ElsterType.ET_LITTLE_ENDIAN:
+        # Swap bytes for little endian values
+        value = int(string_value)
+        high_byte = (value & 0xFF00) >> 8
+        low_byte = (value & 0x00FF) << 8
+        return high_byte | low_byte
+    elif value_type == ElsterType.ET_TIME_DOMAIN:
+        # Time domain format conversion depends on specific format
+        return int(string_value)
+    elif value_type in [ElsterType.ET_DEV_NR, ElsterType.ET_DEV_ID]:
+        # Device-related values are integers
+        return int(string_value)
     else:
         return int(string_value)  # Simple int conversion for other types

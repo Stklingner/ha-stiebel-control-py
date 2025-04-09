@@ -4,7 +4,7 @@ Entity management for the Stiebel Control package.
 import logging
 from typing import Dict, Any, Optional, Tuple
 from stiebel_control.mqtt_interface import MqttInterface
-from stiebel_control.heatpump.elster_table import get_elster_index_by_english_name
+from stiebel_control.heatpump.elster_table import get_elster_entry_by_english_name
 from stiebel_control.services.entity_registration_service import EntityRegistrationService
 from stiebel_control.services.signal_entity_mapper import SignalEntityMapper
 from stiebel_control.config.config_models import EntityConfig
@@ -95,7 +95,7 @@ class EntityManager:
             return None
             
         # Get signal information
-        ei = get_elster_index_by_english_name(signal_name)
+        ei = get_elster_entry_by_english_name(signal_name)
         if ei.name == "UNKNOWN":
             logger.warning(f"Cannot register unknown signal: {signal_name}")
             return None

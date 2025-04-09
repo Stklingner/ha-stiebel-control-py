@@ -14,10 +14,11 @@ from can import Message
 
 from stiebel_control.can.transport import CanTransport
 from stiebel_control.heatpump.elster_table import (
-    get_elster_index_by_index, 
-    get_elster_index_by_name,
-    translate_value,
-    translate_string_to_value
+    get_elster_entry_by_index, 
+    get_elster_entry_by_name,
+    get_elster_entry_by_english_name,
+    value_from_signal,
+    signal_from_value
 )
 
 # Configure logger
@@ -133,13 +134,13 @@ class StiebelProtocol:
                 value_byte2 = data[4]
             
             # Get the signal definition from the Elster table
-            ei = get_elster_index_by_index(index)
+            ei = get_elster_entry_by_index(index)
             
             # Calculate the raw value
             raw_value = (value_byte1 << 8) + value_byte2
             
             # Translate the value according to its type
-            typed_value = translate_value(raw_value, ei.type)
+            typed_value = value_from_signal(raw_value, ei.type)
             
             # Log the received signal
             logger.debug(f"CAN 0x{can_id:X}: {ei.english_name} = {typed_value}")
@@ -180,8 +181,8 @@ class StiebelProtocol:
             member = self.can_members[member_index]
             
             # Get the signal definition
-            ei = get_elster_index_by_name(signal_name)
-            if ei.name == "UNKNOWN":
+            ei = get_elster_entry_by_english_name(signal_name)
+            if not ei:
                 logger.error(f"Unknown signal: {signal_name}")
                 return False
                 
@@ -253,16 +254,16 @@ class StiebelProtocol:
             member = self.can_members[member_index]
             
             # Get the signal definition
-            ei = get_elster_index_by_name(signal_name)
-            if ei.name == "UNKNOWN":
+            ei = get_elster_entry_by_english_name(signal_name)
+            if not ei:
                 logger.error(f"Unknown signal: {signal_name}")
                 return False
                 
             # Convert the value to the raw format
             if isinstance(value, str):
-                raw_value = translate_string_to_value(value, ei.type)
+                raw_value = signal_from_value(value, ei.type)
             else:
-                raw_value = translate_string_to_value(str(value), ei.type)
+                raw_value = signal_from_value(str(value), ei.type)
                 
             # Create the request message
             index_byte1 = (ei.index >> 8) & 0xFF

@@ -3,7 +3,7 @@ Service for mapping between CAN signals and Home Assistant entities.
 """
 import logging
 from typing import Dict, Any, Optional, List, Set, Tuple
-from stiebel_control.heatpump.elster_table import get_elster_index_by_english_name
+from stiebel_control.heatpump.elster_table import get_elster_entry_by_english_name
 
 logger = logging.getLogger(__name__)
 
@@ -177,7 +177,7 @@ class SignalEntityMapper:
         Returns:
             Dictionary with signal information
         """
-        ei = get_elster_index_by_english_name(signal_name)
+        ei = get_elster_entry_by_english_name(signal_name)
         return {
             'name': ei.name,
             'type': ei.type,

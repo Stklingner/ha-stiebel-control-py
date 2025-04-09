@@ -93,6 +93,32 @@ class CanInterface:
         """
         return self.signal_handler.write_signal(member_index, signal_name, value)
     
+    def add_signal_callback(self, signal_name: str, can_id: int, callback: Callable[[str, Any, int], None]) -> None:
+        """
+        Add a callback for a specific signal.
+        
+        Args:
+            signal_name: Name of the signal to subscribe to
+            can_id: CAN ID of the member
+            callback: Callback function that will be called when the signal is updated
+        """
+        self.signal_handler.add_signal_callback(signal_name, can_id, callback)
+        
+    def get_can_id_by_name(self, member_name: str) -> Optional[int]:
+        """
+        Get the CAN ID corresponding to a member name.
+        
+        Args:
+            member_name: Name of the CAN member (e.g., 'PUMP', 'MANAGER')
+            
+        Returns:
+            int: CAN ID if found, None otherwise
+        """
+        for member in self.can_members:
+            if member.name == member_name:
+                return member.can_id
+        return None
+        
     def get_latest_value(self, member_index: int, signal_name: str, can_member_ids: List[int] = None) -> Optional[Any]:
         """
         Get the latest value for a signal.

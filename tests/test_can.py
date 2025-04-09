@@ -91,12 +91,13 @@ class TestCanLayers:
         protocol.add_signal_handler(mock_handler)
         
         # Test read_signal
-        with patch('stiebel_control.can.protocol.get_elster_index_by_name') as mock_get_index:
+        with patch('stiebel_control.can.protocol.get_elster_entry_by_english_name') as mock_get_entry:
             # Setup mock
-            mock_index = MagicMock()
-            mock_index.name = "TEST_SIGNAL"
-            mock_index.index = 42
-            mock_get_index.return_value = mock_index
+            mock_entry = MagicMock()
+            mock_entry.name = "TEST_SIGNAL"
+            mock_entry.english_name = "TEST_SIGNAL"
+            mock_entry.index = 42
+            mock_get_entry.return_value = mock_entry
             
             # Test read with standard index
             protocol.read_signal(
@@ -111,7 +112,7 @@ class TestCanLayers:
             mock_transport.send_message.reset_mock()
             
             # Test read with extended index
-            mock_index.index = 0x1234  # Use an index that requires extended format
+            mock_entry.index = 0x1234  # Use an index that requires extended format
             protocol.read_signal(
                 member_index=protocol.CM_PUMP,
                 signal_name="TEST_SIGNAL"
