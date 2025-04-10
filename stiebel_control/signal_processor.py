@@ -50,6 +50,11 @@ class SignalProcessor:
             value: Updated signal value
             can_id: CAN ID of the member that sent the message
         """
+        # Check if MQTT is connected before proceeding
+        if not self.mqtt_interface.is_connected():
+            logger.debug(f"Received signal {signal_name} = {value} from CAN ID 0x{can_id:X} but MQTT is not connected, skipping processing")
+            return
+            
         # First, try to find an existing entity for this signal
         entity_id = self.entity_manager.get_entity_by_signal(signal_name, can_id)
         
@@ -76,8 +81,11 @@ class SignalProcessor:
             value = self.transformation_service.apply_transformation(value, transform_config)
             
         # Publish the updated value to MQTT
-        self.mqtt_interface.publish_state(entity_id, value)
-        logger.debug(f"Published state for entity {entity_id}: {value}")
+        result = self.mqtt_interface.publish_state(entity_id, value)
+        if result:
+            logger.debug(f"Published state for entity {entity_id}: {value}")
+        else:
+            logger.warning(f"Failed to publish state for entity {entity_id}")
         
     def handle_command(self, entity_id: str, payload: str) -> None:
         """
