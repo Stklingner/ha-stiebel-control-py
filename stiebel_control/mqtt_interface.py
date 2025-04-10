@@ -79,19 +79,30 @@ class MqttInterface:
             logger.debug(f"MQTT client ID: {self.client_id}")
             logger.debug(f"Using username: {'Yes' if self.username else 'No'}")
             
-            self.client.connect(self.host, self.port)
-            logger.info("MQTT connect call made, starting client loop")
+            # Set up LWT (Last Will and Testament) message so Home Assistant knows if we disconnect
+            status_topic = f"{self.base_topic}/status"
+            logger.debug(f"Setting LWT status topic: {status_topic}")
+            self.client.will_set(status_topic, "offline", qos=1, retain=True)
+            
+            # Set connection timeout to something reasonable
+            self.client.connect_async(self.host, self.port, keepalive=60)
+            logger.info("MQTT connect_async call made, starting client loop")
             self.client.loop_start()
             
-            # Wait for connection to establish
             if not self.wait_for_connection():
+                # Stop the loop to clean up resources
+                self.client.loop_stop()
                 return False
             
-            logger.info("MQTT connection confirmed")
             return True
             
         except Exception as e:
             logger.error(f"Error connecting to MQTT broker: {e}", exc_info=True)
+            # Make sure loop is stopped if connection fails
+            try:
+                self.client.loop_stop()
+            except:
+                pass
             return False
             
     def disconnect(self):
@@ -105,27 +116,33 @@ class MqttInterface:
         
     def _on_connect(self, client, userdata, flags, rc):
         """Callback for when the client connects to the broker."""
-        rc_messages = {
+        # Map result codes to human-readable messages
+        result_codes = {
             0: "Connection successful",
-            1: "Connection refused - incorrect protocol version",
-            2: "Connection refused - invalid client identifier",
-            3: "Connection refused - server unavailable",
-            4: "Connection refused - bad username or password",
-            5: "Connection refused - not authorized"
+            1: "Incorrect protocol version",
+            2: "Invalid client identifier",
+            3: "Server unavailable",
+            4: "Bad username or password",
+            5: "Not authorized"
         }
         
         if rc == 0:
             logger.info(f"Connected to MQTT broker at {self.host}:{self.port}")
             self.connected = True
             
-            # Subscribe to command topics
+            # Subscribe to all command topics
             command_topic = f"{self.base_topic}/+/command"
             logger.info(f"Subscribing to command topic: {command_topic}")
-            client.subscribe(command_topic)
-            logger.debug(f"Subscribed to {command_topic}")
+            self.client.subscribe(command_topic)
+            
+            # Publish online status
+            status_topic = f"{self.base_topic}/status"
+            logger.info(f"Publishing online status to: {status_topic}")
+            self.client.publish(status_topic, "online", qos=1, retain=True)
         else:
-            rc_message = rc_messages.get(rc, f"Unknown error (code {rc})")
-            logger.error(f"Failed to connect to MQTT broker: {rc_message}")
+            error_message = result_codes.get(rc, f"Unknown error code: {rc}")
+            logger.error(f"Failed to connect to MQTT broker: {error_message}")
+            self.connected = False
             
     def _on_disconnect(self, client, userdata, rc):
         """Callback for when the client disconnects from the broker."""

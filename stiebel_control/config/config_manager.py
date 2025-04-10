@@ -14,6 +14,9 @@ from stiebel_control.config.config_models import (
 
 logger = logging.getLogger(__name__)
 
+# Singleton instance for global access
+_config_manager_instance = None
+
 class ConfigManager:
     """
     Manages loading, validation, and access to configuration settings.
@@ -57,6 +60,10 @@ class ConfigManager:
         self.update_interval = int(self.service_config.get('update_interval', 60))
         
         logger.info(f"Configuration manager initialized with service config from {service_config_path}")
+        
+        # Register as singleton instance
+        global _config_manager_instance
+        _config_manager_instance = self
         
     def _load_yaml(self, file_path: str) -> Dict[str, Any]:
         """
@@ -116,9 +123,19 @@ class ConfigManager:
         Get update interval in seconds.
         
         Returns:
-            Update interval
+            Update interval in seconds
         """
         return self.update_interval
+        
+    @staticmethod
+    def get_instance() -> Optional['ConfigManager']:
+        """
+        Get the singleton instance of the ConfigManager.
+        
+        Returns:
+            The ConfigManager instance, or None if not initialized
+        """
+        return _config_manager_instance
         
     def get_raw_config(self, section: str) -> Dict[str, Any]:
         """

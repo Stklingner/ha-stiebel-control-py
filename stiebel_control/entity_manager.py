@@ -43,21 +43,27 @@ class EntityManager:
         """
         logger.info("Building entity mapping from configuration")
         
-        if not self.entity_config.entities:
-            logger.warning("No entity configuration found")
-            return
-            
-        # Build the signal to entity mapping
-        self.signal_mapper.build_entity_mapping(self.entity_config.entities, can_interface)
-        
         # Check if MQTT is connected before trying to register entities
         if not self.mqtt_interface.is_connected():
             logger.warning("MQTT is not connected; entity registration will be deferred until connection is established")
             return
             
-        # Register entities with Home Assistant
-        for entity_id, entity_def in self.entity_config.entities.items():
-            self.registration_service.register_entity_from_config(entity_id, entity_def)
+        # Process manual entity registration from entity_config.yaml
+        # This handles the nested structure with categories (sensors, buttons, etc.)
+        from stiebel_control.config.config_manager import ConfigManager
+        config_manager = ConfigManager.get_instance()
+        if config_manager:
+            raw_entity_config = config_manager.raw_entity_config
+            if raw_entity_config:
+                self.registration_service.register_manual_entities(raw_entity_config)
+            else:
+                logger.warning("No raw entity configuration available")
+                
+        # Build signal-to-entity mapping for dynamic entities
+        if self.entity_config.entities:
+            self.signal_mapper.build_entity_mapping(self.entity_config.entities, can_interface)
+        else:
+            logger.info("No explicit entity mapping configuration found")
             
     def get_entity_by_signal(self, signal_name: str, can_id: int) -> Optional[str]:
         """
@@ -111,28 +117,20 @@ class EntityManager:
             logger.warning(f"Cannot register signal from unknown CAN ID: 0x{can_id:X}")
             return None
             
-        # Create entity ID and friendly name
-        entity_id = self.signal_mapper.create_dynamic_entity_id(signal_name, can_id)
-        friendly_name = self.signal_mapper.create_friendly_name(signal_name, can_id)
-        
-        # If entity already exists, don't register again
-        if self.registration_service.is_entity_registered(entity_id):
-            return entity_id
-            
-        # Register the entity with Home Assistant
-        registration_success = self.registration_service.register_dynamic_entity(
-            entity_id=entity_id,
-            friendly_name=friendly_name,
-            signal_type=ei.type,
+        # Register the entity with the registration service - the entity ID is generated inside
+        entity_id = self.registration_service.register_dynamic_entity(
             signal_name=signal_name,
-            value=value
+            signal_type=ei.type,
+            value=value,
+            can_id=can_id
         )
         
-        if registration_success:
-            # Update entity map
+        if entity_id:
+            # Also add to the signal mapper for future lookups
             self.signal_mapper.add_mapping(signal_name, can_id, entity_id)
             return entity_id
         else:
+            logger.error(f"Failed to dynamically register entity for signal {signal_name}")
             return None
             
     def get_entity_config(self, entity_id: str) -> Dict[str, Any]:

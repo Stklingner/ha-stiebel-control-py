@@ -92,27 +92,26 @@ class EntityRegistrationService:
     def register_dynamic_entity(
         self, 
         entity_id: str, 
-        friendly_name: str, 
-        signal_type: ElsterType, 
         signal_name: str, 
-        value: Any
-    ) -> bool:
+        signal_type: ElsterType, 
+        value: Any, 
+        can_id: int
+    ) -> Optional[str]:
         """
-        Dynamically register an entity based on signal characteristics.
+        Register an entity dynamically based on signal type, name, and value.
         
         Args:
-            entity_id: Unique entity ID to use
-            friendly_name: Human-readable name for the entity
-            signal_type: Type of the Elster signal
             signal_name: Name of the signal
+            signal_type: ElsterType of the signal
             value: Current value of the signal
+            can_id: CAN ID of the member that sent the message
             
         Returns:
-            bool: True if registration was successful, False otherwise
+            str: Generated entity ID, or None if registration failed
         """
-        # Skip if already registered
-        if entity_id in self.registered_entities:
-            return True
+        # Skip if we don't have valid values to register with
+        if signal_name == "UNKNOWN" or signal_type == ElsterType.ET_NONE:
+            return None
             
         # Determine entity type and attributes based on signal type
         entity_type = "sensor"  # Default entity type
@@ -159,60 +158,104 @@ class EntityRegistrationService:
                 icon = "mdi:flash"
             else:
                 # Generic numeric value
-                unit_of_measurement = ""
-                icon = "mdi:numeric"
+                device_class = None
+                unit_of_measurement = None
+                icon = "mdi:gauge"
                 
-        # Register the entity with Home Assistant
-        logger.info(f"Dynamically registering {entity_type} for signal {signal_name}")
-        success = False
+        # Create a unique entity ID based on signal name and CAN member
+        entity_id = f"{signal_name.lower()}_{can_id:x}"
         
+        # Skip if already registered
+        if entity_id in self.registered_entities:
+            logger.debug(f"Entity {entity_id} already registered, skipping dynamic registration")
+            return entity_id
+        
+        # Register based on entity type
         if entity_type == "sensor":
-            success = self.mqtt_interface.register_sensor(
+            result = self.mqtt_interface.register_sensor(
                 entity_id=entity_id,
-                name=friendly_name,
+                name=signal_name,
                 device_class=device_class,
                 state_class=state_class,
                 unit_of_measurement=unit_of_measurement,
                 icon=icon
             )
         elif entity_type == "select":
-            # For selects, we need to determine the options and mapping
-            options = []
+            # For selects, determine appropriate options
             options_map = None
-            
             if signal_type == ElsterType.ET_MODE:
-                # For operating modes, use MODELIST for both options and mapping
+                # Use the MODELIST for operating modes
                 options = list(MODELIST.values())
-                options_map = MODELIST
+                options_map = {key: value for key, value in MODELIST.items()}
             elif signal_type == ElsterType.ET_ERR_CODE:
-                # For error codes, use ERRORLIST for both options and mapping
+                # Use ERRORLIST for error codes
                 options = list(ERRORLIST.values())
-                options_map = ERRORLIST
+                options_map = {key: value for key, value in ERRORLIST.items()}
+            else:
+                # Generic options if no specific map is available
+                options = ["Unknown"]
             
-            success = self.mqtt_interface.register_select(
+            result = self.mqtt_interface.register_select(
                 entity_id=entity_id,
-                name=friendly_name,
+                name=signal_name,
                 options=options,
                 icon=icon,
                 options_map=options_map
             )
         else:
-            # Fallback to sensor for unsupported types
-            success = self.mqtt_interface.register_sensor(
-                entity_id=entity_id,
-                name=friendly_name,
-                icon="mdi:help-circle"
-            )
+            logger.warning(f"Unsupported entity type {entity_type} for dynamic registration")
+            return None
             
-        if success:
-            logger.info(f"Successfully registered dynamic entity {entity_id}")
-            # Add to registered entities
+        if result:
             self.registered_entities.add(entity_id)
-            return True
+            logger.info(f"Dynamically registered {entity_type} entity {entity_id} for signal {signal_name}")
         else:
-            logger.warning(f"Failed to register dynamic entity for {signal_name}")
-            return False
+            logger.error(f"Failed to dynamically register entity for signal {signal_name}")
+            return None
             
+        return entity_id
+            
+    def register_manual_entities(self, raw_config: Dict[str, Any]) -> int:
+        """
+        Process and register entities from a structured configuration file.
+        Handles nested configuration structure from entity_config.yaml.
+        
+        Args:
+            raw_config: Raw configuration dictionary from entity_config.yaml
+            
+        Returns:
+            int: Number of successfully registered entities
+        """
+        if not raw_config or 'entities' not in raw_config:
+            logger.warning("No entities section found in configuration")
+            return 0
+            
+        entities_config = raw_config['entities']
+        successful_registrations = 0
+        
+        # Process each entity category (sensors, buttons, selects)
+        for category, entities in entities_config.items():
+            if not isinstance(entities, dict):
+                logger.warning(f"Invalid format for category '{category}', expected dictionary")
+                continue
+                
+            logger.info(f"Processing {len(entities)} {category} entities from manual configuration")
+            
+            # Process each entity in this category
+            for entity_id, entity_def in entities.items():
+                # Add the entity type if not explicitly defined
+                if 'type' not in entity_def:
+                    # Remove trailing 's' from category name for entity type
+                    entity_type = category[:-1] if category.endswith('s') else category
+                    entity_def['type'] = entity_type
+                
+                # Register the entity
+                if self.register_entity_from_config(entity_id, entity_def):
+                    successful_registrations += 1
+        
+        logger.info(f"Successfully registered {successful_registrations} manual entities")
+        return successful_registrations
+        
     def is_entity_registered(self, entity_id: str) -> bool:
         """
         Check if an entity is already registered.
