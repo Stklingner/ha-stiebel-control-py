@@ -55,7 +55,7 @@
 - name: UHRZEIT
   english_name: TIME
   index: 9
-  type: ET_HOUR
+  type: ET_TIME
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: DATUM
@@ -625,7 +625,7 @@
 - name: SOLAR_TAGESERTRAG_KWH
   english_name: SOLAR_DAILY_OUTPUT_KWH
   index: 134
-  type: ET_DOUBLE_VALUE
+  type: ET_DEC_VAL
   ha_entity_type: sensor.energy
   unit_of_measurement: kWh
 - name: SOLAR_GESAMTERTRAG_WH
@@ -637,13 +637,13 @@
 - name: SOLAR_GESAMTERTRAG_KWH
   english_name: SOLAR_TOTAL_OUTPUT_KWH
   index: 136
-  type: ET_DOUBLE_VALUE
+  type: ET_DEC_VAL
   ha_entity_type: sensor.energy
   unit_of_measurement: kWh
 - name: SOLAR_GESAMTERTRAG_MWH
   english_name: SOLAR_TOTAL_OUTPUT_MWH
   index: 137
-  type: ET_TRIPLE_VALUE
+  type: ET_MIL_VAL
   ha_entity_type: sensor.energy
   unit_of_measurement: kWh
 - name: MODGRAD_IST
@@ -3313,13 +3313,13 @@
 - name: SOLAR_WOCHENERTRAG_KWH
   english_name: SOLAR_WOCHENERTRAG_KWH
   index: 743
-  type: ET_DOUBLE_VALUE
+  type: ET_DEC_VAL
   ha_entity_type: sensor.energy
   unit_of_measurement: kWh
 - name: SOLAR_WOCHENERTRAG_MWH
   english_name: SOLAR_WOCHENERTRAG_MWH
   index: 744
-  type: ET_TRIPLE_VALUE
+  type: ET_MIL_VAL
   ha_entity_type: sensor.energy
   unit_of_measurement: kWh
 - name: SOLAR_JAHRESERTRAG_WH
@@ -3331,13 +3331,13 @@
 - name: SOLAR_JAHRESERTRAG_KWH
   english_name: SOLAR_JAHRESERTRAG_KWH
   index: 746
-  type: ET_DOUBLE_VALUE
+  type: ET_DEC_VAL
   ha_entity_type: sensor.energy
   unit_of_measurement: kWh
 - name: SOLAR_JAHRESERTRAG_MWH
   english_name: SOLAR_JAHRESERTRAG_MWH
   index: 747
-  type: ET_TRIPLE_VALUE
+  type: ET_MIL_VAL
   ha_entity_type: sensor.energy
   unit_of_measurement: kWh
 - name: SOLAR_UMSCHALTVENTIL_1
@@ -4519,7 +4519,7 @@
 - name: WAERMEERTRAG_RUECKGE_TAG_KWH
   english_name: HEATING_YIELD_BACK_DAY_KWH
   index: 944
-  type: ET_DOUBLE_VALUE
+  type: ET_DEC_VAL
   ha_entity_type: sensor.energy
   unit_of_measurement: kWh
 - name: WAERMEERTRAG_RUECKGE_SUMME_KWH
@@ -4531,7 +4531,7 @@
 - name: WAERMEERTRAG_RUECKGE_SUMME_MWH
   english_name: HEATING_YIELD_BACK_SUM_MWH
   index: 950
-  type: ET_DOUBLE_VALUE
+  type: ET_DEC_VAL
   ha_entity_type: sensor.energy
   unit_of_measurement: kWh
 - name: SOLAR_MAX_DREHZAHL_TEMP
@@ -11935,7 +11935,7 @@
 - name: EL_AUFNAHMELEISTUNG_WW_TAG_KWH
   english_name: ELECTRICITY_INTAKE_DHW_DAY_KWH
   index: 2331
-  type: ET_DOUBLE_VALUE
+  type: ET_DEC_VAL
   ha_entity_type: sensor.power
   unit_of_measurement: kW
 - name: EL_AUFNAHMELEISTUNG_WW_SUM_KWH
@@ -11947,7 +11947,7 @@
 - name: EL_AUFNAHMELEISTUNG_WW_SUM_MWH
   english_name: ELECTRICITY_INTAKE_DHW_SUM_MWH
   index: 2333
-  type: ET_DOUBLE_VALUE
+  type: ET_DEC_VAL
   ha_entity_type: sensor.power
   unit_of_measurement: kW
 - name: EL_AUFNAHMELEISTUNG_HEIZ_TAG_WH
@@ -11959,7 +11959,7 @@
 - name: EL_AUFNAHMELEISTUNG_HEIZ_TAG_KWH
   english_name: ELECTRICITY_INTAKE_HEATING_DAY_KWH
   index: 2335
-  type: ET_DOUBLE_VALUE
+  type: ET_DEC_VAL
   ha_entity_type: sensor.power
   unit_of_measurement: kW
 - name: EL_AUFNAHMELEISTUNG_HEIZ_SUM_KWH
@@ -11971,7 +11971,7 @@
 - name: EL_AUFNAHMELEISTUNG_HEIZ_SUM_MWH
   english_name: ELECTRICITY_INTAKE_HEATING_SUM_MWH
   index: 2337
-  type: ET_DOUBLE_VALUE
+  type: ET_DEC_VAL
   ha_entity_type: sensor.power
   unit_of_measurement: kW
 - name: WAERMEERTRAG_2WE_WW_TAG_WH
@@ -11983,7 +11983,7 @@
 - name: WAERMEERTRAG_2WE_WW_TAG_KWH
   english_name: HEATING_DHW_2WE_DAY_KWH
   index: 2339
-  type: ET_DOUBLE_VALUE
+  type: ET_DEC_VAL
   ha_entity_type: sensor.energy
   unit_of_measurement: kWh
 - name: WAERMEERTRAG_2WE_WW_SUM_KWH
@@ -11995,7 +11995,7 @@
 - name: WAERMEERTRAG_2WE_WW_SUM_MWH
   english_name: HEATING_DHW_2WE_SUM_MWH
   index: 2341
-  type: ET_DOUBLE_VALUE
+  type: ET_DEC_VAL
   ha_entity_type: sensor.energy
   unit_of_measurement: kWh
 - name: WAERMEERTRAG_2WE_HEIZ_TAG_WH
@@ -12007,7 +12007,7 @@
 - name: WAERMEERTRAG_2WE_HEIZ_TAG_KWH
   english_name: HEATING_HEAT_2WE_DAY_KWH
   index: 2343
-  type: ET_DOUBLE_VALUE
+  type: ET_DEC_VAL
   ha_entity_type: sensor.energy
   unit_of_measurement: kWh
 - name: WAERMEERTRAG_2WE_HEIZ_SUM_KWH
@@ -12019,7 +12019,7 @@
 - name: WAERMEERTRAG_2WE_HEIZ_SUM_MWH
   english_name: HEATING_HEAT_2WE_SUM_MWH
   index: 2345
-  type: ET_DOUBLE_VALUE
+  type: ET_DEC_VAL
   ha_entity_type: sensor.energy
   unit_of_measurement: kWh
 - name: WAERMEERTRAG_WW_TAG_WH
@@ -12031,7 +12031,7 @@
 - name: WAERMEERTRAG_WW_TAG_KWH
   english_name: HEATING_DHW_DAY_KWH
   index: 2347
-  type: ET_DOUBLE_VALUE
+  type: ET_DEC_VAL
   ha_entity_type: sensor.energy
   unit_of_measurement: kWh
 - name: WAERMEERTRAG_WW_SUM_KWH
@@ -12043,7 +12043,7 @@
 - name: WAERMEERTRAG_WW_SUM_MWH
   english_name: HEATING_DHW_SUM_MWH
   index: 2349
-  type: ET_DOUBLE_VALUE
+  type: ET_DEC_VAL
   ha_entity_type: sensor.energy
   unit_of_measurement: kWh
 - name: WAERMEERTRAG_HEIZ_TAG_WH
@@ -12055,7 +12055,7 @@
 - name: WAERMEERTRAG_HEIZ_TAG_KWH
   english_name: HEAT_YIELD_HEATING_DAY_KWH
   index: 2351
-  type: ET_DOUBLE_VALUE
+  type: ET_DEC_VAL
   ha_entity_type: sensor.energy
   unit_of_measurement: kWh
 - name: WAERMEERTRAG_HEIZ_SUM_KWH
@@ -12067,7 +12067,7 @@
 - name: WAERMEERTRAG_HEIZ_SUM_MWH
   english_name: HEAT_YIELD_HEATING_SUM_MWH
   index: 2353
-  type: ET_DOUBLE_VALUE
+  type: ET_DEC_VAL
   ha_entity_type: sensor.energy
   unit_of_measurement: kWh
 - name: BUSKENNUNG_HEIZMODUL0
@@ -15758,127 +15758,127 @@
 - name: HEIZPROG_1_MO
   english_name: HEATING_PROGRAM_1_MO
   index: 5136
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_1_MO_SCHALT_2
   english_name: HEATING_PROGRAM_1_MO_SWITCH_2
   index: 5137
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_1_MO_SCHALT_3
   english_name: HEATING_PROGRAM_1_MO_SWITCH_3
   index: 5138
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_1_DI
   english_name: HEATING_PROGRAM_1_DI
   index: 5152
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_1_DI_SCHALT_2
   english_name: HEATING_PROGRAM_1_DI_SWITCH_2
   index: 5153
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_1_DI_SCHALT_3
   english_name: HEATING_PROGRAM_1_DI_SWITCH_3
   index: 5154
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_1_MI
   english_name: HEATING_PROGRAM_1_MI
   index: 5168
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_1_MI_SCHALT_2
   english_name: HEATING_PROGRAM_1_MI_SWITCH_2
   index: 5169
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_1_MI_SCHALT_3
   english_name: HEATING_PROGRAM_1_MI_SWITCH_3
   index: 5170
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_1_DO
   english_name: HEATING_PROGRAM_1_DO
   index: 5184
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_1_DO_SCHALT_2
   english_name: HEATING_PROGRAM_1_DO_SWITCH_2
   index: 5185
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_1_DO_SCHALT_3
   english_name: HEATING_PROGRAM_1_DO_SWITCH_3
   index: 5186
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_1_FR
   english_name: HEATING_PROGRAM_1_FR
   index: 5200
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_1_FR_SCHALT_2
   english_name: HEATING_PROGRAM_1_FR_SWITCH_2
   index: 5201
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_1_FR_SCHALT_3
   english_name: HEATING_PROGRAM_1_FR_SWITCH_3
   index: 5202
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_1_SA
   english_name: HEATING_PROGRAM_1_SA
   index: 5216
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_1_SA_SCHALT_2
   english_name: HEATING_PROGRAM_1_SA_SWITCH_2
   index: 5217
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_1_SA_SCHALT_3
   english_name: HEATING_PROGRAM_1_SA_SWITCH_3
   index: 5218
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_1_SO
   english_name: HEATING_PROGRAM_1_SO
   index: 5232
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_1_SO_SCHALT_2
   english_name: HEATING_PROGRAM_1_SO_SWITCH_2
   index: 5233
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_1_SO_SCHALT_3
   english_name: HEATING_PROGRAM_1_SO_SWITCH_3
   index: 5234
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_1_MO_FR
@@ -15962,127 +15962,127 @@
 - name: HEIZPROG_2_MO
   english_name: HEATING_PROG_2_MO
   index: 5392
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_2_MO_SCHALT_2
   english_name: HEATING_PROG_2_MO_SWITCH_2
   index: 5393
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_2_MO_SCHALT_3
   english_name: HEATING_PROG_2_MO_SWITCH_3
   index: 5394
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_2_DI
   english_name: HEATING_PROG_2_DI
   index: 5408
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_2_DI_SCHALT_2
   english_name: HEATING_PROG_2_DI_SWITCH_2
   index: 5409
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_2_DI_SCHALT_3
   english_name: HEATING_PROG_2_DI_SWITCH_3
   index: 5410
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_2_MI
   english_name: HEATING_PROG_2_MI
   index: 5424
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_2_MI_SCHALT_2
   english_name: HEATING_PROG_2_MI_SWITCH_2
   index: 5425
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_2_MI_SCHALT_3
   english_name: HEATING_PROG_2_MI_SWITCH_3
   index: 5426
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_2_DO
   english_name: HEATING_PROG_2_DO
   index: 5440
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_2_DO_SCHALT_2
   english_name: HEATING_PROG_2_DO_SWITCH_2
   index: 5441
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_2_DO_SCHALT_3
   english_name: HEATING_PROG_2_DO_SWITCH_3
   index: 5442
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_2_FR
   english_name: HEATING_PROG_2_FR
   index: 5456
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_2_FR_SCHALT_2
   english_name: HEATING_PROG_2_FR_SWITCH_2
   index: 5457
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_2_FR_SCHALT_3
   english_name: HEATING_PROG_2_FR_SWITCH_3
   index: 5458
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_2_SA
   english_name: HEATING_PROG_2_SA
   index: 5472
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_2_SA_SCHALT_2
   english_name: HEATING_PROG_2_SA_SWITCH_2
   index: 5473
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_2_SA_SCHALT_3
   english_name: HEATING_PROG_2_SA_SWITCH_3
   index: 5474
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_2_SO
   english_name: HEATING_PROG_2_SO
   index: 5488
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_2_SO_SCHALT_2
   english_name: HEATING_PROG_2_SO_SWITCH_2
   index: 5489
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_2_SO_SCHALT_3
   english_name: HEATING_PROG_2_SO_SWITCH_3
   index: 5490
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_2_MO_FR
@@ -16166,127 +16166,127 @@
 - name: HEIZPROG_3_MO
   english_name: HEATING_PROG_3_MO
   index: 5648
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_3_MO_SCHALT_2
   english_name: HEATING_PROG_3_MO_SWITCH_2
   index: 5649
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_3_MO_SCHALT_3
   english_name: HEATING_PROG_3_MO_SWITCH_3
   index: 5650
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_3_DI
   english_name: HEATING_PROG_3_DI
   index: 5664
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_3_DI_SCHALT_2
   english_name: HEATING_PROG_3_DI_SWITCH_2
   index: 5665
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_3_DI_SCHALT_3
   english_name: HEATING_PROG_3_DI_SWITCH_3
   index: 5666
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_3_MI
   english_name: HEIZPROG_3_MI
   index: 5680
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_3_MI_SCHALT_2
   english_name: HEATING_PROG_3_MI_SWITCH_2
   index: 5681
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_3_MI_SCHALT_3
   english_name: HEATING_PROG_3_MI_SWITCH_3
   index: 5682
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_3_DO
   english_name: HEATING_PROG_3_DO
   index: 5696
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_3_DO_SCHALT_2
   english_name: HEATING_PROG_3_DO_SWITCH_2
   index: 5697
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_3_DO_SCHALT_3
   english_name: HEATING_PROG_3_DO_SWITCH_3
   index: 5698
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_3_FR
   english_name: HEATING_PROG_3_FR
   index: 5712
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_3_FR_SCHALT_2
   english_name: HEATING_PROG_3_FR_SWITCH_2
   index: 5713
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_3_FR_SCHALT_3
   english_name: HEATING_PROG_3_FR_SWITCH_3
   index: 5714
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_3_SA
   english_name: HEATING_PROG_3_SA
   index: 5728
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_3_SA_SCHALT_2
   english_name: HEATING_PROG_3_SA_SWITCH_2
   index: 5729
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_3_SA_SCHALT_3
   english_name: HEATING_PROG_3_SA_SWITCH_3
   index: 5730
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_3_SO
   english_name: HEATING_PROG_3_SO
   index: 5744
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_3_SO_SCHALT_2
   english_name: HEATING_PROG_3_SO_SWITCH_2
   index: 5745
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_3_SO_SCHALT_3
   english_name: HEATING_PROG_3_SO_SWITCH_3
   index: 5746
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZPROG_3_MO_FR
@@ -16370,127 +16370,127 @@
 - name: W_WASSERPROG_1_MO
   english_name: WATER_PROG_1_MO
   index: 5904
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_1_MO_SCHALT_2
   english_name: WATER_PROG_1_MO_SWITCH_2
   index: 5905
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_1_MO_SCHALT_3
   english_name: WATER_PROG_1_MO_SWITCH_3
   index: 5906
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_1_DI
   english_name: WATER_PROG_1_DI
   index: 5920
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_1_DI_SCHALT_2
   english_name: WATER_PROG_1_DI_SWITCH_2
   index: 5921
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_1_DI_SCHALT_3
   english_name: WATER_PROG_1_DI_SWITCH_3
   index: 5922
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_1_MI
   english_name: WATER_PROG_1_MI
   index: 5936
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_1_MI_SCHALT_2
   english_name: WATER_PROG_1_MI_SWITCH_2
   index: 5937
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_1_MI_SCHALT_3
   english_name: WATER_PROG_1_MI_SWITCH_3
   index: 5938
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_1_DO
   english_name: WATER_PROG_1_DO
   index: 5952
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_1_DO_SCHALT_2
   english_name: WATER_PROG_1_DO_SWITCH_2
   index: 5953
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_1_DO_SCHALT_3
   english_name: WATER_PROG_1_DO_SWITCH_3
   index: 5954
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_1_FR
   english_name: WATER_PROG_1_FR
   index: 5968
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_1_FR_SCHALT_2
   english_name: WATER_PROG_1_FR_SWITCH_2
   index: 5969
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_1_FR_SCHALT_3
   english_name: WATER_PROG_1_FR_SWITCH_3
   index: 5970
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_1_SA
   english_name: WATER_PROG_1_SA
   index: 5984
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_1_SA_SCHALT_2
   english_name: WATER_PROG_1_SA_SWITCH_2
   index: 5985
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_1_SA_SCHALT_3
   english_name: WATER_PROG_1_SA_SWITCH_3
   index: 5986
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_1_SO
   english_name: WATER_PROG_1_SO
   index: 6000
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_1_SO_SCHALT_2
   english_name: WATER_PROG_1_SO_SWITCH_2
   index: 6001
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_1_SO_SCHALT_3
   english_name: WATER_PROG_1_SO_SWITCH_3
   index: 6002
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_1_MO_FR
@@ -16574,127 +16574,127 @@
 - name: W_WASSERPROG_2_MO
   english_name: W_WASSERPROG_2_MO
   index: 6160
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_2_MO_SCHALT_2
   english_name: W_WASSERPROG_2_MO_SCHALT_2
   index: 6161
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_2_MO_SCHALT_3
   english_name: W_WASSERPROG_2_MO_SCHALT_3
   index: 6162
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_2_DI
   english_name: W_WASSERPROG_2_DI
   index: 6176
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_2_DI_SCHALT_2
   english_name: W_WASSERPROG_2_DI_SCHALT_2
   index: 6177
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_2_DI_SCHALT_3
   english_name: W_WASSERPROG_2_DI_SCHALT_3
   index: 6178
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_2_MI
   english_name: W_WASSERPROG_2_MI
   index: 6192
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_2_MI_SCHALT_2
   english_name: W_WASSERPROG_2_MI_SCHALT_2
   index: 6193
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_2_MI_SCHALT_3
   english_name: W_WASSERPROG_2_MI_SCHALT_3
   index: 6194
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_2_DO
   english_name: W_WASSERPROG_2_DO
   index: 6208
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_2_DO_SCHALT_2
   english_name: W_WASSERPROG_2_DO_SCHALT_2
   index: 6209
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_2_DO_SCHALT_3
   english_name: W_WASSERPROG_2_DO_SCHALT_3
   index: 6210
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_2_FR
   english_name: W_WASSERPROG_2_FR
   index: 6224
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_2_FR_SCHALT_2
   english_name: W_WASSERPROG_2_FR_SCHALT_2
   index: 6225
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_2_FR_SCHALT_3
   english_name: W_WASSERPROG_2_FR_SCHALT_3
   index: 6226
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_2_SA
   english_name: W_WASSERPROG_2_SA
   index: 6240
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_2_SA_SCHALT_2
   english_name: W_WASSERPROG_2_SA_SCHALT_2
   index: 6241
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_2_SA_SCHALT_3
   english_name: W_WASSERPROG_2_SA_SCHALT_3
   index: 6242
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_2_SO
   english_name: W_WASSERPROG_2_SO
   index: 6256
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_2_SO_SCHALT_2
   english_name: W_WASSERPROG_2_SO_SCHALT_2
   index: 6257
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_2_SO_SCHALT_3
   english_name: W_WASSERPROG_2_SO_SCHALT_3
   index: 6258
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_2_MO_FR
@@ -16778,127 +16778,127 @@
 - name: W_WASSERPROG_3_MO
   english_name: W_WASSERPROG_3_MO
   index: 6416
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_3_MO_SCHALT_2
   english_name: W_WASSERPROG_3_MO_SCHALT_2
   index: 6417
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_3_MO_SCHALT_3
   english_name: W_WASSERPROG_3_MO_SCHALT_3
   index: 6418
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_3_DI
   english_name: W_WASSERPROG_3_DI
   index: 6432
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_3_DI_SCHALT_2
   english_name: W_WASSERPROG_3_DI_SCHALT_2
   index: 6433
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_3_DI_SCHALT_3
   english_name: W_WASSERPROG_3_DI_SCHALT_3
   index: 6434
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_3_MI
   english_name: W_WASSERPROG_3_MI
   index: 6448
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_3_MI_SCHALT_2
   english_name: W_WASSERPROG_3_MI_SCHALT_2
   index: 6449
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_3_MI_SCHALT_3
   english_name: W_WASSERPROG_3_MI_SCHALT_3
   index: 6450
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_3_DO
   english_name: W_WASSERPROG_3_DO
   index: 6464
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_3_DO_SCHALT_2
   english_name: W_WASSERPROG_3_DO_SCHALT_2
   index: 6465
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_3_DO_SCHALT_3
   english_name: W_WASSERPROG_3_DO_SCHALT_3
   index: 6466
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_3_FR
   english_name: W_WASSERPROG_3_FR
   index: 6480
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_3_FR_SCHALT_2
   english_name: W_WASSERPROG_3_FR_SCHALT_2
   index: 6481
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_3_FR_SCHALT_3
   english_name: W_WASSERPROG_3_FR_SCHALT_3
   index: 6482
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_3_SA
   english_name: W_WASSERPROG_3_SA
   index: 6496
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_3_SA_SCHALT_2
   english_name: W_WASSERPROG_3_SA_SCHALT_2
   index: 6497
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_3_SA_SCHALT_3
   english_name: W_WASSERPROG_3_SA_SCHALT_3
   index: 6498
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_3_SO
   english_name: W_WASSERPROG_3_SO
   index: 6512
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_3_SO_SCHALT_2
   english_name: W_WASSERPROG_3_SO_SCHALT_2
   index: 6513
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_3_SO_SCHALT_3
   english_name: W_WASSERPROG_3_SO_SCHALT_3
   index: 6514
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: W_WASSERPROG_3_MO_FR
@@ -16982,127 +16982,127 @@
 - name: ZIRKPROG_1_MO
   english_name: ZIRKPROG_1_MO
   index: 6672
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_1_MO_SCHALT_2
   english_name: ZIRKPROG_1_MO_SCHALT_2
   index: 6673
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_1_MO_SCHALT_3
   english_name: ZIRKPROG_1_MO_SCHALT_3
   index: 6674
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_1_DI
   english_name: ZIRKPROG_1_DI
   index: 6688
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_1_DI_SCHALT_2
   english_name: ZIRKPROG_1_DI_SCHALT_2
   index: 6689
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_1_DI_SCHALT_3
   english_name: ZIRKPROG_1_DI_SCHALT_3
   index: 6690
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_1_MI
   english_name: ZIRKPROG_1_MI
   index: 6704
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_1_MI_SCHALT_2
   english_name: ZIRKPROG_1_MI_SCHALT_2
   index: 6705
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_1_MI_SCHALT_3
   english_name: ZIRKPROG_1_MI_SCHALT_3
   index: 6706
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_1_DO
   english_name: ZIRKPROG_1_DO
   index: 6720
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_1_DO_SCHALT_2
   english_name: ZIRKPROG_1_DO_SCHALT_2
   index: 6721
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_1_DO_SCHALT_3
   english_name: ZIRKPROG_1_DO_SCHALT_3
   index: 6722
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_1_FR
   english_name: ZIRKPROG_1_FR
   index: 6736
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_1_FR_SCHALT_2
   english_name: ZIRKPROG_1_FR_SCHALT_2
   index: 6737
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_1_FR_SCHALT_3
   english_name: ZIRKPROG_1_FR_SCHALT_3
   index: 6738
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_1_SA
   english_name: ZIRKPROG_1_SA
   index: 6752
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_1_SA_SCHALT_2
   english_name: ZIRKPROG_1_SA_SCHALT_2
   index: 6753
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_1_SA_SCHALT_3
   english_name: ZIRKPROG_1_SA_SCHALT_3
   index: 6754
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_1_SO
   english_name: ZIRKPROG_1_SO
   index: 6768
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_1_SO_SCHALT_2
   english_name: ZIRKPROG_1_SO_SCHALT_2
   index: 6769
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_1_SO_SCHALT_3
   english_name: ZIRKPROG_1_SO_SCHALT_3
   index: 6770
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_1_MO_FR
@@ -17186,127 +17186,127 @@
 - name: ZIRKPROG_2_MO
   english_name: CIRCProgram_2_MO
   index: 6928
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_2_MO_SCHALT_2
   english_name: CIRCProgram_2_MO_SWITCH_2
   index: 6929
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_2_MO_SCHALT_3
   english_name: CIRCProgram_2_MO_SWITCH_3
   index: 6930
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_2_DI
   english_name: CIRCProgram_2_DI
   index: 6944
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_2_DI_SCHALT_2
   english_name: CIRCProgram_2_DI_SWITCH_2
   index: 6945
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_2_DI_SCHALT_3
   english_name: CIRCProgram_2_DI_SWITCH_3
   index: 6946
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_2_MI
   english_name: CIRCProgram_2_MI
   index: 6960
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_2_MI_SCHALT_2
   english_name: CIRCProgram_2_MI_SWITCH_2
   index: 6961
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_2_MI_SCHALT_3
   english_name: CIRCProgram_2_MI_SWITCH_3
   index: 6962
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_2_DO
   english_name: CIRCProgram_2_DO
   index: 6976
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_2_DO_SCHALT_2
   english_name: CIRCProgram_2_DO_SWITCH_2
   index: 6977
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_2_DO_SCHALT_3
   english_name: CIRCProgram_2_DO_SWITCH_3
   index: 6978
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_2_FR
   english_name: CIRCProgram_2_FR
   index: 6992
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_2_FR_SCHALT_2
   english_name: CIRCProgram_2_FR_SWITCH_2
   index: 6993
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_2_FR_SCHALT_3
   english_name: CIRCProgram_2_FR_SWITCH_3
   index: 6994
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_2_SA
   english_name: CIRCProgram_2_SA
   index: 7008
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_2_SA_SCHALT_2
   english_name: CIRCProgram_2_SA_SWITCH_2
   index: 7009
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_2_SA_SCHALT_3
   english_name: CIRCProgram_2_SA_SWITCH_3
   index: 7010
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_2_SO
   english_name: CIRCProgram_2_SO
   index: 7024
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_2_SO_SCHALT_2
   english_name: CIRCProgram_2_SO_SWITCH_2
   index: 7025
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_2_SO_SCHALT_3
   english_name: CIRCProgram_2_SO_SWITCH_3
   index: 7026
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_2_MO_FR
@@ -17390,127 +17390,127 @@
 - name: ZIRKPROG_3_MO
   english_name: CIRCProgram_3_MO
   index: 7184
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_3_MO_SCHALT_2
   english_name: CIRCProgram_3_MO_SWITCH_2
   index: 7185
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_3_MO_SCHALT_3
   english_name: ZIRKPROG_3_MO_SCHALT_3
   index: 7186
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_3_DI
   english_name: CIRCPROG_3_DI
   index: 7200
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_3_DI_SCHALT_2
   english_name: CIRCPROG_3_DI_SWITCH_2
   index: 7201
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_3_DI_SCHALT_3
   english_name: CIRCPROG_3_DI_SWITCH_3
   index: 7202
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_3_MI
   english_name: CIRCPROG_3_MI
   index: 7216
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_3_MI_SCHALT_2
   english_name: CIRCPROG_3_MI_SWITCH_2
   index: 7217
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_3_MI_SCHALT_3
   english_name: CIRCPROG_3_MI_SWITCH_3
   index: 7218
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_3_DO
   english_name: CIRCPROG_3_DO
   index: 7232
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_3_DO_SCHALT_2
   english_name: CIRCPROG_3_DO_SWITCH_2
   index: 7233
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_3_DO_SCHALT_3
   english_name: CIRCPROG_3_DO_SWITCH_3
   index: 7234
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_3_FR
   english_name: CIRCPROG_3_FR
   index: 7248
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_3_FR_SCHALT_2
   english_name: CIRCPROG_3_FR_SWITCH_2
   index: 7249
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_3_FR_SCHALT_3
   english_name: CIRCPROG_3_FR_SWITCH_3
   index: 7250
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_3_SA
   english_name: CIRCPROG_3_SA
   index: 7264
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_3_SA_SCHALT_2
   english_name: CIRCPROG_3_SA_SWITCH_2
   index: 7265
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_3_SA_SCHALT_3
   english_name: CIRCPROG_3_SA_SWITCH_3
   index: 7266
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_3_SO
   english_name: CIRCPROG_3_SO
   index: 7280
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_3_SO_SCHALT_2
   english_name: CIRCPROG_3_SO_SWITCH_2
   index: 7281
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_3_SO_SCHALT_3
   english_name: CIRCPROG_3_SO_SWITCH_3
   index: 7282
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZIRKPROG_3_MO_FR
@@ -17594,127 +17594,127 @@
 - name: ZBV_PROG_1_MO
   english_name: ZBV_PROG_1_MO
   index: 7440
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_1_MO_SCHALT_2
   english_name: ZBV_PROG_1_MO_SWITCH_2
   index: 7441
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_1_MO_SCHALT_3
   english_name: ZBV_PROG_1_MO_SWITCH_3
   index: 7442
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_1_DI
   english_name: ZBV_PROG_1_DI
   index: 7456
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_1_DI_SCHALT_2
   english_name: ZBV_PROG_1_DI_SWITCH_2
   index: 7457
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_1_DI_SCHALT_3
   english_name: ZBV_PROG_1_DI_SWITCH_3
   index: 7458
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_1_MI
   english_name: ZBV_PROG_1_MI
   index: 7472
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_1_MI_SCHALT_2
   english_name: ZBV_PROG_1_MI_SWITCH_2
   index: 7473
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_1_MI_SCHALT_3
   english_name: ZBV_PROG_1_MI_SWITCH_3
   index: 7474
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_1_DO
   english_name: ZBV_PROG_1_DO
   index: 7488
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_1_DO_SCHALT_2
   english_name: ZBV_PROG_1_DO_SWITCH_2
   index: 7489
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_1_DO_SCHALT_3
   english_name: ZBV_PROG_1_DO_SWITCH_3
   index: 7490
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_1_FR
   english_name: ZBV_PROG_1_FR
   index: 7504
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_1_FR_SCHALT_2
   english_name: ZBV_PROG_1_FR_SWITCH_2
   index: 7505
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_1_FR_SCHALT_3
   english_name: ZBV_PROG_1_FR_SWITCH_3
   index: 7506
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_1_SA
   english_name: ZBV_PROG_1_SA
   index: 7520
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_1_SA_SCHALT_2
   english_name: ZBV_PROG_1_SA_SWITCH_2
   index: 7521
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_1_SA_SCHALT_3
   english_name: ZBV_PROG_1_SA_SWITCH_3
   index: 7522
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_1_SO
   english_name: ZBV_PROG_1_SO
   index: 7536
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_1_SO_SCHALT_2
   english_name: ZBV_PROG_1_SO_SWITCH_2
   index: 7537
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_1_SO_SCHALT_3
   english_name: ZBV_PROG_1_SO_SWITCH_3
   index: 7538
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_1_MO_FR
@@ -17798,127 +17798,127 @@
 - name: ZBV_PROG_2_MO
   english_name: ZBV_PROG_2_MO
   index: 7696
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_2_MO_SCHALT_2
   english_name: ZBV_PROG_2_MO_SWITCH_2
   index: 7697
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_2_MO_SCHALT_3
   english_name: ZBV_PROG_2_MO_SWITCH_3
   index: 7698
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_2_DI
   english_name: ZBV_PROG_2_DI
   index: 7712
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_2_DI_SCHALT_2
   english_name: ZBV_PROG_2_DI_SWITCH_2
   index: 7713
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_2_DI_SCHALT_3
   english_name: ZBV_PROG_2_DI_SWITCH_3
   index: 7714
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_2_MI
   english_name: ZBV_PROG_2_MI
   index: 7728
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_2_MI_SCHALT_2
   english_name: ZBV_PROG_2_MI_SWITCH_2
   index: 7729
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_2_MI_SCHALT_3
   english_name: ZBV_PROG_2_MI_SWITCH_3
   index: 7730
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_2_DO
   english_name: ZBV_PROG_2_DO
   index: 7744
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_2_DO_SCHALT_2
   english_name: ZBV_PROG_2_DO_SWITCH_2
   index: 7745
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_2_DO_SCHALT_3
   english_name: ZBV_PROG_2_DO_SWITCH_3
   index: 7746
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_2_FR
   english_name: ZBV_PROG_2_FR
   index: 7760
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_2_FR_SCHALT_2
   english_name: ZBV_PROG_2_FR_SWITCH_2
   index: 7761
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_2_FR_SCHALT_3
   english_name: ZBV_PROG_2_FR_SWITCH_3
   index: 7762
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_2_SA
   english_name: ZBV_PROG_2_SA
   index: 7776
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_2_SA_SCHALT_2
   english_name: ZBV_PROG_2_SA_SWITCH_2
   index: 7777
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_2_SA_SCHALT_3
   english_name: ZBV_PROG_2_SA_SWITCH_3
   index: 7778
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_2_SO
   english_name: ZBV_PROG_2_SO
   index: 7792
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_2_SO_SCHALT_2
   english_name: ZBV_PROG_2_SO_SWITCH_2
   index: 7793
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_2_SO_SCHALT_3
   english_name: ZBV_PROG_2_SO_SWITCH_3
   index: 7794
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: ZBV_PROG_2_MO_FR
@@ -18758,127 +18758,127 @@
 - name: ZEITPROG_1_MO
   english_name: TIME_PROGRAM_1_MONDAY
   index: 8208
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_1_MO_SCHALT_2
   english_name: TIME_PROGRAM_1_MONDAY_SWITCH_2
   index: 8209
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_1_MO_SCHALT_3
   english_name: TIME_PROGRAM_1_MONDAY_SWITCH_3
   index: 8210
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_1_DI
   english_name: TIME_PROGRAM_1_TUESDAY
   index: 8224
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_1_DI_SCHALT_2
   english_name: TIME_PROGRAM_1_TUESDAY_SWITCH_2
   index: 8225
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_1_DI_SCHALT_3
   english_name: TIME_PROGRAM_1_TUESDAY_SWITCH_3
   index: 8226
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_1_MI
   english_name: TIME_PROGRAM_1_WEDNESDAY
   index: 8240
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_1_MI_SCHALT_2
   english_name: TIME_PROGRAM_1_WEDNESDAY_SWITCH_2
   index: 8241
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_1_MI_SCHALT_3
   english_name: TIME_PROGRAM_1_WEDNESDAY_SWITCH_3
   index: 8242
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_1_DO
   english_name: TIME_PROGRAM_1_THURSDAY
   index: 8256
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_1_DO_SCHALT_2
   english_name: TIME_PROGRAM_1_THURSDAY_SWITCH_2
   index: 8257
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_1_DO_SCHALT_3
   english_name: TIME_PROGRAM_1_THURSDAY_SWITCH_3
   index: 8258
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_1_FR
   english_name: TIME_PROGRAM_1_FRIDAY
   index: 8272
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_1_FR_SCHALT_2
   english_name: TIME_PROGRAM_1_FRIDAY_SWITCH_2
   index: 8273
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_1_FR_SCHALT_3
   english_name: TIME_PROGRAM_1_FRIDAY_SWITCH_3
   index: 8274
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_1_SA
   english_name: TIME_PROGRAM_1_SATURDAY
   index: 8288
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_1_SA_SCHALT_2
   english_name: TIME_PROGRAM_1_SATURDAY_SWITCH_2
   index: 8289
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_1_SA_SCHALT_3
   english_name: TIME_PROGRAM_1_SATURDAY_SWITCH_3
   index: 8290
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_1_SO
   english_name: TIME_PROGRAM_1_SUNDAY
   index: 8304
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_1_SO_SCHALT_2
   english_name: TIME_PROGRAM_1_SUNDAY_SWITCH_2
   index: 8305
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_1_SO_SCHALT_3
   english_name: TIME_PROGRAM_1_SUNDAY_SWITCH_3
   index: 8306
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_1_MO_FR
@@ -18962,127 +18962,127 @@
 - name: ZEITPROG_2_MO
   english_name: TIMEPROG_2_MO
   index: 8464
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_2_MO_SCHALT_2
   english_name: TIMEPROG_2_MO_SWITCH_2
   index: 8465
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_2_MO_SCHALT_3
   english_name: TIMEPROG_2_MO_SWITCH_3
   index: 8466
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_2_DI
   english_name: TIMEPROG_2_DI
   index: 8480
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_2_DI_SCHALT_2
   english_name: TIMEPROG_2_DI_SWITCH_2
   index: 8481
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_2_DI_SCHALT_3
   english_name: TIMEPROG_2_DI_SWITCH_3
   index: 8482
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_2_MI
   english_name: TIMEPROG_2_MI
   index: 8496
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_2_MI_SCHALT_2
   english_name: TIMEPROG_2_MI_SWITCH_2
   index: 8497
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_2_MI_SCHALT_3
   english_name: TIMEPROG_2_MI_SWITCH_3
   index: 8498
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_2_DO
   english_name: TIMEPROG_2_DO
   index: 8512
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_2_DO_SCHALT_2
   english_name: TIMEPROG_2_DO_SWITCH_2
   index: 8513
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_2_DO_SCHALT_3
   english_name: TIMEPROG_2_DO_SWITCH_3
   index: 8514
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_2_FR
   english_name: TIMEPROG_2_FR
   index: 8528
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_2_FR_SCHALT_2
   english_name: TIMEPROG_2_FR_SWITCH_2
   index: 8529
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_2_FR_SCHALT_3
   english_name: TIMEPROG_2_FR_SWITCH_3
   index: 8530
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_2_SA
   english_name: TIMEPROG_2_SA
   index: 8544
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_2_SA_SCHALT_2
   english_name: TIMEPROG_2_SA_SWITCH_2
   index: 8545
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_2_SA_SCHALT_3
   english_name: TIMEPROG_2_SA_SWITCH_3
   index: 8546
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_2_SO
   english_name: TIMEPROG_2_SO
   index: 8560
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_2_SO_SCHALT_2
   english_name: TIMEPROG_2_SO_SWITCH_2
   index: 8561
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_2_SO_SCHALT_3
   english_name: TIMEPROG_2_SO_SWITCH_3
   index: 8562
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_2_MO_FR
@@ -19166,127 +19166,127 @@
 - name: ZEITPROG_3_MO
   english_name: TIMEPROG_3_MO
   index: 8720
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_3_MO_SCHALT_2
   english_name: TIMEPROG_3_MO_SWITCH_2
   index: 8721
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_3_MO_SCHALT_3
   english_name: TIMEPROG_3_MO_SWITCH_3
   index: 8722
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_3_DI
   english_name: TIMEPROG_3_DI
   index: 8736
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_3_DI_SCHALT_2
   english_name: TIMEPROG_3_DI_SWITCH_2
   index: 8737
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_3_DI_SCHALT_3
   english_name: TIMEPROG_3_DI_SWITCH_3
   index: 8738
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_3_MI
   english_name: ZEITPROG_3_MI
   index: 8752
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_3_MI_SCHALT_2
   english_name: TIMEPROG_3_MI_SWITCH_2
   index: 8753
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_3_MI_SCHALT_3
   english_name: TIMEPROG_3_MI_SWITCH_3
   index: 8754
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_3_DO
   english_name: TIMEPROG_3_DO
   index: 8768
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_3_DO_SCHALT_2
   english_name: TIMEPROG_3_DO_SWITCH_2
   index: 8769
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_3_DO_SCHALT_3
   english_name: TIMEPROG_3_DO_SWITCH_3
   index: 8770
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_3_FR
   english_name: TIMEPROG_3_FR
   index: 8784
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_3_FR_SCHALT_2
   english_name: TIMEPROG_3_FR_SWITCH_2
   index: 8785
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_3_FR_SCHALT_3
   english_name: TIMEPROG_3_FR_SWITCH_3
   index: 8786
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_3_SA
   english_name: TIMEPROG_3_SA
   index: 8800
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_3_SA_SCHALT_2
   english_name: TIMEPROG_3_SA_SWITCH_2
   index: 8801
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_3_SA_SCHALT_3
   english_name: TIMEPROG_3_SA_SWITCH_3
   index: 8802
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_3_SO
   english_name: TIMEPROG_3_SO
   index: 8816
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_3_SO_SCHALT_2
   english_name: TIMEPROG_3_SO_SWITCH_2
   index: 8817
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_3_SO_SCHALT_3
   english_name: TIMEPROG_3_SO_SWITCH_3
   index: 8818
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_3_MO_FR
@@ -19370,127 +19370,127 @@
 - name: ZEITPROG_4_MO
   english_name: TIMEPROG_4_MO
   index: 8976
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_4_MO_SCHALT_2
   english_name: TIMEPROG_4_MO_SWITCH_2
   index: 8977
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_4_MO_SCHALT_3
   english_name: TIMEPROG_4_MO_SWITCH_3
   index: 8978
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_4_DI
   english_name: TIMEPROG_4_DI
   index: 8992
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_4_DI_SCHALT_2
   english_name: TIMEPROG_4_DI_SWITCH_2
   index: 8993
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_4_DI_SCHALT_3
   english_name: TIMEPROG_4_DI_SWITCH_3
   index: 8994
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_4_MI
   english_name: TIMEPROG_4_MI
   index: 9008
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_4_MI_SCHALT_2
   english_name: TIMEPROG_4_MI_SWITCH_2
   index: 9009
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_4_MI_SCHALT_3
   english_name: TIMEPROG_4_MI_SWITCH_3
   index: 9010
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_4_DO
   english_name: TIMEPROG_4_DO
   index: 9024
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_4_DO_SCHALT_2
   english_name: TIMEPROG_4_DO_SWITCH_2
   index: 9025
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_4_DO_SCHALT_3
   english_name: TIMEPROG_4_DO_SWITCH_3
   index: 9026
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_4_FR
   english_name: TIMEPROG_4_FR
   index: 9040
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_4_FR_SCHALT_2
   english_name: TIMEPROG_4_FR_SWITCH_2
   index: 9041
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_4_FR_SCHALT_3
   english_name: TIMEPROG_4_FR_SWITCH_3
   index: 9042
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_4_SA
   english_name: TIMEPROG_4_SA
   index: 9056
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_4_SA_SCHALT_2
   english_name: TIMEPROG_4_SA_SWITCH_2
   index: 9057
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_4_SA_SCHALT_3
   english_name: TIMEPROG_4_SA_SWITCH_3
   index: 9058
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_4_SO
   english_name: TIMEPROG_4_SO
   index: 9072
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_4_SO_SCHALT_2
   english_name: TIMEPROG_4_SO_SWITCH_2
   index: 9073
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_4_SO_SCHALT_3
   english_name: TIMEPROG_4_SO_SWITCH_3
   index: 9074
-  type: ET_INTEGER
+  type: ET_TIME_DOMAIN
   ha_entity_type: sensor.timestamp
   unit_of_measurement: null
 - name: ZEITPROG_4_MO_FR

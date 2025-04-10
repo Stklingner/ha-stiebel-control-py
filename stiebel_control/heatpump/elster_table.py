@@ -51,7 +51,17 @@ ET_DATE = ElsterType.ET_DATE
 ET_TIME_DOMAIN = ElsterType.ET_TIME_DOMAIN
 ET_DEV_NR = ElsterType.ET_DEV_NR
 ET_ERR_CODE = ElsterType.ET_ERR_CODE
-#ET_DEV_ID = ElsterType.ET_DEV_ID
+ET_DEV_ID = ElsterType.ET_DEV_ID
+
+# Commented out backward compatibility for renamed/refactored enum values
+# These have been removed as part of the refactoring:
+# ET_HOUR = ElsterType.ET_TIME  # Time values were renamed
+# ET_HOUR_SHORT = ElsterType.ET_TIME  # Another time value variant
+# ET_TEMPERATURE = ElsterType.ET_DEC_VAL  # Temperature values typically use decimal format
+# ET_PERCENT = ElsterType.ET_INTEGER  # Percentage values
+# ET_DOUBLE_VALUE = ElsterType.ET_DEC_VAL  # Double values (likely energy measurements)
+# ET_TRIPLE_VALUE = ElsterType.ET_MIL_VAL  # Triple values (high precision measurements)
+# ET_PROGRAM_SWITCH = ElsterType.ET_MODE  # Program switches are mode selectors
 
 
 class ElsterEntry:
@@ -81,7 +91,7 @@ def load_elster_signals_from_yaml() -> List[ElsterEntry]:
     """
     # Define an emergency fallback in case loading fails
     fallback_signals = [
-        ElsterEntry("INDEX_NOT_FOUND", "INDEX_NOT_FOUND", 0, ET_NONE),
+        ElsterEntry("INDEX_NOT_FOUND", "INDEX_NOT_FOUND", 0, ElsterType.ET_NONE),
     ]
     
     # Update the path to account for the heatpump subfolder
@@ -229,7 +239,7 @@ def value_from_signal(value, value_type):
     """
     if value_type == ElsterType.ET_NONE:
         return value  # Return raw value without conversion for ET_NONE type
-    elif    lsterType.ET_INTEGER or value_type == ElsterType.ET_BYTE:
+    elif value_type == ElsterType.ET_INTEGER or value_type == ElsterType.ET_BYTE:
         return value  # Return integer values as is
     elif value_type == ElsterType.ET_BOOLEAN or value_type == ElsterType.ET_LITTLE_BOOL:
         # For ET_LITTLE_BOOL, value is 0x0100 (256) instead of 0x0001 (1)

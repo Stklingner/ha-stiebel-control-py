@@ -15,42 +15,28 @@ from pathlib import Path
 from typing import List, Dict, Tuple
 
 
-def parse_elster_type_enum(content: str) -> Dict[str, str]:
+def get_type_mapping() -> Dict[str, str]:
     """
-    Parse the ElsterType enum from the C++ header file.
+    Get a mapping of C++ type names to Python type names.
     
-    Args:
-        content: Content of the ElsterTable.h file
-        
     Returns:
-        Dict mapping C++ enum values to Python enum values
+        Dictionary mapping C++ type names to Python type names.
     """
-    # Define the regex pattern for the ElsterType enum
-    enum_pattern = r'typedef\s+enum\s*\{(.*?)\}\s*ElsterType;'
-    enum_match = re.search(enum_pattern, content, re.DOTALL)
-    
-    if not enum_match:
-        print("WARNING: Could not find ElsterType enum definition in header file!")
-        return {}
-    
-    enum_content = enum_match.group(1)
-    
-    # Create a mapping from C++ type to Python type
     type_mapping = {
-        'et_default': 'ET_INTEGER',          # Plain integer values
+        'et_default': 'ET_INTEGER',       # Plain integer values
         'et_dec_val': 'ET_DEC_VAL',      # Values with 1 decimal place (typically temperatures)
         'et_cent_val': 'ET_CENT_VAL',         # Values with 2 decimal places (typically percentages)
         'et_mil_val': 'ET_MIL_VAL',     # Values with 3 decimal places
         'et_byte': 'ET_BYTE',             # Byte values (8-bit integers)
         'et_bool': 'ET_BOOLEAN',             # Boolean values (0x0001/0x0000)
         'et_little_bool': 'ET_LITTLE_BOOL',      # Boolean values in different format (0x0100/0x0000)
-        'et_double_val': 'ET_DOUBLE_VALUE',  # Values with 3 decimal places
-        'et_triple_val': 'ET_TRIPLE_VALUE',  # Values with 6 decimal places
+        'et_double_val': 'ET_DEC_VAL',  # Map to ET_DEC_VAL instead of ET_DOUBLE_VALUE 
+        'et_triple_val': 'ET_MIL_VAL',  # Map to ET_MIL_VAL instead of ET_TRIPLE_VALUE
         'et_little_endian': 'ET_LITTLE_ENDIAN',    # Byte-swapped integers
         'et_betriebsart': 'ET_MODE', # Operation modes
-        'et_zeit': 'ET_HOUR',                # Time values (HH:MM)
+        'et_zeit': 'ET_TIME',                # Map to ET_TIME instead of ET_HOUR
         'et_datum': 'ET_DATE',               # Date values (DD.MM)
-        'et_time_domain': 'ET_INTEGER',      # Time ranges with special formatting
+        'et_time_domain': 'ET_TIME_DOMAIN',  # Map to ET_TIME_DOMAIN instead of ET_INTEGER
         'et_dev_nr': 'ET_DEV_NR',            # Device numbers
         'et_err_nr': 'ET_ERR_CODE',          # Error codes
         'et_dev_id': 'ET_DEV_ID'             # Device IDs
@@ -277,7 +263,7 @@ def main():
         content = f.read()
     
     # Parse the header file
-    type_map = parse_elster_type_enum(content)
+    type_map = get_type_mapping()
     elster_table = parse_elster_table(content, type_map)
     
     # Generate output files
