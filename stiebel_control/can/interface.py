@@ -47,12 +47,34 @@ class CanInterface:
         self.can_members = can_members or self.protocol.DEFAULT_CAN_MEMBERS
         self.bitrate = bitrate
         
+        # Store the callback for property access
+        self._callback = callback
+        
         # If a callback was provided, add it as a global callback
         if callback:
             self.signal_handler.add_global_callback(callback)
         
         # Flag to track if the interface is running
         self.running = False
+    
+    @property
+    def callback(self) -> Optional[Callable[[str, Any, int], None]]:
+        """Get the current global callback."""
+        return self._callback
+        
+    @callback.setter
+    def callback(self, callback: Optional[Callable[[str, Any, int], None]]):
+        """Set a new global callback and register it with the signal handler."""
+        # If we had a previous callback, remove it
+        if self._callback:
+            self.signal_handler.remove_global_callback(self._callback)
+            
+        # Store the new callback
+        self._callback = callback
+        
+        # Register with the signal handler if not None
+        if callback:
+            self.signal_handler.add_global_callback(callback)
         
     def start(self):
         """Start the CAN interface."""
