@@ -50,6 +50,11 @@ class EntityManager:
         # Build the signal to entity mapping
         self.signal_mapper.build_entity_mapping(self.entity_config.entities, can_interface)
         
+        # Check if MQTT is connected before trying to register entities
+        if not self.mqtt_interface.is_connected():
+            logger.warning("MQTT is not connected; entity registration will be deferred until connection is established")
+            return
+            
         # Register entities with Home Assistant
         for entity_id, entity_def in self.entity_config.entities.items():
             self.registration_service.register_entity_from_config(entity_id, entity_def)

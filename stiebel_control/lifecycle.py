@@ -114,8 +114,16 @@ class LifecycleManager:
         """
         logger.info(f"Starting {self.application_name}...")
         try:
+            # Execute each start callback and check for success
             for callback in self.start_callbacks:
-                callback()
+                result = callback()
+                # If callback returns a boolean False (not None, not truthy value), 
+                # consider it a failure
+                if isinstance(result, bool) and not result:
+                    logger.error(f"Startup component failed to start properly")
+                    # Don't set is_running since we're failing
+                    return False
+                    
             self.is_running = True
             logger.info(f"{self.application_name} started")
             return True

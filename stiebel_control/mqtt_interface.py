@@ -84,17 +84,11 @@ class MqttInterface:
             self.client.loop_start()
             
             # Wait for connection to establish
-            timeout_seconds = 10  # Increase timeout for potentially slow connections
-            logger.info(f"Waiting up to {timeout_seconds} seconds for MQTT connection to establish")
-            for i in range(timeout_seconds):
-                if self.connected:
-                    logger.info("MQTT connection confirmed")
-                    return True
-                logger.debug(f"Waiting for MQTT connection: {i+1}/{timeout_seconds} seconds")
-                time.sleep(1)
-                
-            logger.error(f"Timed out connecting to MQTT broker at {self.host}:{self.port}")
-            return False
+            if not self.wait_for_connection():
+                return False
+            
+            logger.info("MQTT connection confirmed")
+            return True
             
         except Exception as e:
             logger.error(f"Error connecting to MQTT broker: {e}", exc_info=True)
@@ -157,80 +151,75 @@ class MqttInterface:
         except Exception as e:
             logger.error(f"Error processing message: {e}")
             
-    def register_sensor(self, entity_id: str, name: str, device_class: str = None,
-                      state_class: str = None, unit_of_measurement: str = None,
-                      icon: str = None) -> bool:
+    def register_sensor(self, entity_id: str, name: str, device_class: str = None, 
+                      state_class: str = None, unit_of_measurement: str = None, 
+                      icon: str = None, value_template: str = None) -> bool:
         """
-        Register a sensor with Home Assistant using MQTT discovery.
+        Register a sensor entity with Home Assistant using MQTT discovery.
         
         Args:
-            entity_id: Unique ID for the sensor
-            name: Display name for the sensor
-            device_class: Home Assistant device class (e.g., 'temperature')
-            state_class: Home Assistant state class (e.g., 'measurement')
-            unit_of_measurement: Unit of measurement (e.g., '°C')
-            icon: Icon to use (e.g., 'mdi:thermometer')
+            entity_id: Unique ID for the entity
+            name: Display name for the entity
+            device_class: Home Assistant device class (e.g., temperature, humidity)
+            state_class: Home Assistant state class (e.g., measurement)
+            unit_of_measurement: Unit of measurement (e.g., °C, %, W)
+            icon: Material Design Icon to use (e.g., mdi:thermometer)
+            value_template: Optional value template for processing state values
             
         Returns:
             bool: True if registered successfully, False otherwise
         """
-        if not self.connected:
-            logger.error(f"Cannot register sensor {entity_id}: not connected to MQTT broker")
+        if not self.is_connected():
+            logger.error("Cannot register sensor entities: not connected to MQTT broker")
             return False
             
+        # Generate discovery topic
+        discovery_topic = f"{self.discovery_prefix}/sensor/{entity_id}/config"
+        
+        # Create config payload
+        config = {
+            "name": name,
+            "unique_id": f"{self.client_id}_{entity_id}",
+            "state_topic": f"{self.base_topic}/{entity_id}/state",
+            "availability_topic": f"{self.base_topic}/status",
+            "payload_available": "online",
+            "payload_not_available": "offline",
+        }
+        
+        # Add optional fields if provided
+        if device_class:
+            config["device_class"] = device_class
+        if state_class:
+            config["state_class"] = state_class
+        if unit_of_measurement:
+            config["unit_of_measurement"] = unit_of_measurement
+        if icon:
+            config["icon"] = icon
+        if value_template:
+            config["value_template"] = value_template
+            
+        # Add device info
+        config["device"] = {
+            "identifiers": [self.client_id],
+            "name": "Stiebel Eltron Heat Pump",
+            "model": "CAN Interface",
+            "manufacturer": "Stiebel Eltron"
+        }
+        
+        # Publish discovery config
         try:
-            # Create the state topic where sensor values will be published
-            state_topic = f"{self.base_topic}/{entity_id}/state"
-            logger.debug(f"State topic for {entity_id}: {state_topic}")
+            logger.debug(f"Publishing discovery config for {entity_id}")
+            self.client.publish(discovery_topic, json.dumps(config), retain=True)
             
-            # Create the discovery payload
-            config = {
-                "name": name,
-                "unique_id": f"{self.client_id}_{entity_id}",
-                "state_topic": state_topic,
-                "device": {
-                    "identifiers": [self.client_id],
-                    "name": "Stiebel Eltron Heat Pump",
-                    "model": "CAN Interface",
-                    "manufacturer": "Stiebel Eltron"
-                }
-            }
-            
-            # Add optional fields if provided
-            if device_class:
-                config["device_class"] = device_class
-            if state_class:
-                config["state_class"] = state_class
-            if unit_of_measurement:
-                config["unit_of_measurement"] = unit_of_measurement
-            if icon:
-                config["icon"] = icon
-                
-            # Create the discovery topic
-            discovery_topic = f"{self.discovery_prefix}/sensor/{self.client_id}/{entity_id}/config"
-            logger.debug(f"Discovery topic for {entity_id}: {discovery_topic}")
-            
-            # Publish the discovery message
-            logger.info(f"Publishing discovery config for sensor {entity_id} to {discovery_topic}")
-            result = self.client.publish(discovery_topic, json.dumps(config), qos=1, retain=True)
-            if result.rc == 0:
-                logger.info(f"Successfully published discovery config for {entity_id}")
-            else:
-                logger.error(f"Failed to publish discovery config for {entity_id}, return code: {result.rc}")
-                return False
-            
-            # Store the entity info for later use
+            # Track the entity
             self.entities[entity_id] = {
                 "type": "sensor",
-                "state_topic": state_topic,
                 "config": config
             }
             
-            logger.info(f"Sensor {entity_id} successfully registered with Home Assistant")
             return True
-            
         except Exception as e:
-            logger.error(f"Error registering sensor {entity_id}: {e}", exc_info=True)
+            logger.error(f"Error registering sensor {entity_id}: {e}")
             return False
             
     def register_select(self, entity_id: str, name: str, options: list,
@@ -249,7 +238,7 @@ class MqttInterface:
         Returns:
             bool: True if registered successfully, False otherwise
         """
-        if not self.connected:
+        if not self.is_connected():
             logger.error(f"Cannot register select {entity_id}: not connected to MQTT broker")
             return False
             
@@ -340,7 +329,7 @@ class MqttInterface:
         Returns:
             bool: True if registered successfully, False otherwise
         """
-        if not self.connected:
+        if not self.is_connected():
             logger.error("Cannot register button: not connected to MQTT broker")
             return False
             
@@ -396,7 +385,7 @@ class MqttInterface:
         Returns:
             bool: True if published successfully, False otherwise
         """
-        if not self.connected:
+        if not self.is_connected():
             logger.error("Cannot publish state: not connected to MQTT broker")
             return False
             
@@ -432,3 +421,34 @@ class MqttInterface:
         except Exception as e:
             logger.error(f"Error publishing state: {e}", exc_info=True)
             return False
+
+    def is_connected(self) -> bool:
+        """Check if the interface is currently connected to the MQTT broker.
+        
+        Returns:
+            bool: True if connected, False otherwise
+        """
+        return self.connected
+
+    def wait_for_connection(self, timeout_seconds: int = 10) -> bool:
+        """Wait for the MQTT connection to be established.
+        
+        Args:
+            timeout_seconds: Maximum time to wait in seconds
+            
+        Returns:
+            bool: True if connected successfully within the timeout, False otherwise
+        """
+        if self.connected:
+            return True
+            
+        logger.info(f"Waiting up to {timeout_seconds} seconds for MQTT connection to establish")
+        for i in range(timeout_seconds):
+            if self.connected:
+                logger.info("MQTT connection confirmed")
+                return True
+            logger.debug(f"Waiting for MQTT connection: {i+1}/{timeout_seconds} seconds")
+            time.sleep(1)
+                
+        logger.error(f"Timed out waiting for MQTT connection to establish")
+        return False
