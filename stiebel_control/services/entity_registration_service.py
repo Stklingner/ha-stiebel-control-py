@@ -91,7 +91,6 @@ class EntityRegistrationService:
         
     def register_dynamic_entity(
         self, 
-        entity_id: str, 
         signal_name: str, 
         signal_type: ElsterType, 
         value: Any, 
