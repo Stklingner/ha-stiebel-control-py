@@ -130,8 +130,8 @@ class MqttInterface:
             logger.info(f"Connected to MQTT broker at {self.host}:{self.port}")
             self.connected = True
             
-            # Subscribe to all command topics
-            command_topic = f"{self.base_topic}/+/command"
+            # Use a flat topic structure for Home Assistant compatibility
+            command_topic = f"{self.base_topic}/cmd/+"
             logger.info(f"Subscribing to command topic: {command_topic}")
             self.client.subscribe(command_topic)
             
@@ -160,8 +160,8 @@ class MqttInterface:
             logger.debug(f"Received message on topic {topic}: {payload}")
             
             # Check if this is a command topic
-            if topic.endswith('/command'):
-                entity_id = topic.split('/')[-2]
+            if '/cmd/' in topic:
+                entity_id = topic.split('/')[-1]
                 if self.command_callback:
                     self.command_callback(entity_id, payload)
                     
@@ -193,11 +193,14 @@ class MqttInterface:
         # Generate discovery topic
         discovery_topic = f"{self.discovery_prefix}/sensor/{entity_id}/config"
         
+        # Use a flat topic structure for Home Assistant compatibility
+        state_topic = f"{self.base_topic}/state/{entity_id}"
+        
         # Create config payload
         config = {
             "name": name,
             "unique_id": f"{self.client_id}_{entity_id}",
-            "state_topic": f"{self.base_topic}/{entity_id}/state",
+            "state_topic": state_topic,
             "availability_topic": f"{self.base_topic}/status",
             "payload_available": "online",
             "payload_not_available": "offline",
@@ -214,181 +217,32 @@ class MqttInterface:
             config["icon"] = icon
         if value_template:
             config["value_template"] = value_template
-            
+                
         # Add device info
         config["device"] = {
             "identifiers": [self.client_id],
             "name": "Stiebel Eltron Heat Pump",
             "model": "CAN Interface",
-            "manufacturer": "Stiebel Eltron"
+            "manufacturer": "Stiebel Eltron",
+            "sw_version": "1.0.0"
         }
-        
-        # Publish discovery config
-        try:
-            logger.debug(f"Publishing discovery config for {entity_id}")
-            self.client.publish(discovery_topic, json.dumps(config), retain=True)
             
-            # Track the entity
+        # Publish the discovery message
+        logger.info(f"Publishing discovery config for sensor {entity_id} to {discovery_topic}")
+        result = self.client.publish(discovery_topic, json.dumps(config), qos=1, retain=True)
+        if result.rc == 0:
+            logger.info(f"Successfully published discovery config for {entity_id}")
+            
+            # Store the entity with its state topic
             self.entities[entity_id] = {
                 "type": "sensor",
-                "config": config
-            }
-            
-            return True
-        except Exception as e:
-            logger.error(f"Error registering sensor {entity_id}: {e}")
-            return False
-            
-    def register_select(self, entity_id: str, name: str, options: list,
-                       icon: str = None, options_map: Dict[int, str] = None) -> bool:
-        """
-        Register a select entity with Home Assistant using MQTT discovery.
-        
-        Args:
-            entity_id: Unique ID for the select entity
-            name: Display name for the select
-            options: List of options for the select
-            icon: Icon to use (e.g., 'mdi:menu')
-            options_map: Optional mapping between internal numeric values and human-readable strings.
-                         If provided, a value_template will be set up for proper conversion.
-            
-        Returns:
-            bool: True if registered successfully, False otherwise
-        """
-        if not self.is_connected():
-            logger.error(f"Cannot register select {entity_id}: not connected to MQTT broker")
-            return False
-            
-        try:
-            # Create the topics
-            state_topic = f"{self.base_topic}/{entity_id}/state"
-            command_topic = f"{self.base_topic}/{entity_id}/command"
-            logger.debug(f"State topic for {entity_id}: {state_topic}")
-            logger.debug(f"Command topic for {entity_id}: {command_topic}")
-            
-            # Create the discovery payload
-            config = {
-                "name": name,
-                "unique_id": f"{self.client_id}_{entity_id}",
                 "state_topic": state_topic,
-                "command_topic": command_topic,
-                "options": options,
-                "device": {
-                    "identifiers": [self.client_id],
-                    "name": "Stiebel Eltron Heat Pump",
-                    "model": "CAN Interface",
-                    "manufacturer": "Stiebel Eltron"
-                }
-            }
-            
-            # If we have a mapping between internal values and display strings,
-            # add a value template to convert numeric values to strings
-            if options_map:
-                # Create a value template that checks each possible numeric value
-                # and converts it to the corresponding string option
-                value_template_parts = []
-                for value, text in options_map.items():
-                    value_template_parts.append(f'{{% if value == "{value}" %}}"{text}"{{% endif %}}')
-                    
-                # Combine all parts with else conditions
-                value_template = "{{" + " else ".join(value_template_parts) + " else value }}"
-                config["value_template"] = value_template
-                
-                # Also create a command template to convert back to internal values
-                command_template_parts = []
-                for value, text in options_map.items():
-                    command_template_parts.append(f'{{% if value == "{text}" %}}{value}{{% endif %}}')
-                    
-                command_template = "{{" + " else ".join(command_template_parts) + " }}"
-                config["command_template"] = command_template
-                
-            # Add optional fields if provided
-            if icon:
-                config["icon"] = icon
-                
-            # Create the discovery topic
-            discovery_topic = f"{self.discovery_prefix}/select/{self.client_id}/{entity_id}/config"
-            logger.debug(f"Discovery topic for {entity_id}: {discovery_topic}")
-            
-            # Publish the discovery message
-            logger.info(f"Publishing discovery config for select {entity_id} to {discovery_topic}")
-            result = self.client.publish(discovery_topic, json.dumps(config), qos=1, retain=True)
-            if result.rc == 0:
-                logger.info(f"Successfully published discovery config for {entity_id}")
-            else:
-                logger.error(f"Failed to publish discovery config for {entity_id}, return code: {result.rc}")
-                return False
-            
-            # Store the entity info for later use
-            self.entities[entity_id] = {
-                "type": "select",
-                "state_topic": state_topic,
-                "command_topic": command_topic,
-                "config": config
-            }
-            
-            logger.info(f"Select {entity_id} successfully registered with Home Assistant")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Error registering select {entity_id}: {e}", exc_info=True)
-            return False
-            
-    def register_button(self, entity_id: str, name: str, icon: str = None) -> bool:
-        """
-        Register a button entity with Home Assistant using MQTT discovery.
-        
-        Args:
-            entity_id: Unique ID for the button
-            name: Display name for the button
-            icon: Icon to use (e.g., 'mdi:refresh')
-            
-        Returns:
-            bool: True if registered successfully, False otherwise
-        """
-        if not self.is_connected():
-            logger.error("Cannot register button: not connected to MQTT broker")
-            return False
-            
-        try:
-            # Create the command topic
-            command_topic = f"{self.base_topic}/{entity_id}/command"
-            
-            # Create the discovery payload
-            config = {
-                "name": name,
-                "unique_id": f"{self.client_id}_{entity_id}",
-                "command_topic": command_topic,
-                "device": {
-                    "identifiers": [self.client_id],
-                    "name": "Stiebel Eltron Heat Pump",
-                    "model": "CAN Interface",
-                    "manufacturer": "Stiebel Eltron"
-                }
-            }
-            
-            # Add optional fields if provided
-            if icon:
-                config["icon"] = icon
-                
-            # Create the discovery topic
-            discovery_topic = f"{self.discovery_prefix}/button/{self.client_id}/{entity_id}/config"
-            
-            # Publish the discovery message
-            self.client.publish(discovery_topic, json.dumps(config), qos=1, retain=True)
-            logger.debug(f"Registered button {entity_id} with Home Assistant")
-            
-            # Store the entity info for later use
-            self.entities[entity_id] = {
-                "type": "button",
-                "command_topic": command_topic,
                 "config": config
             }
             
             return True
-            
-        except Exception as e:
-            logger.error(f"Error registering button: {e}")
+        else:
+            logger.error(f"Failed to publish discovery config for {entity_id}, return code: {result.rc}")
             return False
             
     def publish_state(self, entity_id: str, state: Any) -> bool:
