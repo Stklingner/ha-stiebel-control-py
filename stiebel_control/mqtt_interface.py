@@ -234,7 +234,7 @@ class MqttInterface:
             return False
             
     def register_select(self, entity_id: str, name: str, options: list,
-                       icon: str = None) -> bool:
+                       icon: str = None, options_map: Dict[int, str] = None) -> bool:
         """
         Register a select entity with Home Assistant using MQTT discovery.
         
@@ -243,6 +243,8 @@ class MqttInterface:
             name: Display name for the select
             options: List of options for the select
             icon: Icon to use (e.g., 'mdi:menu')
+            options_map: Optional mapping between internal numeric values and human-readable strings.
+                         If provided, a value_template will be set up for proper conversion.
             
         Returns:
             bool: True if registered successfully, False otherwise
@@ -273,6 +275,27 @@ class MqttInterface:
                 }
             }
             
+            # If we have a mapping between internal values and display strings,
+            # add a value template to convert numeric values to strings
+            if options_map:
+                # Create a value template that checks each possible numeric value
+                # and converts it to the corresponding string option
+                value_template_parts = []
+                for value, text in options_map.items():
+                    value_template_parts.append(f'{{% if value == "{value}" %}}"{text}"{{% endif %}}')
+                    
+                # Combine all parts with else conditions
+                value_template = "{{" + " else ".join(value_template_parts) + " else value }}"
+                config["value_template"] = value_template
+                
+                # Also create a command template to convert back to internal values
+                command_template_parts = []
+                for value, text in options_map.items():
+                    command_template_parts.append(f'{{% if value == "{text}" %}}{value}{{% endif %}}')
+                    
+                command_template = "{{" + " else ".join(command_template_parts) + " }}"
+                config["command_template"] = command_template
+                
             # Add optional fields if provided
             if icon:
                 config["icon"] = icon

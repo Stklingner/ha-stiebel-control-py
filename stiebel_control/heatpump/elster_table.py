@@ -31,7 +31,7 @@ class ElsterType(Enum):
     ET_DATE = auto()        # et_datum - Date value
     ET_TIME_DOMAIN = auto() # et_time_domain - Time range with special formatting
     ET_DEV_NR = auto()      # et_dev_nr - Device number
-    ET_ERR_CODE = auto()      # et_err_nr - Error code
+    ET_ERR_CODE = auto()    # et_err_nr - Error code
     ET_DEV_ID = auto()      # et_dev_id - Device ID
 
 

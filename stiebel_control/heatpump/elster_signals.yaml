@@ -8,7 +8,7 @@
   english_name: ERROR_MESSAGE
   index: 1
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: KESSELSOLLTEMP
   english_name: BOILER_SET_TEMP
@@ -446,7 +446,7 @@
   english_name: OPERATION_MODE
   index: 104
   type: ET_NONE
-  ha_entity_type: select
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: IO_TEST
   english_name: IO_TEST
@@ -488,7 +488,7 @@
   english_name: VACATION_MODE
   index: 111
   type: ET_NONE
-  ha_entity_type: select
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: DREHZAHLREG_JA_NEIN
   english_name: VARIABLE_SPEED_DRIVE_ENABLED
@@ -704,7 +704,7 @@
   english_name: CAN_ERROR_MESSAGE
   index: 252
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: BUSKONFIGURATION
   english_name: BUS_CONFIGURATION
@@ -788,13 +788,13 @@
   english_name: HEATING_CURVE_DISTANCE
   index: 273
   type: ET_DEC_VAL
-  ha_entity_type: sensor.temperature
-  unit_of_measurement: °C
+  ha_entity_type: sensor
+  unit_of_measurement: null
 - name: PROGRAMMSCHALTER
   english_name: PROGRAM_SWITCH
   index: 274
   type: ET_MODE
-  ha_entity_type: select
+  ha_entity_type: sensor
   unit_of_measurement: null
 - name: SPRACHE
   english_name: LANGUAGE
@@ -998,7 +998,7 @@
   english_name: DHWMODE
   index: 309
   type: ET_LITTLE_ENDIAN
-  ha_entity_type: select
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: ADAPT_INFO
   english_name: ADAPT_INFO
@@ -1058,7 +1058,7 @@
   english_name: HEATINGCURVE_MODE
   index: 321
   type: ET_NONE
-  ha_entity_type: select
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: HZK_NACHLAUF
   english_name: HEATINGCURVE_RUNON
@@ -1178,7 +1178,7 @@
   english_name: QQ_IN_TRANSPARENT_MODE
   index: 348
   type: ET_NONE
-  ha_entity_type: select
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: NON_FAILSAVE_CRC
   english_name: NON_FAILSAFE_CRC
@@ -1730,8 +1730,8 @@
   english_name: SOLAR_DIFFERENCE
   index: 440
   type: ET_DEC_VAL
-  ha_entity_type: sensor.temperature
-  unit_of_measurement: °C
+  ha_entity_type: sensor
+  unit_of_measurement: null
 - name: SOLARTEMP_MAX
   english_name: SOLARTEMP_MAX
   index: 441
@@ -1898,38 +1898,38 @@
   english_name: SOURCE_ACTUAL
   index: 468
   type: ET_DEC_VAL
-  ha_entity_type: sensor.temperature
-  unit_of_measurement: °C
+  ha_entity_type: sensor
+  unit_of_measurement: null
 - name: PUFFERSOLL
   english_name: BUFFER_SETPOINT
   index: 469
   type: ET_DEC_VAL
-  ha_entity_type: sensor.temperature
-  unit_of_measurement: °C
+  ha_entity_type: sensor
+  unit_of_measurement: null
 - name: WPVORLAUFIST
   english_name: HEATING_RETURN_ACTUAL
   index: 470
   type: ET_DEC_VAL
-  ha_entity_type: sensor.temperature
-  unit_of_measurement: °C
+  ha_entity_type: sensor
+  unit_of_measurement: null
 - name: HILFSKESSELSOLL
   english_name: AUXILIARY_BOILER_SETPOINT
   index: 471
   type: ET_DEC_VAL
-  ha_entity_type: sensor.temperature
-  unit_of_measurement: °C
+  ha_entity_type: sensor
+  unit_of_measurement: null
 - name: FUEHLER_1
   english_name: SENSOR_1
   index: 472
   type: ET_DEC_VAL
-  ha_entity_type: sensor.temperature
-  unit_of_measurement: °C
+  ha_entity_type: sensor
+  unit_of_measurement: null
 - name: FUEHLER_2
   english_name: SENSOR_2
   index: 473
   type: ET_DEC_VAL
-  ha_entity_type: sensor.temperature
-  unit_of_measurement: °C
+  ha_entity_type: sensor
+  unit_of_measurement: null
 - name: VOLUMENSTROM
   english_name: VOLUME_FLOW
   index: 474
@@ -2072,13 +2072,13 @@
   english_name: ERROR_LIST_ENTRY
   index: 497
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERART
   english_name: ERROR_TYPE
   index: 498
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: ZUFALLSZAHL
   english_name: RANDOM_NUMBER
@@ -2372,31 +2372,31 @@
   english_name: K_OS_ERROR_MESSAGE_1
   index: 555
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_OS_STUNDEN_TAGESZAEHLER_1
   english_name: K_OS_HOURS_DAILY_COUNTER_1
   index: 556
   type: ET_NONE
-  ha_entity_type: sensor.count
+  ha_entity_type: sensor
   unit_of_measurement: null
 - name: K_OS_STOERMELDUNG_2
   english_name: K_OS_ERROR_MESSAGE_2
   index: 557
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_OS_STUNDEN_TAGESZAEHLER_2
   english_name: K_OS_HOURS_DAILY_COUNTER_2
   index: 558
   type: ET_NONE
-  ha_entity_type: sensor.count
+  ha_entity_type: sensor
   unit_of_measurement: null
 - name: K_OS_STOERMELDUNG_3
   english_name: K_OS_ERROR_MESSAGE_3
   index: 559
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_OS_STUNDEN_TAGESZAEHLER_3
   english_name: K_OS_STUNDEN_TAGESZAEHLER_3
@@ -2408,91 +2408,91 @@
   english_name: Error_Message_4
   index: 561
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_OS_STUNDEN_TAGESZAEHLER_4
   english_name: Hourly Counter_4
   index: 562
   type: ET_NONE
-  ha_entity_type: sensor.count
+  ha_entity_type: sensor
   unit_of_measurement: null
 - name: K_OS_STOERMELDUNG_5
   english_name: Error_Message_5
   index: 563
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_OS_STUNDEN_TAGESZAEHLER_5
   english_name: Hourly Counter_5
   index: 564
   type: ET_NONE
-  ha_entity_type: sensor.count
+  ha_entity_type: sensor
   unit_of_measurement: null
 - name: K_OS_STOERMELDUNG_6
   english_name: Error_Message_6
   index: 565
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_OS_STUNDEN_TAGESZAEHLER_6
   english_name: Hourly Counter_6
   index: 566
   type: ET_NONE
-  ha_entity_type: sensor.count
+  ha_entity_type: sensor
   unit_of_measurement: null
 - name: K_OS_STOERMELDUNG_7
   english_name: Error_Message_7
   index: 567
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_OS_STUNDEN_TAGESZAEHLER_7
   english_name: Hourly Counter_7
   index: 568
   type: ET_NONE
-  ha_entity_type: sensor.count
+  ha_entity_type: sensor
   unit_of_measurement: null
 - name: K_OS_STOERMELDUNG_8
   english_name: Error_Message_8
   index: 569
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_OS_STUNDEN_TAGESZAEHLER_8
   english_name: Hourly Counter_8
   index: 570
   type: ET_NONE
-  ha_entity_type: sensor.count
+  ha_entity_type: sensor
   unit_of_measurement: null
 - name: K_OS_STOERMELDUNG_9
   english_name: Error_Message_9
   index: 571
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_OS_STUNDEN_TAGESZAEHLER_9
   english_name: Hourly Counter_9
   index: 572
   type: ET_NONE
-  ha_entity_type: sensor.count
+  ha_entity_type: sensor
   unit_of_measurement: null
 - name: K_OS_STOERMELDUNG_10
   english_name: Error_Message_10
   index: 573
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_OS_STUNDEN_TAGESZAEHLER_10
   english_name: Hourly Counter_10
   index: 574
   type: ET_NONE
-  ha_entity_type: sensor.count
+  ha_entity_type: sensor
   unit_of_measurement: null
 - name: K_OS_20S_ZAEHLER
   english_name: 20s Counter
   index: 575
   type: ET_NONE
-  ha_entity_type: sensor.count
+  ha_entity_type: sensor
   unit_of_measurement: null
 - name: DEBUG_MEMORY_POINTER
   english_name: Debug Memory Pointer
@@ -2576,14 +2576,14 @@
   english_name: Room Setpoint Geblaese
   index: 605
   type: ET_DEC_VAL
-  ha_entity_type: sensor.temperature
-  unit_of_measurement: °C
+  ha_entity_type: sensor
+  unit_of_measurement: null
 - name: HYSTERESE_GEBLAESE
   english_name: Hysteresis Geblaese
   index: 606
   type: ET_DEC_VAL
-  ha_entity_type: sensor.temperature
-  unit_of_measurement: °C
+  ha_entity_type: sensor
+  unit_of_measurement: null
 - name: FLAECHENKUEHLUNG
   english_name: Area Cooling
   index: 607
@@ -2600,8 +2600,8 @@
   english_name: Room Setpoint Area
   index: 609
   type: ET_DEC_VAL
-  ha_entity_type: sensor.temperature
-  unit_of_measurement: °C
+  ha_entity_type: sensor
+  unit_of_measurement: null
 - name: HYSTERESE_FLAECHE
   english_name: Hysteresis Area
   index: 610
@@ -2750,25 +2750,25 @@
   english_name: STORED_ERRORS_CLEAR
   index: 634
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERSTATISTIK_FELDINDEX
   english_name: ERROR_STATISTICS_FIELD_INDEX
   index: 635
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERSTATISTIK_FEHLERNUMMER
   english_name: ERROR_STATISTICS_ERROR_NUMBER
   index: 636
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERSTATISTIK_FEHLERANZAHL
   english_name: ERROR_STATISTICS_ERROR_COUNT
   index: 637
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: WW_ECO
   english_name: DHW_ECO
@@ -2828,7 +2828,7 @@
   english_name: COOLING_MODE
   index: 647
   type: ET_NONE
-  ha_entity_type: select
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: KUEHLDYNAMIK_FLAECHE
   english_name: COOLING_DYNAMICS_AREA
@@ -2990,7 +2990,7 @@
   english_name: NUMBER_OF_START_BOILERS
   index: 674
   type: ET_NONE
-  ha_entity_type: sensor.count
+  ha_entity_type: sensor
   unit_of_measurement: null
 - name: AKTIVE_FOLGE
   english_name: ACTIVE_SEQUENCE
@@ -3236,7 +3236,7 @@
   english_name: NUMBER_OF_COLLECTORS
   index: 730
   type: ET_NONE
-  ha_entity_type: sensor.count
+  ha_entity_type: sensor
   unit_of_measurement: null
 - name: PRIO_1_PUFFER
   english_name: PRIORITY_1_BUFFER
@@ -4076,217 +4076,217 @@
   english_name: K Error Counter 01
   index: 870
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_02
   english_name: K Error Counter 02
   index: 871
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_03
   english_name: K Error Counter 03
   index: 872
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_04
   english_name: K Error Counter 04
   index: 873
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_05
   english_name: K Error Counter 05
   index: 874
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_06
   english_name: K Error Counter 06
   index: 875
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_07
   english_name: K Error Counter 07
   index: 876
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_08
   english_name: K Error Counter 08
   index: 877
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_09
   english_name: K Error Counter 09
   index: 878
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_10
   english_name: K Error Counter 10
   index: 879
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_11
   english_name: K Error Counter 11
   index: 880
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_12
   english_name: K Error Counter 12
   index: 881
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_13
   english_name: K Error Counter 13
   index: 882
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_14
   english_name: K Error Counter 14
   index: 883
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_15
   english_name: K Error Counter 15
   index: 884
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_16
   english_name: K Error Counter 16
   index: 885
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_17
   english_name: K Error Counter 17
   index: 886
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_18
   english_name: K Error Counter 18
   index: 887
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_19
   english_name: K Error Counter 19
   index: 888
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_20
   english_name: K Error Counter 20
   index: 889
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_21
   english_name: K Error Counter 21
   index: 890
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_22
   english_name: K_FEHLERZAEHLER_22
   index: 891
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_23
   english_name: Error counter 23
   index: 892
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_24
   english_name: Error counter 24
   index: 893
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_FEHLERZAEHLER_25
   english_name: Error counter 25
   index: 894
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_OS_STOERMELDUNG_POINTER
   english_name: OS fault message pointer
   index: 895
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_OS_STOERMELDUNG_11
   english_name: OS fault message 11
   index: 896
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_OS_STOERMELDUNG_12
   english_name: OS fault message 12
   index: 897
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_OS_STOERMELDUNG_13
   english_name: OS fault message 13
   index: 898
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_OS_STOERMELDUNG_14
   english_name: OS fault message 14
   index: 899
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_OS_STOERMELDUNG_15
   english_name: OS fault message 15
   index: 900
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_OS_STOERMELDUNG_16
   english_name: OS fault message 16
   index: 901
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_OS_STOERMELDUNG_17
   english_name: OS fault message 17
   index: 902
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_OS_STOERMELDUNG_18
   english_name: OS fault message 18
   index: 903
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_OS_STOERMELDUNG_19
   english_name: OS fault message 19
   index: 904
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_OS_STOERMELDUNG_20
   english_name: OS fault message 20
   index: 905
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: K_OS_DUMMY
   english_name: OS dummy
@@ -4436,7 +4436,7 @@
   english_name: Mixing valve operating mode
   index: 930
   type: ET_NONE
-  ha_entity_type: select
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: HD_EVE_GRENZWERT_VND
   english_name: HD even limit value VND
@@ -4448,7 +4448,7 @@
   english_name: Number of cooling stages
   index: 932
   type: ET_NONE
-  ha_entity_type: sensor.count
+  ha_entity_type: sensor
   unit_of_measurement: null
 - name: KONFIGURATION_KUEHLUNG
   english_name: Cooling configuration
@@ -4664,7 +4664,7 @@
   english_name: SOLAR_OPERATING_MODE_RPM
   index: 972
   type: ET_NONE
-  ha_entity_type: select
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: SOLAR_THERMOSTATFUNKTION_EINSCHALTTEMP
   english_name: SOLAR_THERMOSTAT_FUNCTION_ON_TEMP
@@ -7334,7 +7334,7 @@
   english_name: NUMBER_OF_STEPS_DHW
   index: 1419
   type: ET_NONE
-  ha_entity_type: sensor.count
+  ha_entity_type: sensor
   unit_of_measurement: null
 - name: WW_SPEICHER_ALS_PUFFER
   english_name: USE_HOT_WATER_TANK_AS_BUFFER
@@ -7460,7 +7460,7 @@
   english_name: NUMBER_OF_STEPS_HEATING
   index: 1440
   type: ET_NONE
-  ha_entity_type: sensor.count
+  ha_entity_type: sensor
   unit_of_measurement: null
 - name: NHZ_VERZOEGERUNG
   english_name: HEATING_CURVE_DELAY
@@ -7700,7 +7700,7 @@
   english_name: ERROR_LOGGING_STOP
   index: 1480
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: HEIZEITVORVERLEGUNG_VERDICHTER
   english_name: PREHEATING_COMPRESSOR
@@ -7802,7 +7802,7 @@
   english_name: BETRIEBSART_QUELLENPUMPE
   index: 1497
   type: ET_NONE
-  ha_entity_type: select
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: GASVENTIL1
   english_name: GASVALVE1
@@ -10580,8 +10580,8 @@
   english_name: COMPRESSOR
   index: 1960
   type: ET_DEC_VAL
-  ha_entity_type: sensor.temperature
-  unit_of_measurement: °C
+  ha_entity_type: sensor
+  unit_of_measurement: null
 - name: VERDAMPFERISTTEMP_KOMPENSIERT
   english_name: EVAPORATOR_REGULATED_TEMP
   index: 1961
@@ -10862,7 +10862,7 @@
   english_name: START_COUNT_UNTIL_CALIBRATION
   index: 2007
   type: ET_NONE
-  ha_entity_type: sensor.count
+  ha_entity_type: sensor
   unit_of_measurement: null
 - name: LAUFZEIT_BIS_KALIBRIERUNG
   english_name: RUNTIME_UNTIL_CALIBRATION
@@ -11024,7 +11024,7 @@
   english_name: OPERATION_MODE_WP
   index: 2034
   type: ET_NONE
-  ha_entity_type: select
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: SOLLWERT_UEBERHITZUNG
   english_name: SETPOINT_OVERHEATING
@@ -11192,7 +11192,7 @@
   english_name: FATAL_ERROR
   index: 2062
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: UEBERHITZUNG_ZWISCHENEINSPRITZUNG
   english_name: OVERHEATING_INJECTED_MIXING
@@ -11330,7 +11330,7 @@
   english_name: DATA_LOGGER_RING_OPERATION_MODE
   index: 2085
   type: ET_NONE
-  ha_entity_type: select
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: DATENLOGGER_RING_ZYKLUS
   english_name: DATA_LOGGER_RING_CYCLE
@@ -11348,7 +11348,7 @@
   english_name: ERROR_PARAMETER_SET_IWS
   index: 2088
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: PARAMETERSATZ_ANGEPASST_IWS
   english_name: ADAPTED_PARAMETER_SET_IWS
@@ -12362,13 +12362,13 @@
   english_name: FOLGENWECHSEL_MINCOUNTER_LOW
   index: 2403
   type: ET_NONE
-  ha_entity_type: sensor.count
+  ha_entity_type: sensor
   unit_of_measurement: null
 - name: FOLGENWECHSEL_MINCOUNTER_HIGH
   english_name: FOLGENWECHSEL_MINCOUNTER_HIGH
   index: 2404
   type: ET_NONE
-  ha_entity_type: sensor.count
+  ha_entity_type: sensor
   unit_of_measurement: null
 - name: ERKANNTE_KASKADENKESSEL
   english_name: DETECTED_CASCADED_BOILERS
@@ -12470,13 +12470,13 @@
   english_name: HOUR_ERROR
   index: 2421
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLER_MINUTE
   english_name: MINUTE_ERROR
   index: 2422
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: KOLLEKTORTEMP1_MIN_24H
   english_name: COLLECTOR1_TEMP_MIN_24H
@@ -13509,19 +13509,19 @@
   english_name: EBUS_LOCK_COUNTER
   index: 2596
   type: ET_NONE
-  ha_entity_type: sensor.count
+  ha_entity_type: sensor
   unit_of_measurement: null
 - name: FEHLERSTRING
   english_name: ERROR_STRING
   index: 2597
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: BUSFEHLER
   english_name: BUS_ERROR
   index: 2598
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: DIREKT_EINGANG
   english_name: DIRECT_INPUT
@@ -14037,901 +14037,901 @@
   english_name: ERROR_FIELD_0
   index: 2816
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_1
   english_name: ERROR_FIELD_1
   index: 2817
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_2
   english_name: ERROR_FIELD_2
   index: 2818
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_3
   english_name: ERROR_FIELD_3
   index: 2819
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_4
   english_name: ERROR_FIELD_4
   index: 2820
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_5
   english_name: ERROR_FIELD_5
   index: 2821
   type: ET_DEV_NR
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_6
   english_name: ERROR_FIELD_6
   index: 2822
   type: ET_ERR_CODE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_7
   english_name: ERROR_FIELD_7
   index: 2823
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_8
   english_name: ERROR_FIELD_8
   index: 2824
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_9
   english_name: ERROR_FIELD_9
   index: 2825
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_10
   english_name: ERROR_FIELD_10
   index: 2826
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_11
   english_name: FEHLERFELD_11
   index: 2827
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_12
   english_name: ERROR_FIELD_12
   index: 2828
   type: ET_DEV_NR
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_13
   english_name: ERROR_FIELD_13
   index: 2829
   type: ET_ERR_CODE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_14
   english_name: ERROR_FIELD_14
   index: 2830
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_15
   english_name: ERROR_FIELD_15
   index: 2831
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_16
   english_name: ERROR_FIELD_16
   index: 2832
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_17
   english_name: ERROR_FIELD_17
   index: 2833
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_18
   english_name: ERROR_FIELD_18
   index: 2834
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_19
   english_name: ERROR_FIELD_19
   index: 2835
   type: ET_DEV_NR
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_20
   english_name: ERROR_FIELD_20
   index: 2836
   type: ET_ERR_CODE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_21
   english_name: ERROR_FIELD_21
   index: 2837
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_22
   english_name: ERROR_FIELD_22
   index: 2838
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_23
   english_name: ERROR_FIELD_23
   index: 2839
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_24
   english_name: ERROR_FIELD_24
   index: 2840
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_25
   english_name: ERROR_FIELD_25
   index: 2841
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_26
   english_name: ERROR_FIELD_26
   index: 2842
   type: ET_DEV_NR
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_27
   english_name: ERROR_FIELD_27
   index: 2843
   type: ET_ERR_CODE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_28
   english_name: ERROR_FIELD_28
   index: 2844
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_29
   english_name: ERROR_FIELD_29
   index: 2845
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_30
   english_name: ERROR_FIELD_30
   index: 2846
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_31
   english_name: ERROR_FIELD_31
   index: 2847
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_32
   english_name: ERROR_FIELD_32
   index: 2848
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_33
   english_name: ERROR_FIELD_33
   index: 2849
   type: ET_DEV_NR
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_34
   english_name: ERROR_FIELD_34
   index: 2850
   type: ET_ERR_CODE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_35
   english_name: ERROR_FIELD_35
   index: 2851
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_36
   english_name: ERROR_FIELD_36
   index: 2852
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_37
   english_name: ERROR_FIELD_37
   index: 2853
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_38
   english_name: ERROR_FIELD_38
   index: 2854
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_39
   english_name: ERROR_FIELD_39
   index: 2855
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_40
   english_name: ERROR_FIELD_40
   index: 2856
   type: ET_DEV_NR
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_41
   english_name: ERROR_FIELD_41
   index: 2857
   type: ET_ERR_CODE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_42
   english_name: ERROR_FIELD_42
   index: 2858
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_43
   english_name: ERROR_FIELD_43
   index: 2859
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_44
   english_name: ERROR_FIELD_44
   index: 2860
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_45
   english_name: ERROR_FIELD_45
   index: 2861
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_46
   english_name: ERROR_FIELD_46
   index: 2862
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_47
   english_name: ERROR_FIELD_47
   index: 2863
   type: ET_DEV_NR
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_48
   english_name: ERROR_FIELD_48
   index: 2864
   type: ET_ERR_CODE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_49
   english_name: ERROR_FIELD_49
   index: 2865
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_50
   english_name: ERROR_FIELD_50
   index: 2866
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_51
   english_name: ERROR_FIELD_51
   index: 2867
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_52
   english_name: ERROR_FIELD_52
   index: 2868
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_53
   english_name: ERROR_FIELD_53
   index: 2869
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_54
   english_name: ERROR_FIELD_54
   index: 2870
   type: ET_DEV_NR
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_55
   english_name: ERROR_FIELD_55
   index: 2871
   type: ET_ERR_CODE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_56
   english_name: ERROR_FIELD_56
   index: 2872
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_57
   english_name: ERROR_FIELD_57
   index: 2873
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_58
   english_name: ERROR_FIELD_58
   index: 2874
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_59
   english_name: ERROR_FIELD_59
   index: 2875
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_60
   english_name: ERROR_FIELD_60
   index: 2876
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_61
   english_name: FEHLERFELD_61
   index: 2877
   type: ET_DEV_NR
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_62
   english_name: ERROR_FIELD_62
   index: 2878
   type: ET_ERR_CODE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_63
   english_name: ERROR_FIELD_63
   index: 2879
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_64
   english_name: ERROR_FIELD_64
   index: 2880
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_65
   english_name: ERROR_FIELD_65
   index: 2881
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_66
   english_name: ERROR_FIELD_66
   index: 2882
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_67
   english_name: ERROR_FIELD_67
   index: 2883
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_68
   english_name: ERROR_FIELD_68
   index: 2884
   type: ET_DEV_NR
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_69
   english_name: ERROR_FIELD_69
   index: 2885
   type: ET_ERR_CODE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_70
   english_name: ERROR_FIELD_70
   index: 2886
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_71
   english_name: ERROR_FIELD_71
   index: 2887
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_72
   english_name: ERROR_FIELD_72
   index: 2888
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_73
   english_name: ERROR_FIELD_73
   index: 2889
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_74
   english_name: ERROR_FIELD_74
   index: 2890
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_75
   english_name: ERROR_FIELD_75
   index: 2891
   type: ET_DEV_NR
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_76
   english_name: ERROR_FIELD_76
   index: 2892
   type: ET_ERR_CODE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_77
   english_name: ERROR_FIELD_77
   index: 2893
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_78
   english_name: ERROR_FIELD_78
   index: 2894
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_79
   english_name: ERROR_FIELD_79
   index: 2895
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_80
   english_name: ERROR_FIELD_80
   index: 2896
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_81
   english_name: ERROR_FIELD_81
   index: 2897
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_82
   english_name: ERROR_FIELD_82
   index: 2898
   type: ET_DEV_NR
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_83
   english_name: ERROR_FIELD_83
   index: 2899
   type: ET_ERR_CODE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_84
   english_name: ERROR_FIELD_84
   index: 2900
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_85
   english_name: ERROR_FIELD_85
   index: 2901
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_86
   english_name: ERROR_FIELD_86
   index: 2902
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_87
   english_name: ERROR_FIELD_87
   index: 2903
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_88
   english_name: ERROR_FIELD_88
   index: 2904
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_89
   english_name: ERROR_FIELD_89
   index: 2905
   type: ET_DEV_NR
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_90
   english_name: ERROR_FIELD_90
   index: 2906
   type: ET_ERR_CODE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_91
   english_name: ERROR_FIELD_91
   index: 2907
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_92
   english_name: ERROR_FIELD_92
   index: 2908
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_93
   english_name: ERROR_FIELD_93
   index: 2909
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_94
   english_name: ERROR_FIELD_94
   index: 2910
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_95
   english_name: ERROR_FIELD_95
   index: 2911
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_96
   english_name: ERROR_FIELD_96
   index: 2912
   type: ET_DEV_NR
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_97
   english_name: ERROR_FIELD_97
   index: 2913
   type: ET_ERR_CODE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_98
   english_name: ERROR_FIELD_98
   index: 2914
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_99
   english_name: ERROR_FIELD_99
   index: 2915
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_100
   english_name: ERROR_FIELD_100
   index: 2916
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_101
   english_name: ERROR_FIELD_101
   index: 2917
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_102
   english_name: ERROR_FIELD_102
   index: 2918
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_103
   english_name: ERROR_FIELD_103
   index: 2919
   type: ET_DEV_NR
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_104
   english_name: ERROR_FIELD_104
   index: 2920
   type: ET_ERR_CODE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_105
   english_name: ERROR_FIELD_105
   index: 2921
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_106
   english_name: ERROR_FIELD_106
   index: 2922
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_107
   english_name: ERROR_FIELD_107
   index: 2923
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_108
   english_name: ERROR_FIELD_108
   index: 2924
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_109
   english_name: ERROR_FIELD_109
   index: 2925
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_110
   english_name: ERROR_FIELD_110
   index: 2926
   type: ET_DEV_NR
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_111
   english_name: FEHLERFELD_111
   index: 2927
   type: ET_ERR_CODE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_112
   english_name: ERROR_FIELD_112
   index: 2928
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_113
   english_name: ERROR_FIELD_113
   index: 2929
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_114
   english_name: ERROR_FIELD_114
   index: 2930
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_115
   english_name: ERROR_FIELD_115
   index: 2931
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_116
   english_name: ERROR_FIELD_116
   index: 2932
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_117
   english_name: ERROR_FIELD_117
   index: 2933
   type: ET_DEV_NR
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_118
   english_name: ERROR_FIELD_118
   index: 2934
   type: ET_ERR_CODE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_119
   english_name: ERROR_FIELD_119
   index: 2935
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_120
   english_name: ERROR_FIELD_120
   index: 2936
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_121
   english_name: ERROR_FIELD_121
   index: 2937
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_122
   english_name: ERROR_FIELD_122
   index: 2938
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_123
   english_name: ERROR_FIELD_123
   index: 2939
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_124
   english_name: ERROR_FIELD_124
   index: 2940
   type: ET_DEV_NR
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_125
   english_name: ERROR_FIELD_125
   index: 2941
   type: ET_ERR_CODE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_126
   english_name: ERROR_FIELD_126
   index: 2942
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_127
   english_name: ERROR_FIELD_127
   index: 2943
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_128
   english_name: ERROR_FIELD_128
   index: 2944
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_129
   english_name: ERROR_FIELD_129
   index: 2945
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_130
   english_name: ERROR_FIELD_130
   index: 2946
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_131
   english_name: ERROR_FIELD_131
   index: 2947
   type: ET_DEV_NR
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_132
   english_name: ERROR_FIELD_132
   index: 2948
   type: ET_ERR_CODE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_133
   english_name: ERROR_FIELD_133
   index: 2949
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_134
   english_name: ERROR_FIELD_134
   index: 2950
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_135
   english_name: ERROR_FIELD_135
   index: 2951
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_136
   english_name: ERROR_FIELD_136
   index: 2952
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_137
   english_name: ERROR_FIELD_137
   index: 2953
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_138
   english_name: ERROR_FIELD_138
   index: 2954
   type: ET_DEV_NR
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERFELD_139
   english_name: ERROR_FIELD_139
   index: 2955
   type: ET_ERR_CODE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERSPEICHER_FELDINDEX
   english_name: ERROR_STORAGE_FIELD_INDEX
   index: 2970
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERSPEICHER_FEHLERNUMMER
   english_name: ERROR_STORAGE_ERROR_NUMBER
   index: 2971
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERSPEICHER_MODULTYD
   english_name: ERROR_STORAGE_MODULEID
   index: 2972
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERSPEICHER_BUSKENNUNG
   english_name: ERROR_STORAGE_BUSDESIGNATION
   index: 2973
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERSPEICHER_SEKUNDE
   english_name: ERROR_STORAGE_SECOND
   index: 2974
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERSPEICHER_MINUTE
   english_name: ERROR_STORAGE_MINUTE
   index: 2975
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERSPEICHER_STUNDE
   english_name: ERROR_STORAGE_HOUR
   index: 2976
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERSPEICHER_TAG
   english_name: ERROR_STORAGE_DAY
   index: 2977
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERSPEICHER_MONAT
   english_name: ERROR_STORAGE_MONTH
   index: 2978
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FEHLERSPEICHER_JAHR
   english_name: ERROR_STORAGE_YEAR
   index: 2979
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: ESTRICHPROGRAMM_TAG_1
   english_name: SCREED_PROGRAM_DAY_1
@@ -15225,7 +15225,7 @@
   english_name: PWM_PUMPS_MODE
   index: 3106
   type: ET_NONE
-  ha_entity_type: select
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: PWM_TEMPERATURDIFFERENZREGELUNG_TV_TWEICHE
   english_name: PWM_TEMPERATURE_DIFFERENCE_REGULATION_TV_TWO-WAY
@@ -15297,7 +15297,7 @@
   english_name: ERROR NUMBER
   index: 5001
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: REPEAT_MESSAGE_ALL_24H
   english_name: REPEAT_MESSAGE_ALL_24H
@@ -15393,7 +15393,7 @@
   english_name: LARGE_RESET_COUNTER_INPUT
   index: 5059
   type: ET_NONE
-  ha_entity_type: sensor.count
+  ha_entity_type: sensor
   unit_of_measurement: null
 - name: LARGE_SMTP_SERVER
   english_name: LARGE_SMTP_SERVER
@@ -15549,7 +15549,7 @@
   english_name: IP_MODE
   index: 5086
   type: ET_NONE
-  ha_entity_type: select
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: LARGE_IP_ADRESS
   english_name: LARGE_IP_ADDRESS
@@ -15597,7 +15597,7 @@
   english_name: LARGE_ERRORLOGDATA
   index: 5094
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: KEEP_ALIVE
   english_name: KEEP_ALIVE
@@ -15609,7 +15609,7 @@
   english_name: LARGE_ERRORLOG_DATA
   index: 5096
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: LARGE_EWI_FILTER_CONFIG
   english_name: LARGE_EWI_FILTER_CONFIG
@@ -21093,7 +21093,7 @@
   english_name: MODE_MULTIFUNCTION_OUTPUT_2
   index: 64933
   type: ET_NONE
-  ha_entity_type: select
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: WECHSELANZEIGE
   english_name: SWITCHING-DISPLAY
@@ -21111,7 +21111,7 @@
   english_name: ERROR_COUNT
   index: 64936
   type: ET_NONE
-  ha_entity_type: sensor.problem
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: ANZEIGESTATUS
   english_name: DISPLAY_STATUS
@@ -21279,7 +21279,7 @@
   english_name: MODE_INPUT_2
   index: 64963
   type: ET_NONE
-  ha_entity_type: select
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: FUEHLERKENNLINIE
   english_name: TEMPERATURE_SENSOR_CHARACTERISTIC
@@ -21315,7 +21315,7 @@
   english_name: OPERATING MODE_HEATING_PUMP
   index: 64969
   type: ET_LITTLE_ENDIAN
-  ha_entity_type: select
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: ANNAHME_LEISTUNGSZWANG
   english_name: POWER_ACCEPTANCE
@@ -21537,7 +21537,7 @@
   english_name: SEQUENCE CHANGE MODE
   index: 65006
   type: ET_NONE
-  ha_entity_type: select
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: SONDERNIVEAU_TEMP
   english_name: ADDITIONAL LEVEL TEMPERATURE
@@ -21549,7 +21549,7 @@
   english_name: MODE INPUT1
   index: 65008
   type: ET_NONE
-  ha_entity_type: select
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: STATUS_VARIABLER_AUSGANG
   english_name: STATUS VARIABLE OUTPUT
@@ -21561,7 +21561,7 @@
   english_name: MODE VARIABLE OUTPUT
   index: 65010
   type: ET_NONE
-  ha_entity_type: select
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: STATUS_MULTIFUNKTIONSAUSGANG
   english_name: STATUS MULTIFUNCTION OUTPUT
@@ -21573,7 +21573,7 @@
   english_name: MODE MULTIFUNCTION OUTPUT
   index: 65012
   type: ET_NONE
-  ha_entity_type: select
+  ha_entity_type: sensor.enum
   unit_of_measurement: null
 - name: ANTILEGIONELLEN_ZEITPUNKT
   english_name: FLOW_TEMP_NHZ

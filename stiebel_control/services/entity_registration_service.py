@@ -6,7 +6,8 @@ from typing import Dict, Any, Optional, List, Set
 from stiebel_control.mqtt_interface import MqttInterface
 from stiebel_control.heatpump.elster_table import (
     ElsterType,
-    BETRIEBSARTLIST
+    MODELIST,
+    ERRORLIST
 )
 
 logger = logging.getLogger(__name__)
@@ -121,28 +122,32 @@ class EntityRegistrationService:
         icon = None
         
         # Match signal type to appropriate entity configuration
-        if signal_type == ElsterType.ET_TEMPERATURE:
+        if signal_type == ElsterType.ET_DEC_VAL:  # Temperature values usually have one decimal place
             device_class = "temperature"
             unit_of_measurement = "°C"
             icon = "mdi:thermometer-lines"
         elif signal_type == ElsterType.ET_BOOLEAN:
-            device_class = "binary_sensor"
+            device_class = "binary_sensor" 
             icon = "mdi:toggle-switch"
-        elif signal_type == ElsterType.ET_PERCENT:
+        elif signal_type == ElsterType.ET_INTEGER and "PERCENT" in signal_name:
             unit_of_measurement = "%"
             icon = "mdi:percent"
-        elif signal_type == ElsterType.ET_HOUR or signal_type == ElsterType.ET_HOUR_SHORT:
+        elif signal_type == ElsterType.ET_INTEGER and ("HOUR" in signal_name or "TIME" in signal_name):
             device_class = "duration"
             unit_of_measurement = "h"
             icon = "mdi:timer"
-        elif signal_type == ElsterType.ET_PROGRAM_SWITCH:
+        elif signal_type == ElsterType.ET_MODE:  # Operating mode select
             # This should be a select entity, not a sensor
             entity_type = "select"
             icon = "mdi:tune-vertical"
+        elif signal_type == ElsterType.ET_ERR_CODE:  # Error code select
+            # This should be a select entity too
+            entity_type = "select"
+            icon = "mdi:alert-circle-outline"
         elif signal_type == ElsterType.ET_DATE:
             device_class = "date"
             icon = "mdi:calendar"
-        elif signal_type == ElsterType.ET_DOUBLE_VALUE or signal_type == ElsterType.ET_TRIPLE_VALUE:
+        elif signal_type in [ElsterType.ET_DEC_VAL, ElsterType.ET_CENT_VAL, ElsterType.ET_MIL_VAL]:  # Previously DOUBLE/TRIPLE_VALUE
             # Likely energy value, but could be other types
             if "ENERGY" in signal_name or "KWH" in signal_name:
                 device_class = "energy"
@@ -170,16 +175,26 @@ class EntityRegistrationService:
                 unit_of_measurement=unit_of_measurement,
                 icon=icon
             )
-        elif entity_type == "select" and isinstance(value, str):
-            # For selects, we need to determine the options
-            # For program switches, we use betriebsartlist values
-            options = list(BETRIEBSARTLIST.values()) if hasattr(BETRIEBSARTLIST, 'values') else []
+        elif entity_type == "select":
+            # For selects, we need to determine the options and mapping
+            options = []
+            options_map = None
+            
+            if signal_type == ElsterType.ET_MODE:
+                # For operating modes, use MODELIST for both options and mapping
+                options = list(MODELIST.values())
+                options_map = MODELIST
+            elif signal_type == ElsterType.ET_ERR_CODE:
+                # For error codes, use ERRORLIST for both options and mapping
+                options = list(ERRORLIST.values())
+                options_map = ERRORLIST
             
             success = self.mqtt_interface.register_select(
                 entity_id=entity_id,
                 name=friendly_name,
                 options=options,
-                icon=icon
+                icon=icon,
+                options_map=options_map
             )
         else:
             # Fallback to sensor for unsupported types

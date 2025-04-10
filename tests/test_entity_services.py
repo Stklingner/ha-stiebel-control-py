@@ -122,8 +122,8 @@ class TestEntityRegistrationService:
         success = service.register_dynamic_entity(
             entity_id='pump_pressure',
             friendly_name='Pump Pressure',
-            signal_type=ElsterType.ET_PERCENT,
-            signal_name='PRESSURE',
+            signal_type=ElsterType.ET_INTEGER,
+            signal_name='PRESSURE_PERCENT',
             value=42
         )
         

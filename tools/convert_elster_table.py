@@ -124,18 +124,18 @@ def infer_ha_entity_type_and_unit(signal_name, english_name, value_type):
     Returns:
         tuple: (entity_type, unit_of_measurement)
     """
-    # First, check if the type has a direct mapping to a Home Assistant entity type
+    # First, define default mappings
     type_to_ha_mapping = {
         'ET_NONE': ('sensor', None),
         'ET_INTEGER': ('sensor', None),
         'ET_BOOLEAN': ('binary_sensor', None),
-        'ET_DEC_VAL': ('sensor.temperature', '°C'),
+        'ET_DEC_VAL': ('sensor', None),
         'ET_CENT_VAL': ('sensor', None),
         'ET_MIL_VAL': ('sensor', None),
         'ET_BYTE': ('sensor', None),
         'ET_LITTLE_BOOL': ('binary_sensor', None),
         'ET_LITTLE_ENDIAN': ('sensor', None),
-        'ET_MODE': ('select', None),
+        'ET_MODE': ('sensor', None),
         'ET_TIME': ('sensor', None),
         'ET_DATE': ('sensor', None),
         'ET_TIME_DOMAIN': ('sensor', None),
@@ -187,15 +187,15 @@ def infer_ha_entity_type_and_unit(signal_name, english_name, value_type):
     
     # Operation mode patterns
     if any(pattern in name_for_matching for pattern in ['MODE', 'BETRIEBSART', 'OPERATION_MODE']):
-        return 'select', None
+        return 'sensor.enum', None
     
     # Error patterns
     if any(pattern in name_for_matching for pattern in ['ERROR', 'FEHLER', 'FAULT']):
-        return 'sensor.problem', None
+        return 'sensor.enum', None
     
     # Counting patterns
     if any(pattern in name_for_matching for pattern in ['COUNTER', 'ZÄHLER', 'COUNT', 'ANZAHL']):
-        return 'sensor.count', None
+        return 'sensor', None
     
     # Flow patterns
     if any(pattern in name_for_matching for pattern in ['FLOW', 'DURCHFLUSS', 'VOLUME']):
@@ -261,7 +261,7 @@ def main():
     )
     parser.add_argument(
         '--yaml-output', '-y',
-        default='../stiebel_control/config/elster_signals.yaml',
+        default='../stiebel_control/heatpump/elster_signals.yaml',
         help='Output YAML file path'
     )
     
