@@ -6,7 +6,7 @@ import sys
 import time
 import logging
 import signal
-from typing import Optional
+from typing import Optional, Callable, Any
 
 # Import the components from their packages
 from stiebel_control.can.interface import CanInterface
@@ -16,7 +16,6 @@ from stiebel_control.ha_mqtt.signal_entity_mapper import SignalEntityMapper
 from stiebel_control.signal_gateway import SignalGateway
 from stiebel_control.config.config_manager import ConfigManager
 from stiebel_control.utils.logging_utils import configure_logging
-from stiebel_control.lifecycle.application_context import ApplicationContext
 
 logger = logging.getLogger(__name__)
 
@@ -32,15 +31,15 @@ class StiebelControl:
         Args:
             config_path: Path to the service configuration file
         """
-        # Create application context
-        self.app_context = ApplicationContext()
+        # Set shutdown flag
+        self.running = False
         
         # Load configuration
         self.config_manager = ConfigManager(config_path)
-        self.app_context.register_component("config_manager", self.config_manager)
         
         # Configure logging
-        configure_logging(self.config_manager.get_logging_config())
+        log_config = self.config_manager.get_logging_config()
+        configure_logging(log_config)
         
         # Initialize interfaces
         self._init_can_interface()
@@ -50,24 +49,18 @@ class StiebelControl:
         self.signal_mapper = SignalEntityMapper()
         self.entity_service = EntityRegistrationService(self.mqtt_interface)
         
-        # Register both components
-        self.app_context.register_component("signal_mapper", self.signal_mapper)
-        self.app_context.register_component(
-            "entity_service", 
-            self.entity_service
+        # Initialize signal gateway
+        self.signal_gateway = SignalGateway(
+            entity_service=self.entity_service,
+            mqtt_interface=self.mqtt_interface,
+            can_interface=self.can_interface,
+            signal_mapper=self.signal_mapper,
+            entity_config=self.config_manager.get_entity_config()
         )
         
-        self.signal_processor = SignalProcessor(
-            self.entity_service,
-            self.mqtt_interface,
-            self.can_interface,
-            self.signal_mapper,
-            self.config_manager.get_entity_config()
-        )
-        self.app_context.register_component("signal_processor", self.signal_processor)
-        
-        # Set up callbacks
-        self._setup_callbacks()
+        # Set up signal handlers for graceful shutdown
+        signal.signal(signal.SIGINT, self._handle_signal)
+        signal.signal(signal.SIGTERM, self._handle_signal)
         
         logger.info("Stiebel Control initialized")
         
@@ -79,19 +72,11 @@ class StiebelControl:
         
         try:
             logger.info(f"Initializing CAN interface {can_config.interface} at {can_config.bitrate} bps")
-            # We'll initialize the CAN interface without a callback first
-            # and set it later after signal_processor is initialized
+            # Set up callback to the signal gateway
             self.can_interface = CanInterface(
                 can_interface=can_config.interface,
-                bitrate=can_config.bitrate
-            )
-            
-            # Register with app context
-            self.app_context.register_component(
-                "can_interface",
-                self.can_interface,
-                start_method=self.can_interface.start,
-                stop_method=self.can_interface.stop
+                bitrate=can_config.bitrate,
+                callback=self._can_signal_callback
             )
             
         except Exception as e:
@@ -107,38 +92,53 @@ class StiebelControl:
         try:
             logger.info(f"Initializing MQTT interface to {mqtt_config.host}:{mqtt_config.port}")
             self.mqtt_interface = MqttInterface(
-                host=mqtt_config.host,
-                port=mqtt_config.port,
+                client_id=mqtt_config.client_id,
+                broker_host=mqtt_config.host,
+                broker_port=mqtt_config.port,
                 username=mqtt_config.username,
                 password=mqtt_config.password,
-                client_id=mqtt_config.client_id,
                 discovery_prefix=mqtt_config.discovery_prefix,
-                base_topic=mqtt_config.base_topic
-            )
-            
-            # Register with app context
-            self.app_context.register_component(
-                "mqtt_interface",
-                self.mqtt_interface,
-                start_method=self.mqtt_interface.connect,
-                stop_method=self.mqtt_interface.disconnect
+                base_topic=mqtt_config.base_topic,
+                command_callback=self._mqtt_command_callback
             )
                 
         except Exception as e:
             logger.error(f"Failed to initialize MQTT interface: {e}")
             sys.exit(1)
             
-    def _setup_callbacks(self) -> None:
+    def _can_signal_callback(self, signal_name: str, value: Any, can_id: int) -> None:
         """
-        Set up callbacks between components.
+        Callback for CAN signals.
+        
+        Args:
+            signal_name: Name of the signal
+            value: Signal value
+            can_id: CAN ID of the device
         """
-        # Set the callback for the CAN interface
-        self.can_interface.callback = self.signal_processor.process_signal
+        # Pass the signal to the gateway for processing
+        self.signal_gateway.process_signal(signal_name, value, can_id)
         
-        # Set the MQTT command callback
-        self.mqtt_interface.command_callback = self.signal_processor.handle_command
+    def _mqtt_command_callback(self, entity_id: str, command: str) -> None:
+        """
+        Callback for MQTT commands.
         
-        logger.debug("Callbacks set up")
+        Args:
+            entity_id: ID of the entity receiving the command
+            command: Command string
+        """
+        # Pass the command to the gateway for processing
+        self.signal_gateway.handle_command(entity_id, command)
+        
+    def _handle_signal(self, signum, frame):
+        """
+        Handle shutdown signals.
+        
+        Args:
+            signum: Signal number
+            frame: Current stack frame
+        """
+        logger.info(f"Received signal {signum}, shutting down...")
+        self.stop()
         
     def start(self) -> None:
         """
@@ -147,28 +147,66 @@ class StiebelControl:
         logger.info("Starting Stiebel Control")
         
         try:
-            # Initialize all components
-            self.app_context.initialize()
+            # Connect to MQTT broker
+            if not self.mqtt_interface.connect():
+                logger.error("Failed to connect to MQTT broker")
+                return
+                
+            # Start CAN interface
+            self.can_interface.start()
             
-            # Start all components using the lifecycle manager
-            self.app_context.start()
+            # Register pre-configured entities
+            self._register_configured_entities()
+            
+            # Mark as running
+            self.running = True
             
             # Start update loop
             self._update_loop()
             
         except Exception as e:
-            logger.error(f"Error in controller: {e}")
+            logger.error(f"Error in controller: {e}", exc_info=True)
             self.stop()
+            
+    def _register_configured_entities(self) -> None:
+        """
+        Register pre-configured entities from the configuration.
+        """
+        entity_config = self.config_manager.get_entity_config()
+        
+        if not entity_config or not hasattr(entity_config, 'entities'):
+            logger.warning("No entity configuration found")
+            return
+            
+        logger.info(f"Registering {len(entity_config.entities)} configured entities")
+        
+        for entity_id, entity_def in entity_config.entities.items():
+            try:
+                self.entity_service.register_entity_from_config(entity_id, entity_def)
+            except Exception as e:
+                logger.error(f"Error registering entity {entity_id}: {e}")
             
     def stop(self) -> None:
         """
         Stop the controller and clean up resources.
         """
         logger.info("Stopping Stiebel Control")
+        self.running = False
         
         try:
-            # Use lifecycle manager to stop and cleanup all components
-            self.app_context.shutdown()
+            # Stop CAN interface
+            try:
+                if hasattr(self, 'can_interface'):
+                    self.can_interface.stop()
+            except Exception as e:
+                logger.error(f"Error stopping CAN interface: {e}")
+            
+            # Disconnect from MQTT
+            try:
+                if hasattr(self, 'mqtt_interface'):
+                    self.mqtt_interface.disconnect()
+            except Exception as e:
+                logger.error(f"Error disconnecting from MQTT: {e}")
                 
         except Exception as e:
             logger.error(f"Error during shutdown: {e}")
@@ -181,12 +219,12 @@ class StiebelControl:
         logger.info(f"Starting update loop with interval of {update_interval} seconds")
         
         try:
-            while self.app_context.lifecycle_manager.is_running:
+            while self.running:
                 # The CAN interface is already sending updates asynchronously
                 # via the callback. This loop can be used for periodic tasks
                 # like polling values that don't automatically update.
                 
-                # Process any pending updates
+                # Sleep for the configured interval
                 time.sleep(update_interval)
                 
         except KeyboardInterrupt:
@@ -213,7 +251,15 @@ def main():
         
     # Create and start the controller
     controller = StiebelControl(config_path)
-    controller.start()
+    
+    try:
+        controller.start()
+    except KeyboardInterrupt:
+        logger.info("Application interrupted by user")
+    except Exception as e:
+        logger.error(f"Application error: {e}", exc_info=True)
+    finally:
+        controller.stop()
 
 if __name__ == "__main__":
     main()
