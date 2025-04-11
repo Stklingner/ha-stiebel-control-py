@@ -8,14 +8,15 @@ import logging
 import signal
 from typing import Optional
 
-# Import the new CAN interface from the can package
+# Import the components from their packages
 from stiebel_control.can.interface import CanInterface
-from stiebel_control.mqtt_interface import MqttInterface
-from stiebel_control.config import ConfigManager
-from stiebel_control.entity_manager import EntityManager
-from stiebel_control.signal_processor import SignalProcessor
+from stiebel_control.ha_mqtt.mqtt_interface import MqttInterface
+from stiebel_control.ha_mqtt.entity_registration_service import EntityRegistrationService
+from stiebel_control.ha_mqtt.signal_entity_mapper import SignalEntityMapper
+from stiebel_control.signal_gateway import SignalGateway
+from stiebel_control.config.config_manager import ConfigManager
 from stiebel_control.utils.logging_utils import configure_logging
-from stiebel_control.lifecycle import ApplicationContext, LifecycleManager
+from stiebel_control.lifecycle.application_context import ApplicationContext
 
 logger = logging.getLogger(__name__)
 
@@ -46,20 +47,21 @@ class StiebelControl:
         self._init_mqtt_interface()
         
         # Initialize entity management and signal processing
-        self.entity_manager = EntityManager(
-            self.mqtt_interface, 
-            self.config_manager.get_entity_config()
-        )
+        self.signal_mapper = SignalEntityMapper()
+        self.entity_service = EntityRegistrationService(self.mqtt_interface)
+        
+        # Register both components
+        self.app_context.register_component("signal_mapper", self.signal_mapper)
         self.app_context.register_component(
-            "entity_manager", 
-            self.entity_manager,
-            init_method=lambda: self.entity_manager.build_entity_mapping(self.can_interface)
+            "entity_service", 
+            self.entity_service
         )
         
         self.signal_processor = SignalProcessor(
-            self.entity_manager,
+            self.entity_service,
             self.mqtt_interface,
             self.can_interface,
+            self.signal_mapper,
             self.config_manager.get_entity_config()
         )
         self.app_context.register_component("signal_processor", self.signal_processor)

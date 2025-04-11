@@ -12,7 +12,7 @@ from typing import List, Tuple, Dict, Optional, Callable, Any
 
 from can import Message
 
-from stiebel_control.can.transport import CanTransport
+from transport import CanTransport
 from stiebel_control.heatpump.elster_table import (
     ElsterType,
     get_elster_entry_by_index, 

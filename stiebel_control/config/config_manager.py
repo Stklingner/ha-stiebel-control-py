@@ -14,7 +14,7 @@ from stiebel_control.config.config_models import (
 
 logger = logging.getLogger(__name__)
 
-# Singleton instance for global access
+# Singleton instance
 _config_manager_instance = None
 
 class ConfigManager:
@@ -31,33 +31,7 @@ class ConfigManager:
             service_config_path: Path to the service configuration file
         """
         self.service_config_path = service_config_path
-        self.service_config = self._load_yaml(service_config_path)
-        
-        # Load entity configuration
-        entity_config_path = self.service_config.get('entity_config')
-        if entity_config_path:
-            if not os.path.isabs(entity_config_path):
-                # Convert relative path to absolute path
-                base_dir = os.path.dirname(os.path.abspath(service_config_path))
-                entity_config_path = os.path.join(base_dir, entity_config_path)
-                
-            self.raw_entity_config = self._load_yaml(entity_config_path)
-            logger.info(f"Loaded entity configuration from {entity_config_path}")
-        else:
-            self.raw_entity_config = {}
-            logger.warning("No entity configuration file specified")
-            
-        # Initialize specialized configuration objects
-        self.can_config = CanConfig.from_dict(self.service_config.get('can', {}))
-        self.mqtt_config = MqttConfig.from_dict(self.service_config.get('mqtt', {}))
-        self.logging_config = LoggingConfig.from_dict(self.service_config.get('logging', {}))
-        self.entity_config = EntityConfig.from_dict(
-            self.raw_entity_config,
-            self.service_config.get('dynamic_entity_registration', False)
-        )
-        
-        # Store other common settings
-        self.update_interval = int(self.service_config.get('update_interval', 60))
+        self.reload()
         
         logger.info(f"Configuration manager initialized with service config from {service_config_path}")
         
@@ -65,6 +39,35 @@ class ConfigManager:
         global _config_manager_instance
         _config_manager_instance = self
         
+    def reload(self) -> bool:
+        """
+        Reload configuration from files.
+        
+        Returns:
+            bool: True if reloaded successfully, False otherwise
+        """
+        try:
+            # Reload service config
+            self.service_config = self._load_yaml(self.service_config_path)
+            
+            # Reload entity config
+            entity_config_path = self.service_config.get('entity_config')
+            if entity_config_path:
+                if not os.path.isabs(entity_config_path):
+                    base_dir = os.path.dirname(os.path.abspath(self.service_config_path))
+                    entity_config_path = os.path.join(base_dir, entity_config_path)
+                self.raw_entity_config = self._load_yaml(entity_config_path)
+            else:
+                self.raw_entity_config = {}
+                
+            # Reinitialize specialized configs
+            self._init_specialized_configs()
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error reloading configuration: {e}")
+            return False
+            
     def _load_yaml(self, file_path: str) -> Dict[str, Any]:
         """
         Load a YAML file.
@@ -82,6 +85,46 @@ class ConfigManager:
             logger.error(f"Error loading configuration from {file_path}: {e}")
             return {}
             
+    @classmethod
+    def get_instance(cls) -> Optional['ConfigManager']:
+        """
+        Get the singleton instance of the ConfigManager.
+        
+        Returns:
+            ConfigManager instance or None if not initialized
+        """
+        global _config_manager_instance
+        return _config_manager_instance
+    
+    @classmethod
+    def initialize(cls, service_config_path: str) -> 'ConfigManager':
+        """
+        Initialize the singleton instance of ConfigManager.
+        
+        Args:
+            service_config_path: Path to service configuration file
+            
+        Returns:
+            The singleton ConfigManager instance
+        """
+        global _config_manager_instance
+        if _config_manager_instance is None:
+            _config_manager_instance = cls(service_config_path)
+        return _config_manager_instance
+    
+    def _init_specialized_configs(self):
+        # Initialize specialized configuration objects
+        self.can_config = CanConfig.from_dict(self.service_config.get('can', {}))
+        self.mqtt_config = MqttConfig.from_dict(self.service_config.get('mqtt', {}))
+        self.logging_config = LoggingConfig.from_dict(self.service_config.get('logging', {}))
+        self.entity_config = EntityConfig.from_dict(
+            self.raw_entity_config,
+            self.service_config.get('dynamic_entity_registration', False)
+        )
+        
+        # Store other common settings
+        self.update_interval = int(self.service_config.get('update_interval', 60))
+        
     def get_can_config(self) -> CanConfig:
         """
         Get CAN interface configuration.

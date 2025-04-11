@@ -34,36 +34,6 @@ class ElsterType(Enum):
     ET_ERR_CODE = auto()    # et_err_nr - Error code
     ET_DEV_ID = auto()      # et_dev_id - Device ID
 
-
-# Import enum values into global namespace for backward compatibility
-ET_NONE = ElsterType.ET_NONE
-ET_INTEGER = ElsterType.ET_INTEGER
-ET_BOOLEAN = ElsterType.ET_BOOLEAN
-ET_DEC_VAL = ElsterType.ET_DEC_VAL
-ET_CENT_VAL = ElsterType.ET_CENT_VAL
-ET_MIL_VAL = ElsterType.ET_MIL_VAL
-ET_BYTE = ElsterType.ET_BYTE
-ET_LITTLE_BOOL = ElsterType.ET_LITTLE_BOOL
-ET_LITTLE_ENDIAN = ElsterType.ET_LITTLE_ENDIAN
-ET_MODE = ElsterType.ET_MODE
-ET_TIME = ElsterType.ET_TIME
-ET_DATE = ElsterType.ET_DATE
-ET_TIME_DOMAIN = ElsterType.ET_TIME_DOMAIN
-ET_DEV_NR = ElsterType.ET_DEV_NR
-ET_ERR_CODE = ElsterType.ET_ERR_CODE
-ET_DEV_ID = ElsterType.ET_DEV_ID
-
-# Commented out backward compatibility for renamed/refactored enum values
-# These have been removed as part of the refactoring:
-# ET_HOUR = ElsterType.ET_TIME  # Time values were renamed
-# ET_HOUR_SHORT = ElsterType.ET_TIME  # Another time value variant
-# ET_TEMPERATURE = ElsterType.ET_DEC_VAL  # Temperature values typically use decimal format
-# ET_PERCENT = ElsterType.ET_INTEGER  # Percentage values
-# ET_DOUBLE_VALUE = ElsterType.ET_DEC_VAL  # Double values (likely energy measurements)
-# ET_TRIPLE_VALUE = ElsterType.ET_MIL_VAL  # Triple values (high precision measurements)
-# ET_PROGRAM_SWITCH = ElsterType.ET_MODE  # Program switches are mode selectors
-
-
 class ElsterEntry:
     """Class representing an Elster signal index with metadata."""
     
@@ -226,7 +196,28 @@ def get_elster_entry_by_index(index):
     """
     return ELSTER_INDEX_BY_INDEX.get(index, ELSTER_TABLE[0])
 
-
+def get_ha_entity_info_by_index(index):
+    """Get Home Assistant entity information by index.
+    
+    Args:
+        index (int): Index value of the signal
+        
+    Returns:
+        dict: Dictionary containing entity information or None if not found
+    """
+    elster_entry = get_elster_entry_by_index(index)
+    if elster_entry.type == ElsterType.ET_NONE:
+        return None
+    
+    return {
+        'name': elster_entry.name,
+        'english_name': elster_entry.english_name,
+        'index': elster_entry.index,
+        'type': elster_entry.type,
+        'ha_entity_type': elster_entry.ha_entity_type,
+        'unit_of_measurement': elster_entry.unit_of_measurement
+    }
+    
 def value_from_signal(value, value_type):
     """Convert a raw signal value to a meaningful value based on its type.
     

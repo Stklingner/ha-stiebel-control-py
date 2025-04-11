@@ -8,7 +8,7 @@ signal values, providing callbacks, and managing state.
 import logging
 from typing import Dict, List, Any, Optional, Callable, Tuple
 
-from stiebel_control.can.protocol import StiebelProtocol
+from protocol import StiebelProtocol
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -73,51 +73,56 @@ class CanSignalHandler:
     
     def add_global_callback(self, callback: Callable[[str, Any, int], None]):
         """
-        Add a callback that will be called for all signals.
+        Add a callback for all signals.
         
         Args:
-            callback: Callback function that takes (signal_name, value, can_id)
+            callback: Function to call when any signal is received
         """
         if callback not in self.global_callbacks:
             self.global_callbacks.append(callback)
-    
+            
     def remove_global_callback(self, callback: Callable[[str, Any, int], None]):
         """
         Remove a global callback.
         
         Args:
-            callback: The callback to remove
+            callback: Function to remove from global callbacks
         """
         if callback in self.global_callbacks:
             self.global_callbacks.remove(callback)
     
     def _on_signal_update(self, signal_name: str, value: Any, can_id: int):
         """
-        Internal handler called when a signal is updated.
+        Internal callback for when a signal is updated.
         
         Args:
-            signal_name: Name of the signal
-            value: The new value
-            can_id: CAN ID of the member
+            signal_name: Name of the signal updated
+            value: New value of the signal
+            can_id: CAN ID of the source
         """
         # Store the latest value
-        self.latest_values[(can_id, signal_name)] = value
-        
-        # Call signal-specific callbacks
         key = (can_id, signal_name)
-        if key in self.signal_callbacks:
-            for callback in self.signal_callbacks[key]:
-                try:
-                    callback(signal_name, value, can_id)
-                except Exception as e:
-                    logger.error(f"Error in signal callback: {e}")
+        self.latest_values[key] = value
         
-        # Call global callbacks
+        # Process callbacks
+        self._process_callbacks(key, signal_name, value, can_id)
+    
+    def _process_callbacks(self, key: Tuple[int, str], signal_name: str, value: Any, can_id: int):
+        """Process all callbacks for a signal update."""
+        # Signal-specific callbacks
+        for callback in self.signal_callbacks.get(key, []):
+            self._call_callback(callback, signal_name, value, can_id)
+            
+        # Global callbacks
         for callback in self.global_callbacks:
-            try:
-                callback(signal_name, value, can_id)
-            except Exception as e:
-                logger.error(f"Error in global callback: {e}")
+            self._call_callback(callback, signal_name, value, can_id)
+    
+    def _call_callback(self, callback: Callable, signal_name: str, value: Any, can_id: int):
+        """Safely call a callback with error handling."""
+        try:
+            callback(signal_name, value, can_id)
+        except Exception as e:
+            logger.error(f"Error in callback for {signal_name}: {e}")
     
     def read_signal(self, member_index: int, signal_name: str, callback: Optional[Callable] = None) -> bool:
         """

@@ -42,6 +42,25 @@ class CommandHandler:
             entity_id: Entity ID that received the command
             payload: Command payload
         """
+        # -----------------------------------------------------------------------
+        # RECOMMENDED SELECT ENTITY COMMAND HANDLING:
+        # -----------------------------------------------------------------------
+        # 1. For select entities, the command will be the selected option's display value
+        # 2. You need to map this back to the raw value expected by the CAN device
+        # 
+        # Example implementation:
+        # if entity_id in self.entity_config and 'options_map' in self.entity_config[entity_id]:
+        #     options_map = self.entity_config[entity_id]['options_map']
+        #     # Reverse mapping (from display value to raw value)
+        #     for raw_value, display_value in options_map.items():
+        #         if display_value == payload:
+        #             # Found the matching raw value, send it to the CAN device
+        #             signal_info = self.get_signal_for_entity(entity_id)
+        #             if signal_info:
+        #                 signal_name, can_id = signal_info
+        #                 self.can_interface.write_signal(can_id, signal_name, raw_value)
+        #                 return
+        # -----------------------------------------------------------------------
         if not entity_id or not payload:
             logger.warning(f"Invalid command: entity_id={entity_id}, payload={payload}")
             return

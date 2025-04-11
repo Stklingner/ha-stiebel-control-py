@@ -1,7 +1,7 @@
 """
 CAN Interface facade for Stiebel Eltron heat pump communication.
 
-This module provides a backward-compatible interface that integrates
+This module provides an interface that integrates
 the layered CAN components (transport, protocol, signal_handler) for
 easy integration with existing code.
 """
