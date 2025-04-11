@@ -8,7 +8,7 @@ signal values, providing callbacks, and managing state.
 import logging
 from typing import Dict, List, Any, Optional, Callable, Tuple
 
-from protocol import StiebelProtocol
+from stiebel_control.can.protocol import StiebelProtocol
 
 # Configure logger
 logger = logging.getLogger(__name__)
