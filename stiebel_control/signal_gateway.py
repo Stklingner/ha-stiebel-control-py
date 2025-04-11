@@ -48,16 +48,10 @@ class SignalGateway:
         self.signal_mapper = signal_mapper
         self.entity_config = entity_config
         
-        # Initialize command handler with proper dependencies
-        # Get transformation service or create a simple one if needed
-        from stiebel_control.ha_mqtt.transformation_service import TransformationService
-        self.transformation_service = TransformationService()
-        
-        # Initialize the command handler
+        # Initialize the command handler without a transformation service
         self.command_handler = CommandHandler(
             can_interface=can_interface,
-            entity_config=entity_config.entities if hasattr(entity_config, 'entities') else {},
-            transformation_service=self.transformation_service
+            entity_config=entity_config.entities if hasattr(entity_config, 'entities') else {}
         )
         
         logger.info("Signal gateway initialized")

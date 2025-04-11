@@ -15,7 +15,7 @@ class CommandHandler:
         self, 
         can_interface, 
         entity_config: Dict[str, Dict[str, Any]],
-        transformation_service
+        transformation_service=None
     ):
         """
         Initialize the command handler.
@@ -90,7 +90,7 @@ class CommandHandler:
             
         # Transform command value if needed
         transform_config = entity_def.get('transform', {})
-        if transform_config:
+        if transform_config and self.transformation_service:
             value = self.transformation_service.apply_inverse_transformation(
                 payload, transform_config
             )
