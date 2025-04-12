@@ -37,7 +37,13 @@ class ElsterType(Enum):
 class ElsterEntry:
     """Class representing an Elster signal index with metadata."""
     
-    def __init__(self, name, english_name, index, value_type, ha_entity_type, unit_of_measurement):
+    def __init__(self,
+                name, 
+                english_name, 
+                index, 
+                value_type,
+                ha_entity_type = None, 
+                unit_of_measurement = None):
         """Initialize ElsterEntry.
         
         Args:
@@ -94,9 +100,9 @@ def load_elster_signals_from_yaml() -> List[ElsterEntry]:
                 signal_data['name'],
                 signal_data['english_name'],
                 signal_data['index'],
+                value_type,
                 signal_data['ha_entity_type'],
                 signal_data['unit_of_measurement'],
-                value_type
             )
             signals.append(signal)
         
