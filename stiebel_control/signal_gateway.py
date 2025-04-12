@@ -97,15 +97,16 @@ class SignalGateway:
         # Get existing entity or create one dynamically
         entity_id = self.signal_mapper.get_entity_by_signal(signal_name, member_name)
         
-        logger.debug(f"Resolved {member_name}:{signal_name}:{value} -> Entity {entity_id}")
-        
+        if entity_id:
+            logger.debug(f"Resolved {member_name}:{signal_name} = {value} -> {entity_id}")
+        else:
+            logger.debug(f"Resolved {member_name}:{signal_name} = {value} -> No entity registered")
         if not entity_id:
             # Register dynamically if no mapping exists
             entity_id = self.entity_service.register_dynamic_entity(
                 signal_name=signal_name,
                 value=value,
-                member_name=member_name,
-                signal_type=self._get_signal_type(signal_name)
+                member_name=member_name
             )
             
             if not entity_id:
@@ -255,6 +256,7 @@ class SignalGateway:
         
         self.signal_callbacks[key].append(callback)
         logger.debug(f"Registered callback for signal {signal_name}@{member_name}")
+
     def get_signal_index_by_name(self, signal_name: str) -> Optional[int]:
         """
         Get the signal index for a given signal name.
