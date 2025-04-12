@@ -50,7 +50,6 @@ class MqttInterface:
         self.username = username
         self.password = password
         self.base_topic = base_topic
-        self.flat_topics = flat_topics
         self.discovery_prefix = discovery_prefix
         self.command_callback = command_callback
         
