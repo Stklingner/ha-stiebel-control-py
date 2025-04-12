@@ -34,11 +34,9 @@ class EntityRegistrationService:
         Args:
             mqtt_interface: The MQTT interface for publishing entity discovery/states
             signal_mapper: The signal entity mapper for mapping signals to entities
-            device_config: Optional device configuration for Home Assistant integration
         """
         self.mqtt_interface = mqtt_interface
         self.signal_mapper = signal_mapper
-        self.device_config = device_config
         self.entities = {}  # Store registered entities
         
         # Set up device info
@@ -60,9 +58,6 @@ class EntityRegistrationService:
             "manufacturer": "Stiebel Eltron",
             "sw_version": "1.0.0"
         }
-        
-        if device_config:
-            device_info.update(device_config.to_dict())
         
         return device_info
         
