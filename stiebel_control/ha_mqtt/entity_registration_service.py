@@ -10,7 +10,7 @@ from typing import Dict, Any, Optional
 
 from stiebel_control.ha_mqtt.mqtt_interface import MqttInterface
 from stiebel_control.ha_mqtt.signal_entity_mapper import SignalEntityMapper
-from stiebel_control.heatpump.elster_table import get_elster_entry_by_english_name
+from stiebel_control.heatpump.elster_table import get_elster_entry_by_english_name, ElsterType
 
 logger = logging.getLogger(__name__)
 
