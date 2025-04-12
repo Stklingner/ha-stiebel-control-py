@@ -152,8 +152,6 @@ class SignalEntityMapper:
         
         return friendly_name
         
-
-        
     def get_entity_signal_info(self, signal_name: str) -> Dict[str, Any]:
         """
         Get information about a signal from the Elster table.

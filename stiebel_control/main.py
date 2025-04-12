@@ -6,7 +6,7 @@ import sys
 import time
 import logging
 import signal
-from typing import Optional, Callable, Any
+from typing import Any
 
 # Import the components from their packages
 from stiebel_control.can.interface import CanInterface

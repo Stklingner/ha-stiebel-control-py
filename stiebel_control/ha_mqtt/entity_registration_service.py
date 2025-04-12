@@ -6,12 +6,10 @@ It provides methods for registering different types of entities (sensors,
 binary sensors, selects) and updating their states.
 """
 import logging
-import json
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 
 from stiebel_control.ha_mqtt.mqtt_interface import MqttInterface
 from stiebel_control.ha_mqtt.signal_entity_mapper import SignalEntityMapper
-from stiebel_control.config.config_models import EntityConfig, DeviceConfig
 from stiebel_control.heatpump.elster_table import get_elster_entry_by_english_name
 
 logger = logging.getLogger(__name__)
@@ -29,8 +27,7 @@ class EntityRegistrationService:
     
     def __init__(self, 
                  mqtt_interface: MqttInterface, 
-                 signal_mapper: SignalEntityMapper,
-                 device_config: Optional[DeviceConfig] = None):
+                 signal_mapper: SignalEntityMapper):
         """
         Initialize the entity registration service.
         
@@ -45,16 +42,13 @@ class EntityRegistrationService:
         self.entities = {}  # Store registered entities
         
         # Set up device info
-        self.device_info = self._create_device_info(device_config)
+        self.device_info = self._create_device_info()
         
         logger.info("Entity registration service initialized")
         
-    def _create_device_info(self, device_config: Optional[DeviceConfig] = None) -> Dict[str, Any]:
+    def _create_device_info(self) -> Dict[str, Any]:
         """
         Create device info for Home Assistant.
-        
-        Args:
-            device_config: Optional device configuration
         
         Returns:
             Dict[str, Any]: Device info
