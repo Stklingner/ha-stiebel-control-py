@@ -273,3 +273,27 @@ class SignalGateway:
         if elster_entry:
             return elster_entry.index
         return None
+        
+    def update_system_status(self, status: str) -> None:
+        """
+        Update the system status sensor.
+        
+        Args:
+            status: Current system status (online, offline, starting, error)
+        """
+        logger.info(f"System status: {status}")
+        self.entity_service.update_entity_state("system_status", status)
+        
+    def update_entities_count(self, count: Optional[int] = None) -> None:
+        """
+        Update the entities count sensor.
+        
+        Args:
+            count: Number of entities or None to count automatically
+        """
+        if count is None:
+            # Count the number of registered entities
+            count = len(self.entity_service.entities) + len(self.entity_service.dyn_registered_entities)
+            
+        logger.debug(f"Entities count: {count}")
+        self.entity_service.update_entity_state("entities_count", count)

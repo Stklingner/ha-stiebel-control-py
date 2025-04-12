@@ -25,7 +25,7 @@ mqtt:
 update_interval: 60
 
 # Path to entity configuration file
-entity_config: entity_config.yaml
+# entity_config: entity_config.yaml
 
 # Dynamic entity registration
 # When enabled, the system will automatically create entities in Home Assistant

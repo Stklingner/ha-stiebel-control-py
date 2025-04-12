@@ -147,7 +147,7 @@ class StiebelControl:
         
     def start(self) -> None:
         """
-        Start the controller.
+        Start the Stiebel Control service.
         """
         logger.info("Starting Stiebel Control")
         
@@ -155,6 +155,7 @@ class StiebelControl:
             # Connect to MQTT broker
             if not self.mqtt_interface.connect():
                 logger.error("Failed to connect to MQTT broker")
+                self.signal_gateway.update_system_status("error")
                 return
                 
             # Start CAN interface
@@ -162,6 +163,12 @@ class StiebelControl:
             
             # Register pre-configured entities
             self._register_configured_entities()
+            
+            # Update status to online
+            self.signal_gateway.update_system_status("online")
+            
+            # Update entity count
+            self.signal_gateway.update_entities_count(None)
             
             # Mark as running
             self.running = True
@@ -171,12 +178,16 @@ class StiebelControl:
             
         except Exception as e:
             logger.error(f"Error in controller: {e}", exc_info=True)
+            self.signal_gateway.update_system_status("error")
             self.stop()
             
     def _register_configured_entities(self) -> None:
         """
         Register pre-configured entities from the configuration.
         """
+        # Register system status sensors first
+        self._register_system_sensors()
+        
         entity_config = self.config_manager.get_entity_config()
         
         if not entity_config or not hasattr(entity_config, 'entities'):
@@ -190,6 +201,42 @@ class StiebelControl:
                 self.entity_service.register_entity_from_config(entity_id, entity_def)
             except Exception as e:
                 logger.error(f"Error registering entity {entity_id}: {e}")
+                
+    def _register_system_sensors(self) -> None:
+        """
+        Register system status sensors that track the application state.
+        """
+        logger.info("Registering system status sensors")
+        
+        # Register device status sensor
+        self.entity_service.register_sensor(
+            entity_id="system_status",
+            name="System Status",
+            icon="mdi:heart-pulse",
+            device_class="enum",
+            entity_category="diagnostic",
+            state_class=None,
+            unit_of_measurement=None,
+            options=["online", "offline", "starting", "error"]
+        )
+        
+        # Register entities count sensor
+        self.entity_service.register_sensor(
+            entity_id="entities_count",
+            name="Entities Count",
+            icon="mdi:counter",
+            device_class="measurement",
+            entity_category="diagnostic",
+            state_class="measurement",
+            unit_of_measurement="entities"
+        )
+        
+        try:
+            # Initial states
+            self.signal_gateway.update_system_status("starting")
+            self.signal_gateway.update_entities_count(0)
+        except Exception as e:
+            logger.warning(f"Unable to set initial system status: {e}")
             
     def stop(self) -> None:
         """
@@ -197,6 +244,12 @@ class StiebelControl:
         """
         logger.info("Stopping Stiebel Control")
         self.running = False
+        
+        # Update status to offline
+        try:
+            self.signal_gateway.update_system_status("offline")
+        except Exception as e:
+            logger.warning(f"Unable to update status during shutdown: {e}")
         
         try:
             # Stop CAN interface
@@ -228,6 +281,9 @@ class StiebelControl:
                 # The CAN interface is already sending updates asynchronously
                 # via the callback. This loop can be used for periodic tasks
                 # like polling values that don't automatically update.
+                
+                # Update entity count periodically
+                self.signal_gateway.update_entities_count(None)
                 
                 # Sleep for the configured interval
                 time.sleep(update_interval)
