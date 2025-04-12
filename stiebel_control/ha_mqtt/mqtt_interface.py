@@ -1,8 +1,8 @@
 """
 MQTT Interface module for communication with Home Assistant.
 
-This module handles the MQTT communication with Home Assistant, 
-publishing sensor values and subscribing to command topics.
+This module handles low-level MQTT communication with Home Assistant,
+providing basic publish/subscribe functionality and connection management.
 """
 
 import json
@@ -18,15 +18,17 @@ logger = logging.getLogger(__name__)
 
 class MqttInterface:
     """
-    Interface for MQTT communication with Home Assistant.
+    Low-level interface for MQTT communication with Home Assistant.
     
-    This class handles the MQTT communication, including automatic discovery 
-    for Home Assistant, publishing sensor values, and subscribing to command topics.
+    This class handles the core MQTT connectivity and messaging operations,
+    providing methods for publishing to topics and subscribing to commands.
+    It does not contain entity-specific logic, which is handled by the
+    EntityRegistrationService.
     """
     
     def __init__(self, client_id: str = "stiebel_control", broker_host: str = "localhost",
                  broker_port: int = 1883, username: str = None, password: str = None,
-                 base_topic: str = "homeassistant", flat_topics: bool = True,
+                 base_topic: str = "homeassistant",
                  discovery_prefix: str = "homeassistant",
                  command_callback: Optional[Callable[[str, Any], None]] = None):
         """
@@ -39,8 +41,7 @@ class MqttInterface:
             username: MQTT username (optional)
             password: MQTT password (optional)
             base_topic: Base topic for this device
-            flat_topics: Use flat topic structure (True) or hierarchical (False)
-            discovery_prefix: Home Assistant discovery prefix
+            discovery_prefix: Home Assistant discovery prefix used for auto-discovery
             command_callback: Callback function for commands received via MQTT
         """
         self.client_id = client_id
@@ -66,8 +67,10 @@ class MqttInterface:
         # Flag to track connection state
         self.connected = False
         
-        # Dictionary to track registered entities
-        self.entities = {}
+        # Device-specific information
+        self.client_id = client_id
+        self.base_topic = base_topic
+        self.discovery_prefix = discovery_prefix
         
     def connect(self) -> bool:
         """
@@ -170,7 +173,6 @@ class MqttInterface:
             logger.debug(f"Received message on topic {topic}: {payload}")
             
             # Check if this is a command message
-            # Handle both flat and hierarchical topic structures
             entity_id = None
             is_command = False
             
@@ -180,291 +182,41 @@ class MqttInterface:
             elif "/cmd/" in topic:
                 entity_id = topic.split("/")[-1]
                 is_command = True
-                
+
             if is_command and self.command_callback:
                 self.command_callback(entity_id, payload)
                 
         except Exception as e:
             logger.error(f"Error processing message: {e}")
             
-    def register_entity(self, entity_id: str, name: str, device_class: str = None,
-                       state_class: str = None, unit_of_measurement: str = None,
-                       icon: str = None, value_template: str = None) -> bool:
+    def publish_discovery(self, discovery_topic: str, config: dict) -> bool:
         """
-        Register an entity with Home Assistant using MQTT discovery.
+        Publish discovery configuration to Home Assistant for automatic entity setup.
         
         Args:
-            entity_id: Unique ID for the entity
-            name: Display name for the entity
-            device_class: Home Assistant device class (e.g., temperature, humidity)
-            state_class: Home Assistant state class (e.g., measurement)
-            unit_of_measurement: Unit of measurement (e.g., °C, %, W)
-            icon: Material Design Icon to use (e.g., mdi:thermometer)
-            value_template: Optional value template for processing state values
+            discovery_topic: Full MQTT discovery topic
+            config: Discovery configuration payload
             
         Returns:
-            bool: True if registered successfully, False otherwise
+            bool: True if published successfully, False otherwise
         """
-        logger.debug(f"Registering entity {entity_id} as sensor with name '{name}', device_class={device_class}, "
-                   f"state_class={state_class}, unit={unit_of_measurement}, icon={icon}")
-        
         if not self.is_connected():
-            logger.error("Cannot register sensor entities: not connected to MQTT broker")
+            logger.error("Cannot publish discovery: not connected to MQTT broker")
             return False
             
-        # Generate discovery topic
-        discovery_topic = f"{self.discovery_prefix}/sensor/{entity_id}/config"
-        
-        # Topic structures - support both legacy and new formats for compatibility
-        if self.flat_topics:
-            state_topic = f"{self.base_topic}/state/{entity_id}"
-        else:
-            state_topic = f"{self.base_topic}/{entity_id}/state"
-        
-        # Create config payload with only necessary fields
-        config = {
-            "name": name,
-            "unique_id": f"{self.client_id}_{entity_id}",
-            "state_topic": state_topic,
-            "availability_topic": f"{self.base_topic}/status",
-            "payload_available": "online",
-            "payload_not_available": "offline",
-        }
-        
-        # Add optional fields only if they have values
-        for key, value in {
-            "device_class": device_class,
-            "state_class": state_class,
-            "unit_of_measurement": unit_of_measurement,
-            "icon": icon,
-            "value_template": value_template
-        }.items():
-            if value:
-                config[key] = value
-                
-        # Add device info
-        config["device"] = {
-            "identifiers": [self.client_id],
-            "name": "Stiebel Eltron Heat Pump",
-            "model": "CAN Interface",
-            "manufacturer": "Stiebel Eltron",
-            "sw_version": "1.0.0"
-        }
-            
-        # Publish discovery and store entity if successful
         logger.debug(f"Publishing to discovery topic: {discovery_topic}")
         logger.debug(f"Discovery config: {config}")
         
         result = self.client.publish(discovery_topic, json.dumps(config), qos=1, retain=True)
-        if result.rc == 0:
-            # Store entity info
-            self.entities[entity_id] = {
-                "type": "sensor",
-                "state_topic": state_topic,
-                "config": config
-            }
-            logger.debug(f"Successfully registered entity {entity_id} as sensor")
-            return True
-        else:
-            logger.error(f"Failed to publish discovery for {entity_id}, result code: {result.rc}")
-            return False
-    
-    def register_sensor(self, entity_id: str, name: str, device_class: str = None,
-                      state_class: str = None, unit_of_measurement: str = None,
-                      icon: str = None) -> bool:
+        return result.rc == 0
+            
+    def publish_state(self, topic: str, state: Any) -> bool:
         """
-        Register a sensor entity with Home Assistant.
+        Publish a state update to a topic.
         
         Args:
-            entity_id: Unique ID for the entity
-            name: Display name for the entity
-            device_class: Home Assistant device class (e.g., temperature, humidity)
-            state_class: Home Assistant state class (e.g., measurement)
-            unit_of_measurement: Unit of measurement (e.g., °C, %, W)
-            icon: Material Design Icon to use (e.g., mdi:thermometer)
-            
-        Returns:
-            bool: True if registered successfully, False otherwise
-        """
-        logger.debug(f"Registering sensor entity: {entity_id}, name='{name}', device_class={device_class}, " 
-                   f"state_class={state_class}, unit={unit_of_measurement}, icon={icon}")
-        return self.register_entity(
-            entity_id=entity_id,
-            name=name,
-            device_class=device_class,
-            state_class=state_class,
-            unit_of_measurement=unit_of_measurement,
-            icon=icon
-        )
-    
-    def register_binary_sensor(self, entity_id: str, name: str, device_class: str = None,
-                              icon: str = None) -> bool:
-        """
-        Register a binary sensor entity with Home Assistant.
-        
-        Args:
-            entity_id: Unique ID for the entity
-            name: Display name for the entity
-            device_class: Home Assistant device class (e.g., power, battery)
-            icon: Material Design Icon to use
-            
-        Returns:
-            bool: True if registered successfully, False otherwise
-        """
-        logger.debug(f"Registering binary sensor entity: {entity_id}, name='{name}', device_class={device_class}, icon={icon}")
-        
-        if not self.is_connected():
-            logger.error("Cannot register binary sensor entities: not connected to MQTT broker")
-            return False
-            
-        # Generate discovery topic
-        discovery_topic = f"{self.discovery_prefix}/binary_sensor/{entity_id}/config"
-        
-        # Topic structures
-        if self.flat_topics:
-            state_topic = f"{self.base_topic}/state/{entity_id}"
-        else:
-            state_topic = f"{self.base_topic}/{entity_id}/state"
-        
-        # Create config payload
-        config = {
-            "name": name,
-            "unique_id": f"{self.client_id}_{entity_id}",
-            "state_topic": state_topic,
-            "availability_topic": f"{self.base_topic}/status",
-            "payload_available": "online",
-            "payload_not_available": "offline",
-            "payload_on": "ON",
-            "payload_off": "OFF"
-        }
-        
-        # Add optional fields
-        if device_class:
-            config["device_class"] = device_class
-        if icon:
-            config["icon"] = icon
-            
-        # Add device info
-        config["device"] = {
-            "identifiers": [self.client_id],
-            "name": "Stiebel Eltron Heat Pump",
-            "model": "CAN Interface",
-            "manufacturer": "Stiebel Eltron",
-            "sw_version": "1.0.0"
-        }
-            
-        # Publish discovery
-        logger.debug(f"Publishing to binary sensor discovery topic: {discovery_topic}")
-        logger.debug(f"Binary sensor discovery config: {config}")
-        
-        result = self.client.publish(discovery_topic, json.dumps(config), qos=1, retain=True)
-        if result.rc == 0:
-            # Store entity info
-            self.entities[entity_id] = {
-                "type": "binary_sensor",
-                "state_topic": state_topic,
-                "config": config
-            }
-            logger.debug(f"Successfully registered entity {entity_id} as binary sensor")
-            return True
-        else:
-            logger.error(f"Failed to publish discovery for {entity_id}, result code: {result.rc}")
-            return False
-    
-    def register_select(self, entity_id: str, name: str, options: list = None,
-                       icon: str = None, options_map: dict = None) -> bool:
-        """
-        Register a select entity with Home Assistant.
-        
-        Args:
-            entity_id: Unique ID for the entity
-            name: Display name for the entity
-            options: List of options for the select entity
-            icon: Material Design Icon to use
-            options_map: Optional mapping of raw values to display options
-            
-        Returns:
-            bool: True if registered successfully, False otherwise
-        """
-        logger.debug(f"Registering select entity: {entity_id}, name='{name}', options={options}, "
-                   f"icon={icon}, options_map={options_map}")
-        
-        if not self.is_connected():
-            logger.error("Cannot register select entities: not connected to MQTT broker")
-            return False
-            
-        # Generate discovery topic
-        discovery_topic = f"{self.discovery_prefix}/select/{entity_id}/config"
-        
-        # Topic structures
-        if self.flat_topics:
-            state_topic = f"{self.base_topic}/state/{entity_id}"
-            command_topic = f"{self.base_topic}/cmd/{entity_id}"
-        else:
-            state_topic = f"{self.base_topic}/{entity_id}/state"
-            command_topic = f"{self.base_topic}/{entity_id}/command"
-        
-        # Create config payload
-        config = {
-            "name": name,
-            "unique_id": f"{self.client_id}_{entity_id}",
-            "state_topic": state_topic,
-            "command_topic": command_topic,
-            "availability_topic": f"{self.base_topic}/status",
-            "payload_available": "online",
-            "payload_not_available": "offline"
-        }
-        
-        # Add options if provided
-        if options is not None:
-            config["options"] = options
-        elif options_map is not None:
-            # Use options from options_map if direct options not provided
-            if isinstance(options_map, dict):
-                config["options"] = list(options_map.values())
-            else:
-                config["options"] = list(options_map)
-                
-        # Add icon if provided
-        if icon:
-            config["icon"] = icon
-            
-        # Add device info
-        config["device"] = {
-            "identifiers": [self.client_id],
-            "name": "Stiebel Eltron Heat Pump",
-            "model": "CAN Interface",
-            "manufacturer": "Stiebel Eltron",
-            "sw_version": "1.0.0"
-        }
-            
-        # Publish discovery
-        logger.debug(f"Publishing to select discovery topic: {discovery_topic}")
-        logger.debug(f"Select discovery config: {config}")
-        
-        result = self.client.publish(discovery_topic, json.dumps(config), qos=1, retain=True)
-        if result.rc == 0:
-            # Store entity info
-            self.entities[entity_id] = {
-                "type": "select",
-                "state_topic": state_topic,
-                "command_topic": command_topic,
-                "config": config,
-                "options_map": options_map
-            }
-            logger.debug(f"Successfully registered entity {entity_id} as select entity")
-            return True
-        else:
-            logger.error(f"Failed to publish discovery for {entity_id}, result code: {result.rc}")
-            return False
-            
-    def publish_state(self, entity_id: str, state: Any) -> bool:
-        """
-        Publish a state update for an entity.
-        
-        Args:
-            entity_id: ID of the entity to update
-            state: New state value
+            topic: The MQTT topic to publish to
+            state: The state value to publish
             
         Returns:
             bool: True if published successfully, False otherwise
@@ -473,25 +225,12 @@ class MqttInterface:
             logger.error("Cannot publish state: not connected to MQTT broker")
             return False
             
-        if entity_id not in self.entities:
-            logger.warning(f"Entity {entity_id} not registered, cannot publish state")
-            return False
-            
         try:
-            # Get the state topic for this entity
-            entity_info = self.entities[entity_id]
-            logger.debug(f"Entity info for {entity_id}: {entity_info}")
-            
-            if "state_topic" not in entity_info:
-                logger.warning(f"Entity {entity_id} has no state topic")
-                return False
-                
-            state_topic = entity_info["state_topic"]
-            logger.debug(f"Publishing to topic {state_topic}")
+            logger.debug(f"Publishing to topic {topic}: {state}")
             
             # Convert state to string if needed and publish
             state_str = str(state) if not isinstance(state, str) else state
-            result = self.client.publish(state_topic, state_str, qos=1)
+            result = self.client.publish(topic, state_str, qos=1)
             return result.rc == 0
             
         except Exception as e:

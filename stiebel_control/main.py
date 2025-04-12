@@ -47,7 +47,10 @@ class StiebelControl:
         
         # Initialize entity management and signal processing
         self.signal_mapper = SignalEntityMapper()
-        self.entity_service = EntityRegistrationService(self.mqtt_interface)
+        self.entity_service = EntityRegistrationService(
+            mqtt_interface=self.mqtt_interface,
+            signal_mapper=self.signal_mapper
+        )
         
         # Initialize signal gateway
         self.signal_gateway = SignalGateway(
@@ -55,7 +58,8 @@ class StiebelControl:
             mqtt_interface=self.mqtt_interface,
             can_interface=self.can_interface,
             signal_mapper=self.signal_mapper,
-            entity_config=self.config_manager.get_entity_config()
+            entity_config=self.config_manager.get_entity_config(),
+            protocol=self.can_interface.protocol
         )
         
         # Set up signal handlers for graceful shutdown

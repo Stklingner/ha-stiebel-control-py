@@ -94,15 +94,6 @@ entities:
       unit_of_measurement: °C
       icon: mdi:thermostat
     
-    compressor_temp:
-      name: Compressor Temperature
-      signal: COMPRESSOR
-      can_member: PUMP
-      device_class: temperature
-      state_class: measurement
-      unit_of_measurement: °C
-      icon: mdi:engine
-    
     # Energy sensors
     heating_dhw_day:
       name: Daily DHW Energy
@@ -166,7 +157,7 @@ entities:
       state_class: measurement
       icon: mdi:numeric
     
-  # Select controls (for enum values)
+  # Select controls
   selects:
     program_switch:
       name: Program Switch

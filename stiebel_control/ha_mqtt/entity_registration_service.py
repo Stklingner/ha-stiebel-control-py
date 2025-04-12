@@ -1,36 +1,76 @@
 """
 Service for registering entities with Home Assistant via MQTT.
+
+This service manages entity registration, tracking, and state updates.
+It provides methods for registering different types of entities (sensors,
+binary sensors, selects) and updating their states.
 """
 import logging
-from typing import Dict, Any, Optional, List, Set
+import json
+from typing import Dict, Any, Optional, List
+
 from stiebel_control.ha_mqtt.mqtt_interface import MqttInterface
-from stiebel_control.heatpump.elster_table import (
-    ElsterType,
-    MODELIST,
-    ERRORLIST,
-    get_elster_entry_by_english_name
-)
+from stiebel_control.ha_mqtt.signal_entity_mapper import SignalEntityMapper
+from stiebel_control.config.config_models import EntityConfig, DeviceConfig
+from stiebel_control.heatpump.elster_table import get_elster_entry_by_english_name
 
 logger = logging.getLogger(__name__)
 
 class EntityRegistrationService:
     """
-    Handles registration of entities with Home Assistant via MQTT.
+    Handles registration and tracking of entities with Home Assistant via MQTT.
+    
+    This service is responsible for:
+    1. Registering entities from static configuration
+    2. Dynamically creating entities based on observed signals
+    3. Tracking all registered entities
+    4. Managing entity states
     """
     
-    def __init__(self, mqtt_interface: MqttInterface):
+    def __init__(self, 
+                 mqtt_interface: MqttInterface, 
+                 signal_mapper: SignalEntityMapper,
+                 device_config: Optional[DeviceConfig] = None):
         """
         Initialize the entity registration service.
         
         Args:
-            mqtt_interface: MQTT interface for Home Assistant communication
+            mqtt_interface: The MQTT interface for publishing entity discovery/states
+            signal_mapper: The signal entity mapper for mapping signals to entities
+            device_config: Optional device configuration for Home Assistant integration
         """
         self.mqtt_interface = mqtt_interface
+        self.signal_mapper = signal_mapper
+        self.device_config = device_config
+        self.entities = {}  # Store registered entities
         
-        # Track registered entities to avoid duplicates
-        self.registered_entities = set()
+        # Set up device info
+        self.device_info = self._create_device_info(device_config)
         
         logger.info("Entity registration service initialized")
+        
+    def _create_device_info(self, device_config: Optional[DeviceConfig] = None) -> Dict[str, Any]:
+        """
+        Create device info for Home Assistant.
+        
+        Args:
+            device_config: Optional device configuration
+        
+        Returns:
+            Dict[str, Any]: Device info
+        """
+        device_info = {
+            "identifiers": [self.mqtt_interface.client_id],
+            "name": "Stiebel Eltron Heat Pump",
+            "model": "CAN Interface",
+            "manufacturer": "Stiebel Eltron",
+            "sw_version": "1.0.0"
+        }
+        
+        if device_config:
+            device_info.update(device_config.to_dict())
+        
+        return device_info
         
     def register_entity_from_config(self, entity_id: str, entity_def: Dict[str, Any]) -> bool:
         """
@@ -44,7 +84,7 @@ class EntityRegistrationService:
             bool: True if registration was successful, False otherwise
         """
         # Skip if already registered
-        if entity_id in self.registered_entities:
+        if entity_id in self.entities:
             logger.debug(f"Entity {entity_id} already registered, skipping")
             return True
             
@@ -52,9 +92,24 @@ class EntityRegistrationService:
         name = entity_def.get('name', entity_id)
         success = False
         
+        # Store signal mapping if provided
+        signal_name = entity_def.get('signal')
+        can_member = entity_def.get('can_member')
+        can_member_ids = entity_def.get('can_member_ids', [])
+        
+        if signal_name and (can_member or can_member_ids):
+            # Create a mapping key for each potential CAN ID
+            if can_member_ids:
+                for can_id in can_member_ids:
+                    self.signal_mapper.add_mapping(signal_name, can_id, entity_id)
+            else:
+                # Use symbolic CAN member name for now
+                # The actual CAN ID will be resolved later
+                self.signal_mapper.add_mapping(signal_name, can_member, entity_id)
+        
         if entity_type == 'sensor':
             # Register a sensor entity
-            success = self.mqtt_interface.register_sensor(
+            success = self.register_sensor(
                 entity_id=entity_id,
                 name=name,
                 device_class=entity_def.get('device_class'),
@@ -64,7 +119,7 @@ class EntityRegistrationService:
             )
         elif entity_type == 'binary_sensor':
             # Register a binary sensor entity
-            success = self.mqtt_interface.register_binary_sensor(
+            success = self.register_binary_sensor(
                 entity_id=entity_id,
                 name=name,
                 device_class=entity_def.get('device_class'),
@@ -73,11 +128,12 @@ class EntityRegistrationService:
         elif entity_type == 'select':
             # Register a select entity
             options = entity_def.get('options', [])
-            success = self.mqtt_interface.register_select(
+            success = self.register_select(
                 entity_id=entity_id,
                 name=name,
                 options=options,
-                icon=entity_def.get('icon')
+                icon=entity_def.get('icon'),
+                options_map=entity_def.get('options_map')
             )
         else:
             logger.warning(f"Unsupported entity type '{entity_type}' for entity {entity_id}")
@@ -90,6 +146,197 @@ class EntityRegistrationService:
             
         return success
         
+    def register_sensor(self, entity_id: str, name: str, device_class: str = None,
+                       state_class: str = None, unit_of_measurement: str = None,
+                       icon: str = None, value_template: str = None) -> bool:
+        """
+        Register a sensor entity with Home Assistant.
+        
+        Args:
+            entity_id: Unique ID for the entity
+            name: Display name for the entity
+            device_class: Home Assistant device class (e.g., temperature, humidity)
+            state_class: Home Assistant state class (e.g., measurement)
+            unit_of_measurement: Unit of measurement (e.g., °C, %, W)
+            icon: Material Design Icon to use (e.g., mdi:thermometer)
+            value_template: Optional value template for processing state values
+            
+        Returns:
+            bool: True if registered successfully, False otherwise
+        """
+        logger.debug(f"Registering sensor entity: {entity_id}, name='{name}', device_class={device_class}, " 
+                   f"state_class={state_class}, unit={unit_of_measurement}, icon={icon}")
+                   
+        # Generate discovery topic
+        discovery_topic = f"{self.mqtt_interface.discovery_prefix}/sensor/{entity_id}/config"
+        
+        # Generate state topic
+        state_topic = f"{self.mqtt_interface.base_topic}/{entity_id}/state"
+        
+        # Create config payload
+        config = {
+            "name": name,
+            "unique_id": f"{self.mqtt_interface.client_id}_{entity_id}",
+            "state_topic": state_topic,
+            "availability_topic": f"{self.mqtt_interface.base_topic}/status",
+            "payload_available": "online",
+            "payload_not_available": "offline",
+        }
+        
+        # Add optional fields only if they have values
+        for key, value in {
+            "device_class": device_class,
+            "state_class": state_class,
+            "unit_of_measurement": unit_of_measurement,
+            "icon": icon,
+            "value_template": value_template
+        }.items():
+            if value:
+                config[key] = value
+                
+        # Add device info
+        config["device"] = self.device_info
+        
+        # Publish discovery through MQTT interface
+        if self.mqtt_interface.publish_discovery(discovery_topic, config):
+            # Store entity info
+            self.entities[entity_id] = {
+                "type": "sensor",
+                "state_topic": state_topic,
+                "config": config
+            }
+            logger.debug(f"Successfully registered entity {entity_id} as sensor")
+            return True
+        else:
+            logger.error(f"Failed to publish discovery for {entity_id}")
+            return False
+            
+    def register_binary_sensor(self, entity_id: str, name: str, device_class: str = None,
+                              icon: str = None) -> bool:
+        """
+        Register a binary sensor entity with Home Assistant.
+        
+        Args:
+            entity_id: Unique ID for the entity
+            name: Display name for the entity
+            device_class: Home Assistant device class (e.g., power, battery)
+            icon: Material Design Icon to use
+            
+        Returns:
+            bool: True if registered successfully, False otherwise
+        """
+        logger.debug(f"Registering binary sensor entity: {entity_id}, name='{name}', device_class={device_class}, icon={icon}")
+        
+        # Generate discovery topic
+        discovery_topic = f"{self.mqtt_interface.discovery_prefix}/binary_sensor/{entity_id}/config"
+        
+        # Generate state topic
+        state_topic = f"{self.mqtt_interface.base_topic}/{entity_id}/state"
+        
+        # Create config payload
+        config = {
+            "name": name,
+            "unique_id": f"{self.mqtt_interface.client_id}_{entity_id}",
+            "state_topic": state_topic,
+            "availability_topic": f"{self.mqtt_interface.base_topic}/status",
+            "payload_available": "online",
+            "payload_not_available": "offline",
+            "payload_on": "ON",
+            "payload_off": "OFF"
+        }
+        
+        # Add optional fields
+        if device_class:
+            config["device_class"] = device_class
+        if icon:
+            config["icon"] = icon
+            
+        # Add device info
+        config["device"] = self.device_info
+        
+        # Publish discovery through MQTT interface
+        if self.mqtt_interface.publish_discovery(discovery_topic, config):
+            # Store entity info
+            self.entities[entity_id] = {
+                "type": "binary_sensor",
+                "state_topic": state_topic,
+                "config": config
+            }
+            logger.debug(f"Successfully registered entity {entity_id} as binary sensor")
+            return True
+        else:
+            logger.error(f"Failed to publish discovery for {entity_id}")
+            return False
+            
+    def register_select(self, entity_id: str, name: str, options: list = None,
+                       icon: str = None, options_map: dict = None) -> bool:
+        """
+        Register a select entity with Home Assistant.
+        
+        Args:
+            entity_id: Unique ID for the entity
+            name: Display name for the entity
+            options: List of options for the select entity
+            icon: Material Design Icon to use
+            options_map: Optional mapping of raw values to display options
+            
+        Returns:
+            bool: True if registered successfully, False otherwise
+        """
+        logger.debug(f"Registering select entity: {entity_id}, name='{name}', options={options}, "
+                   f"icon={icon}, options_map={options_map}")
+        
+        # Generate discovery topic
+        discovery_topic = f"{self.mqtt_interface.discovery_prefix}/select/{entity_id}/config"
+        
+        # Generate topics
+        state_topic = f"{self.mqtt_interface.base_topic}/{entity_id}/state"
+        command_topic = f"{self.mqtt_interface.base_topic}/{entity_id}/command"
+        
+        # Create config payload
+        config = {
+            "name": name,
+            "unique_id": f"{self.mqtt_interface.client_id}_{entity_id}",
+            "state_topic": state_topic,
+            "command_topic": command_topic,
+            "availability_topic": f"{self.mqtt_interface.base_topic}/status",
+            "payload_available": "online",
+            "payload_not_available": "offline"
+        }
+        
+        # Add options if provided
+        if options is not None:
+            config["options"] = options
+        elif options_map is not None:
+            # Use options from options_map if direct options not provided
+            if isinstance(options_map, dict):
+                config["options"] = list(options_map.values())
+            else:
+                config["options"] = list(options_map)
+                
+        # Add icon if provided
+        if icon:
+            config["icon"] = icon
+            
+        # Add device info
+        config["device"] = self.device_info
+        
+        # Publish discovery through MQTT interface
+        if self.mqtt_interface.publish_discovery(discovery_topic, config):
+            # Store entity info
+            self.entities[entity_id] = {
+                "type": "select",
+                "state_topic": state_topic,
+                "command_topic": command_topic,
+                "config": config,
+                "options_map": options_map
+            }
+            logger.debug(f"Successfully registered entity {entity_id} as select entity")
+            return True
+        else:
+            logger.error(f"Failed to publish discovery for {entity_id}")
+            return False
+            
     def register_dynamic_entity(
         self, 
         signal_name: str,
@@ -120,8 +367,8 @@ class EntityRegistrationService:
             logger.warning(f"Signal {signal_name} has unknown type, skipping dynamic registration")
             return None
         
-        # Generate entity ID using member name instead of raw CAN ID
-        entity_id = f"{signal_name.lower()}_{member_name.lower()}"
+        # Create entity ID using signal type and name
+        entity_id = f"heatpump_{transform_name_to_id(signal_name)}"
         
         # Skip if already registered
         if entity_id in self.registered_entities:
@@ -188,9 +435,11 @@ class EntityRegistrationService:
         # Generate friendly name with device context
         friendly_name = f"{signal_name.replace('_', ' ').title()} ({member_name.replace('_', ' ').title()})"
         
-        # Now register the entity based on its type
+        
+        
+        # Register with Home Assistant
         if entity_type.lower() == "sensor" and device_class != "enum":
-            success = self.mqtt_interface.register_sensor(
+            success = self.register_sensor(
                 entity_id=entity_id,
                 name=friendly_name,
                 device_class=device_class,
@@ -199,7 +448,7 @@ class EntityRegistrationService:
                 icon=icon
             )
         elif entity_type.lower() == "binary_sensor":
-            success = self.mqtt_interface.register_binary_sensor(
+            success = self.register_binary_sensor(
                 entity_id=entity_id,
                 name=friendly_name,
                 device_class=device_class,
@@ -207,30 +456,88 @@ class EntityRegistrationService:
             )
         elif device_class == "sensor.enum":
             # Check if we have mode list options
+            options_map = None
             if "MODE" in signal_name:
                 options_map = list(MODELIST.values())
             # Check if we have error list options
             elif "ERROR" in signal_name:
                 options_map = list(ERRORLIST.values())
+                
             if options_map:
-                success = self.mqtt_interface.register_select(
+                success = self.mqtt_interface.register_sensor(
                     entity_id=entity_id,
                     name=friendly_name,
+                    device_class=device_class,
                     icon=icon,
                     attributes={"options": options_map}
-            )
+                )
+            else:
+                # No options available, register as regular sensor
+                success = self.mqtt_interface.register_sensor(
+                    entity_id=entity_id,
+                    name=friendly_name,
+                    device_class=device_class,
+                    icon=icon
+                )
         else:
             # Unknown type, register as generic sensor
             success = self.mqtt_interface.register_sensor(
                 entity_id=entity_id,
                 name=friendly_name
             )
-            
-        # Update registered entities list if successful
+                
+        # Update entity list and register signal mapping if successful
         if success:
-            self.registered_entities.add(entity_id)
             logger.info(f"Dynamically registered entity {entity_id} for signal {signal_name}")
+                    
+            # Register the signal mapping in SignalEntityMapper
+            # Use the member_name directly, no need to convert
+            self.signal_mapper.add_mapping(signal_name, member_name, entity_id)
+                    
             return entity_id  # Return entity_id on success (not boolean)
         else:
             logger.warning(f"Failed to dynamically register entity {entity_id}")
             return None  # Return None on failure (not boolean)
+        
+    def update_entity_state(self, entity_id: str, state: Any) -> bool:
+        """
+        Update the state of an entity.
+            
+        Args:
+            entity_id: Entity ID to update
+            state: New state value
+            
+        Returns:
+            bool: True if update was successful, False otherwise
+        """
+        if entity_id not in self.entities:
+            logger.warning(f"Entity {entity_id} not registered, cannot update state")
+            return False
+        
+        entity_info = self.entities[entity_id]
+        state_topic = entity_info.get("state_topic")
+        
+        if not state_topic:
+            logger.warning(f"Entity {entity_id} has no state topic")
+            return False
+        
+        logger.debug(f"Updating state for entity {entity_id} to {state}")
+        return self.mqtt_interface.publish_state(state_topic, state)
+    
+    def get_entity_command_topic(self, entity_id: str) -> Optional[str]:
+        """
+        Get the command topic for an entity if it exists.
+        
+        Args:
+            entity_id: Entity ID to look up
+            
+        Returns:
+            str: Command topic or None if the entity doesn't exist or doesn't support commands
+        """
+        if entity_id not in self.entities:
+            return None
+            
+        entity_info = self.entities[entity_id]
+        return entity_info.get("command_topic")
+    
+
