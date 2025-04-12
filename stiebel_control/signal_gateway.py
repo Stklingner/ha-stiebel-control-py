@@ -10,10 +10,11 @@ from typing import Dict, Any, Optional
 from stiebel_control.ha_mqtt.entity_registration_service import EntityRegistrationService
 from stiebel_control.ha_mqtt.mqtt_interface import MqttInterface
 from stiebel_control.ha_mqtt.signal_entity_mapper import SignalEntityMapper
-from stiebel_control.ha_mqtt.command_handler import CommandHandler
+from stiebel_control.command_handler import CommandHandler
 from stiebel_control.can.interface import CanInterface
 from stiebel_control.config.config_models import EntityConfig
 from stiebel_control.can.protocol import StiebelProtocol
+from stiebel_control.heatpump.elster_table import get_elster_entry_by_index, get_elster_entry_by_english_name
 from stiebel_control.ha_mqtt.transformations import transform_value
 
 logger = logging.getLogger(__name__)
@@ -57,12 +58,14 @@ class SignalGateway:
         # Initialize the command handler without a transformation service
         self.command_handler = CommandHandler(
             can_interface=can_interface,
-            entity_config=entity_config.entities if hasattr(entity_config, 'entities') else {}
+            entity_config=entity_config.entities if hasattr(entity_config, 'entities') else {},
+            get_elster_entry_by_english_name=get_elster_entry_by_english_name,
+            transformation_service=None # TODO: Add transformation service
         )
         
         logger.info("Signal gateway initialized")
     
-    def process_signal(self, signal_name: str, value: Any, can_id: int) -> Optional[str]:
+    def process_signal(self, signal_index: int, value: Any, can_id: int) -> Optional[str]:
         """
         Route a CAN signal to the appropriate MQTT entity (CAN → MQTT direction).
         
@@ -71,19 +74,30 @@ class SignalGateway:
         when new signals are encountered.
         
         Args:
-            signal_name: Name of the signal received from CAN bus
+            signal_index: Index of the signal received from CAN bus
             value: Value of the CAN signal
             can_id: CAN ID of the message source
         """
+        logger.debug(f"Processing signal {signal_index} = {value}")
         # Skip processing if not connected to MQTT
         if not self.mqtt_interface.is_connected():
             return
             
-        # Get the CAN member name from ID for better readability
+        # Get the CAN member name from ID
         member_name = self.get_can_member_name(can_id) or f"device_{can_id:x}"
+        
+        # Get signal name from index
+        elster_entry = get_elster_entry_by_index(signal_index)
+        if not elster_entry:
+            logger.warning(f"Unknown signal index: {signal_index}, can't process")
+            return None
+            
+        signal_name = elster_entry.english_name
         
         # Get existing entity or create one dynamically
         entity_id = self.signal_mapper.get_entity_by_signal(signal_name, member_name)
+        
+        logger.debug(f"Resolved {member_name}:{signal_name}:{value} -> Entity {entity_id}")
         
         if not entity_id:
             # Register dynamically if no mapping exists
@@ -163,19 +177,17 @@ class SignalGateway:
         )
         
     def _get_signal_type(self, signal_name: str) -> Optional[str]:
-        """Get the signal type from the protocol if available."""
-        if self.protocol:
-            elster_entry = self.protocol.get_elster_entry_by_english_name(signal_name)
-            if elster_entry:
-                return elster_entry.ha_entity_type
+        """Get the signal type from the elster table if available."""
+        elster_entry = get_elster_entry_by_english_name(signal_name)
+        if elster_entry:
+            return elster_entry.ha_entity_type
         return None
         
     def _get_signal_unit(self, signal_name: str) -> str:
-        """Get the signal unit from the protocol if available."""
-        if self.protocol:
-            elster_entry = self.protocol.get_elster_entry_by_english_name(signal_name)
-            if elster_entry:
-                return elster_entry.unit_of_measurement
+        """Get the signal unit from the elster table if available."""
+        elster_entry = get_elster_entry_by_english_name(signal_name)
+        if elster_entry:
+            return elster_entry.unit_of_measurement
         return ''
         
     def get_can_member_name(self, can_id: int) -> Optional[str]:
@@ -243,3 +255,17 @@ class SignalGateway:
         
         self.signal_callbacks[key].append(callback)
         logger.debug(f"Registered callback for signal {signal_name}@{member_name}")
+    def get_signal_index_by_name(self, signal_name: str) -> Optional[int]:
+        """
+        Get the signal index for a given signal name.
+        
+        Args:
+            signal_name: English name of the signal
+            
+        Returns:
+            int: Signal index if found, None otherwise
+        """
+        elster_entry = get_elster_entry_by_english_name(signal_name)
+        if elster_entry:
+            return elster_entry.index
+        return None

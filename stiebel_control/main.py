@@ -62,6 +62,9 @@ class StiebelControl:
             protocol=self.can_interface.protocol
         )
         
+        # Now set the signal gateway's process_signal method as the CAN interface callback
+        self.can_interface.callback = self.signal_gateway.process_signal
+        
         # Set up signal handlers for graceful shutdown
         signal.signal(signal.SIGINT, self._handle_signal)
         signal.signal(signal.SIGTERM, self._handle_signal)
@@ -70,19 +73,17 @@ class StiebelControl:
         
     def _init_can_interface(self) -> None:
         """
-        Initialize the CAN interface.
+        Initialize the CAN bus interface.
         """
         can_config = self.config_manager.get_can_config()
         
         try:
             logger.info(f"Initializing CAN interface {can_config.interface} at {can_config.bitrate} bps")
-            # Set up callback to the signal gateway
+            # Initialize without a callback - we'll set it after signal_gateway is created
             self.can_interface = CanInterface(
                 can_interface=can_config.interface,
-                bitrate=can_config.bitrate,
-                callback=self._can_signal_callback
+                bitrate=can_config.bitrate
             )
-            
         except Exception as e:
             logger.error(f"Failed to initialize CAN interface: {e}")
             sys.exit(1)

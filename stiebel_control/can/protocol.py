@@ -14,10 +14,7 @@ from can import Message
 
 from stiebel_control.can.transport import CanTransport
 from stiebel_control.heatpump.elster_table import (
-    ElsterType,
-    get_elster_entry_by_index, 
-    get_elster_entry_by_name,
-    get_elster_entry_by_english_name,
+    get_elster_entry_by_index,
     value_from_signal,
     signal_from_value
 )
@@ -115,6 +112,7 @@ class StiebelProtocol:
         """
         try:
             can_id = msg.arbitration_id
+            can_member = self._get_can_member(can_id)
             data = msg.data
             
             # Check message length
@@ -144,7 +142,7 @@ class StiebelProtocol:
             typed_value = value_from_signal(raw_value, ei.type)
             
             # Log the received signal
-            logger.debug(f"CAN 0x{can_id:X}: {ei.english_name} = {typed_value}")
+            logger.debug(f"CAN 0x{can_id:X}:{index} = {typed_value}")
             
             # If this is a response to a pending request, handle it
             request_key = (can_id, index)
@@ -156,30 +154,33 @@ class StiebelProtocol:
             
             # Notify all signal handlers
             for handler in self.signal_handlers:
-                handler(ei.english_name, typed_value, can_id)
+                handler(ei.index, typed_value, can_id)
                 
         except Exception as e:
             logger.error(f"Error processing CAN message: {e}")
     
-    def get_elster_entry_by_english_name(self, signal_name: str) -> Optional[Dict[str, Any]]:
+    def _get_can_member(self, can_id: int) -> Optional[CanMember]:
         """
-        Get the Elster entry by English name.
+        Get a CAN member by its ID.
         
         Args:
-            signal_name: Name of the signal
+            can_id: CAN ID of the member
             
         Returns:
-            Optional[Dict[str, Any]]: Elster entry if found, None otherwise
+            Optional[CanMember]: The CAN member if found, None otherwise
         """
-        return get_elster_entry_by_english_name(signal_name)
+        for member in self.can_members:
+            if member.can_id == can_id:
+                return member
+        return None
 
-    def read_signal(self, member_index: int, signal_name: str, callback: Optional[Callable] = None) -> bool:
+    def read_signal(self, member_index: int, signal_index: int, callback: Optional[Callable] = None) -> bool:
         """
         Read a signal from a CAN member.
         
         Args:
             member_index: Index of the CAN member in the can_members list
-            signal_name: Name of the signal to read (must exist in ElsterTable)
+            signal_index: Index of the signal to read (must exist in ElsterTable)
             callback: Optional callback for the response (will be called with the value)
             
         Returns:
@@ -194,12 +195,12 @@ class StiebelProtocol:
             member = self.can_members[member_index]
             
             # Get the signal definition
-            ei = get_elster_entry_by_english_name(signal_name)
+            ei = get_elster_entry_by_index(signal_index)
             if not ei:
-                logger.error(f"Unknown signal: {signal_name}")
+                logger.error(f"Unknown signal: {signal_index}")
                 return False
                 
-            logger.debug(f"Preparing to read signal {signal_name} (index {ei.index}) from member {member.name} (CAN ID 0x{member.can_id:X})")
+            logger.debug(f"Preparing to read signal {ei.english_name} (index {ei.index}) from member {member.name} (CAN ID 0x{member.can_id:X})")
             
             # Create the request message
             index_byte1 = (ei.index >> 8) & 0xFF
@@ -250,7 +251,7 @@ class StiebelProtocol:
             logger.error(f"Error sending read request: {e}")
             return False
             
-    def write_signal(self, member_index: int, signal_name: str, value: Any) -> bool:
+    def write_signal(self, member_index: int, signal_index: int, value: Any) -> bool:
         """
         Write a value to a signal on a CAN member.
         
@@ -267,9 +268,9 @@ class StiebelProtocol:
             member = self.can_members[member_index]
             
             # Get the signal definition
-            ei = get_elster_entry_by_english_name(signal_name)
+            ei = get_elster_entry_by_index(signal_index)
             if not ei:
-                logger.error(f"Unknown signal: {signal_name}")
+                logger.error(f"Unknown signal: {signal_index}")
                 return False
                 
             # Convert the value to the raw format

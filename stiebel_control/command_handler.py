@@ -15,6 +15,7 @@ class CommandHandler:
         self, 
         can_interface, 
         entity_config: Dict[str, Dict[str, Any]],
+        get_elster_entry_by_english_name: Callable,
         transformation_service=None
     ):
         """
@@ -27,6 +28,7 @@ class CommandHandler:
         """
         self.can_interface = can_interface
         self.entity_config = entity_config
+        self.get_elster_entry_by_english_name = get_elster_entry_by_english_name
         self.transformation_service = transformation_service
         
         # Keep track of pending commands to avoid echoes
@@ -42,25 +44,7 @@ class CommandHandler:
             entity_id: Entity ID that received the command
             payload: Command payload
         """
-        # -----------------------------------------------------------------------
-        # RECOMMENDED SELECT ENTITY COMMAND HANDLING:
-        # -----------------------------------------------------------------------
-        # 1. For select entities, the command will be the selected option's display value
-        # 2. You need to map this back to the raw value expected by the CAN device
-        # 
-        # Example implementation:
-        # if entity_id in self.entity_config and 'options_map' in self.entity_config[entity_id]:
-        #     options_map = self.entity_config[entity_id]['options_map']
-        #     # Reverse mapping (from display value to raw value)
-        #     for raw_value, display_value in options_map.items():
-        #         if display_value == payload:
-        #             # Found the matching raw value, send it to the CAN device
-        #             signal_info = self.get_signal_for_entity(entity_id)
-        #             if signal_info:
-        #                 signal_name, can_id = signal_info
-        #                 self.can_interface.write_signal(can_id, signal_name, raw_value)
-        #                 return
-        # -----------------------------------------------------------------------
+
         if not entity_id or not payload:
             logger.warning(f"Invalid command: entity_id={entity_id}, payload={payload}")
             return
@@ -75,6 +59,7 @@ class CommandHandler:
             
         # Extract signal info
         signal_name = entity_def.get('signal')
+        signal_index = self._get_signal_index_by_name(signal_name)
         can_member = entity_def.get('can_member')
         can_member_ids = entity_def.get('can_member_ids', [])
         
@@ -100,9 +85,17 @@ class CommandHandler:
         # Record pending command to avoid echo
         self.pending_commands[entity_id] = value
         
+        # Convert signal name to index
+        elster_entry = self.get_elster_entry_by_english_name(signal_name)
+        if not elster_entry:
+            logger.error(f"Cannot process command: unknown signal {signal_name}")
+            return
+            
+        signal_index = elster_entry.index
+        
         # Send command to the CAN bus
-        self.can_interface.set_value(can_id, signal_name, value)
-        logger.info(f"Sent command to CAN bus: signal={signal_name}, value={value}, can_id=0x{can_id:X}")
+        self.can_interface.set_value(can_id, signal_index, value)
+        logger.info(f"Sent command to CAN bus: signal={signal_name} (index {signal_index}), value={value}, can_id=0x{can_id:X}")
         
     def _resolve_can_id(self, can_member: Optional[str], can_member_ids: list) -> Optional[int]:
         """
@@ -124,7 +117,14 @@ class CommandHandler:
             can_id = can_member_ids[0]
             
         return can_id
-        
+    
+    def _get_signal_index_by_name(self, signal_name: str) -> Optional[int]:
+        """Convert a signal name to its corresponding index."""
+        elster_entry = self.get_elster_entry_by_english_name(signal_name)
+        if elster_entry:
+            return elster_entry.index
+        return None
+
     def is_pending_command(self, entity_id: str, value: Any) -> bool:
         """
         Check if a value update is from a pending command.

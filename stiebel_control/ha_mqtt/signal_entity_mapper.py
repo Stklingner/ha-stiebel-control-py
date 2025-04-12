@@ -88,35 +88,6 @@ class SignalEntityMapper:
         """
         return self.entity_map.get((signal_name, member_name))
         
-    def get_entity_by_signal_with_id(self, signal_name: str, can_id: int) -> Optional[str]:
-        """
-        Get entity ID for a given signal and CAN ID (legacy support).
-        
-        Args:
-            signal_name: Name of the signal
-            can_id: CAN ID of the member that sent the message
-            
-        Returns:
-            Entity ID, or None if no mapping found
-        """
-        # Convert ID to member name first
-        member_name = self.get_can_member_name_by_id(can_id)
-        if member_name:
-            return self.get_entity_by_signal(signal_name, member_name)
-        return None
-        
-    def get_signal_by_entity(self, entity_id: str) -> Optional[Tuple[str, int]]:
-        """
-        Get signal name and CAN ID for a given entity ID.
-        
-        Args:
-            entity_id: Entity ID in Home Assistant
-            
-        Returns:
-            Tuple of (signal_name, member_name), or None if no mapping found
-        """
-        return self.entity_to_signal_map.get(entity_id)
-        
     def create_dynamic_entity_id(self, signal_name: str, member_name: str) -> str:
         """
         Create a dynamic entity ID for a given signal and member name.
@@ -151,20 +122,3 @@ class SignalEntityMapper:
         friendly_name = f"{signal_name.replace('_', ' ').title()} ({member_name})"
         
         return friendly_name
-        
-    def get_entity_signal_info(self, signal_name: str) -> Dict[str, Any]:
-        """
-        Get information about a signal from the Elster table.
-        
-        Args:
-            signal_name: Name of the signal to look up
-            
-        Returns:
-            Dictionary with signal information
-        """
-        ei = get_elster_entry_by_english_name(signal_name)
-        return {
-            'name': ei.name,
-            'type': ei.type,
-            'index': ei.index
-        }
