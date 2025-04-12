@@ -137,7 +137,7 @@ class EntityRegistrationService:
         
     def register_sensor(self, entity_id: str, name: str, device_class: str = None,
                        state_class: str = None, unit_of_measurement: str = None,
-                       icon: str = None, value_template: str = None) -> bool:
+                       icon: str = None, value_template: str = None, options: list = None) -> bool:
         """
         Register a sensor entity with Home Assistant.
         
@@ -149,6 +149,7 @@ class EntityRegistrationService:
             unit_of_measurement: Unit of measurement (e.g., °C, %, W)
             icon: Material Design Icon to use (e.g., mdi:thermometer)
             value_template: Optional value template for processing state values
+            options: Optional list of options for enum or select entities
             
         Returns:
             bool: True if registered successfully, False otherwise
@@ -178,6 +179,7 @@ class EntityRegistrationService:
             "state_class": state_class,
             "unit_of_measurement": unit_of_measurement,
             "icon": icon,
+            "options": options,
             "value_template": value_template
         }.items():
             if value:
