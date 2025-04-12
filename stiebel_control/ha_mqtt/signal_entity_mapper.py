@@ -24,44 +24,44 @@ class SignalEntityMapper:
         
         logger.info("Signal entity mapper initialized")
         
-    def build_entity_mapping(self, entity_config: Dict[str, Dict[str, Any]]) -> None:
-        """
-        Build mapping between CAN signals and Home Assistant entities.
+    # def build_entity_mapping(self, entity_config: Dict[str, Dict[str, Any]]) -> None:
+    #     """
+    #     Build mapping between CAN signals and Home Assistant entities.
         
-        Args:
-            entity_config: Entity configuration dictionary
-        """
-        logger.info("Building entity mapping from configuration")
+    #     Args:
+    #         entity_config: Entity configuration dictionary
+    #     """
+    #     logger.info("Building entity mapping from configuration")
         
-        if not entity_config:
-            logger.warning("No entity configuration found")
-            return
+    #     if not entity_config:
+    #         logger.warning("No entity configuration found")
+    #         return
             
-        # Process each entity in the configuration
-        for entity_id, entity_def in entity_config.items():
-            signal_name = entity_def.get('signal')
-            can_member = entity_def.get('can_member')
-            can_member_ids = entity_def.get('can_member_ids', [])
+    #     # Process each entity in the configuration
+    #     for entity_id, entity_def in entity_config.items():
+    #         signal_name = entity_def.get('signal')
+    #         can_member = entity_def.get('can_member')
+    #         can_member_ids = entity_def.get('can_member_ids', [])
             
-            if not signal_name:
-                logger.warning(f"Missing signal name for entity {entity_id}")
-                continue
+    #         if not signal_name:
+    #             logger.warning(f"Missing signal name for entity {entity_id}")
+    #             continue
                 
-            # Process entities that define a single CAN member
-            if can_member and not can_member_ids:
-                # Use the member name directly
-                self.add_mapping(signal_name, can_member, entity_id)
-                logger.debug(f"Mapped signal {signal_name} from {can_member} to entity {entity_id}")
+    #         # Process entities that define a single CAN member
+    #         if can_member and not can_member_ids:
+    #             # Use the member name directly
+    #             self.add_mapping(signal_name, can_member, entity_id)
+    #             logger.debug(f"Mapped signal {signal_name} from {can_member} to entity {entity_id}")
                     
-            # Process entities that define multiple CAN members
-            elif can_member_ids:
-                for member_id in can_member_ids:
-                    # Convert all member_ids to strings for consistent handling
-                    member_name = str(member_id)
-                    self.add_mapping(signal_name, member_name, entity_id)
-                    logger.debug(f"Mapped signal {signal_name} from member {member_name} to entity {entity_id}")
+    #         # Process entities that define multiple CAN members
+    #         elif can_member_ids:
+    #             for member_id in can_member_ids:
+    #                 # Convert all member_ids to strings for consistent handling
+    #                 member_name = str(member_id)
+    #                 self.add_mapping(signal_name, member_name, entity_id)
+    #                 logger.debug(f"Mapped signal {signal_name} from member {member_name} to entity {entity_id}")
         
-        logger.info(f"Built entity mapping with {len(self.entity_map)} signal-to-entity mappings")
+    #     logger.info(f"Built entity mapping with {len(self.entity_map)} signal-to-entity mappings")
         
     def add_mapping(self, signal_name: str, member_name: str, entity_id: str) -> None:
         """
@@ -87,38 +87,3 @@ class SignalEntityMapper:
             Entity ID, or None if no mapping found
         """
         return self.entity_map.get((signal_name, member_name))
-        
-    def create_dynamic_entity_id(self, signal_name: str, member_name: str) -> str:
-        """
-        Create a dynamic entity ID for a given signal and member name.
-        
-        Args:
-            signal_name: Name of the signal
-            member_name: Name of the CAN member
-            
-        Returns:
-            Generated entity ID string
-        """
-        # Clean up signal name for use in entity ID
-        signal_id = signal_name.lower().replace(' ', '_').replace('.', '_')
-        
-        # Create entity ID
-        entity_id = f"{signal_id}_{member_name.lower()}"
-        
-        return entity_id
-        
-    def create_friendly_name(self, signal_name: str, member_name: str) -> str:
-        """
-        Create a friendly display name for a signal and member name.
-        
-        Args:
-            signal_name: Name of the signal
-            member_name: Name of the CAN member
-            
-        Returns:
-            Human-readable display name
-        """
-        # Format friendly name
-        friendly_name = f"{signal_name.replace('_', ' ').title()} ({member_name})"
-        
-        return friendly_name

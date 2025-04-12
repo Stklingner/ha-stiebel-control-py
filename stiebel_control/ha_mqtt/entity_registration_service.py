@@ -356,9 +356,12 @@ class EntityRegistrationService:
             logger.warning(f"Signal {signal_name} has unknown type, skipping dynamic registration")
             return None
         
-        # Create entity ID using signal type and name
-        entity_id = f"heatpump_{transform_name_to_id(signal_name)}"
+        # Clean up signal name for use in entity ID
+        signal_id = signal_name.lower().replace(' ', '_').replace('.', '_')
         
+        # Create entity ID
+        entity_id = f"sc_{member_name.lower()}_{signal_id}"
+
         # Skip if already registered
         if entity_id in self.dyn_registered_entities:
             logger.debug(f"Entity {entity_id} already registered, skipping dynamic registration")
