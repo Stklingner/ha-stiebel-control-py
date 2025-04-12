@@ -113,7 +113,11 @@ class EntityRegistrationService:
         elster_entry = get_elster_entry_by_english_name(signal_name)
         
         # Skip if we don't have valid values to register with
-        if elster_entry.name == "UNKNOWN" or elster_entry.type == ElsterType.ET_NONE:
+        if elster_entry.name == "UNKNOWN":
+            logger.warning(f"Signal {signal_name} not found in Elster table, skipping dynamic registration")
+            return None
+        elif elster_entry.type == ElsterType.ET_NONE:
+            logger.warning(f"Signal {signal_name} has unknown type, skipping dynamic registration")
             return None
         
         # Generate entity ID using member name instead of raw CAN ID
@@ -134,31 +138,43 @@ class EntityRegistrationService:
         if hasattr(elster_entry, 'ha_entity_type') and elster_entry.ha_entity_type:
             ha_entity_parts = elster_entry.ha_entity_type.split('.')
             entity_type = ha_entity_parts[0]  # e.g., 'sensor' from 'sensor.temperature'
+            logger.debug(f"Entity type from Elster table: {entity_type}")
             
             # Extract device class if specified
             if len(ha_entity_parts) > 1:
                 device_class = ha_entity_parts[1]  # e.g., 'temperature' from 'sensor.temperature'
+                logger.debug(f"Device class from Elster table: {device_class}")
         
         # Get unit from Elster table
         if hasattr(elster_entry, 'unit_of_measurement') and elster_entry.unit_of_measurement:
             unit_of_measurement = elster_entry.unit_of_measurement
+            logger.debug(f"Unit of measurement from Elster table: {unit_of_measurement}")
         
         # Map icons based on device class and entity type
-        if device_class == "temperature":
+        if device_class == "temperature" or unit_of_measurement == "°C":
             icon = "mdi:thermometer-lines"
         elif device_class == "humidity":
             icon = "mdi:water-percent"
         elif device_class == "pressure":
             icon = "mdi:gauge"
-        elif device_class == "power":
+        elif device_class == "power" or unit_of_measurement == "W":
             icon = "mdi:flash"
-        elif device_class == "energy":
+        elif device_class == "energy" or unit_of_measurement == "Wh":
             icon = "mdi:lightning-bolt"
         elif "PERCENT" in signal_name or unit_of_measurement == "%":
             icon = "mdi:percent"
-        elif "HOUR" in signal_name or "TIME" in signal_name or unit_of_measurement == "h":
-            device_class = "duration"
+        elif "HOUR" in signal_name or unit_of_measurement == "h":
             icon = "mdi:timer"
+        elif "MINUTE" in signal_name or unit_of_measurement == "min":
+            icon = "mdi:timer-outline"
+        elif "TIME" in signal_name:
+            icon = "mdi:clock-outline"
+        elif "DAY" in signal_name or unit_of_measurement == "d":
+            icon = "mdi:calendar-today"
+        elif "MONTH" in signal_name:
+            icon = "mdi:calendar-month"
+        elif "YEAR" in signal_name:
+            icon = "mdi:calendar"
         elif entity_type == "enum" or entity_type == "select":
             icon = "mdi:format-list-bulleted"
         elif "ERROR" in signal_name or "FAULT" in signal_name:
@@ -170,7 +186,7 @@ class EntityRegistrationService:
             return None
                 
         # Generate friendly name with device context
-        friendly_name = f"{signal_name} ({member_name})"
+        friendly_name = f"{signal_name.replace('_', ' ').title()} ({member_name.replace('_', ' ').title()})"
         
         # Now register the entity based on its type
         if entity_type.lower() == "sensor" and device_class != "enum":

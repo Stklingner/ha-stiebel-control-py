@@ -205,6 +205,9 @@ class MqttInterface:
         Returns:
             bool: True if registered successfully, False otherwise
         """
+        logger.debug(f"Registering entity {entity_id} as sensor with name '{name}', device_class={device_class}, "
+                   f"state_class={state_class}, unit={unit_of_measurement}, icon={icon}")
+        
         if not self.is_connected():
             logger.error("Cannot register sensor entities: not connected to MQTT broker")
             return False
@@ -249,6 +252,9 @@ class MqttInterface:
         }
             
         # Publish discovery and store entity if successful
+        logger.debug(f"Publishing to discovery topic: {discovery_topic}")
+        logger.debug(f"Discovery config: {config}")
+        
         result = self.client.publish(discovery_topic, json.dumps(config), qos=1, retain=True)
         if result.rc == 0:
             # Store entity info
@@ -257,9 +263,10 @@ class MqttInterface:
                 "state_topic": state_topic,
                 "config": config
             }
+            logger.debug(f"Successfully registered entity {entity_id} as sensor")
             return True
         else:
-            logger.error(f"Failed to publish discovery for {entity_id}")
+            logger.error(f"Failed to publish discovery for {entity_id}, result code: {result.rc}")
             return False
     
     def register_sensor(self, entity_id: str, name: str, device_class: str = None,
@@ -279,6 +286,8 @@ class MqttInterface:
         Returns:
             bool: True if registered successfully, False otherwise
         """
+        logger.debug(f"Registering sensor entity: {entity_id}, name='{name}', device_class={device_class}, " 
+                   f"state_class={state_class}, unit={unit_of_measurement}, icon={icon}")
         return self.register_entity(
             entity_id=entity_id,
             name=name,
@@ -302,6 +311,8 @@ class MqttInterface:
         Returns:
             bool: True if registered successfully, False otherwise
         """
+        logger.debug(f"Registering binary sensor entity: {entity_id}, name='{name}', device_class={device_class}, icon={icon}")
+        
         if not self.is_connected():
             logger.error("Cannot register binary sensor entities: not connected to MQTT broker")
             return False
@@ -343,6 +354,9 @@ class MqttInterface:
         }
             
         # Publish discovery
+        logger.debug(f"Publishing to binary sensor discovery topic: {discovery_topic}")
+        logger.debug(f"Binary sensor discovery config: {config}")
+        
         result = self.client.publish(discovery_topic, json.dumps(config), qos=1, retain=True)
         if result.rc == 0:
             # Store entity info
@@ -351,9 +365,10 @@ class MqttInterface:
                 "state_topic": state_topic,
                 "config": config
             }
+            logger.debug(f"Successfully registered entity {entity_id} as binary sensor")
             return True
         else:
-            logger.error(f"Failed to publish discovery for {entity_id}")
+            logger.error(f"Failed to publish discovery for {entity_id}, result code: {result.rc}")
             return False
     
     def register_select(self, entity_id: str, name: str, options: list = None,
@@ -371,6 +386,9 @@ class MqttInterface:
         Returns:
             bool: True if registered successfully, False otherwise
         """
+        logger.debug(f"Registering select entity: {entity_id}, name='{name}', options={options}, "
+                   f"icon={icon}, options_map={options_map}")
+        
         if not self.is_connected():
             logger.error("Cannot register select entities: not connected to MQTT broker")
             return False
@@ -421,6 +439,9 @@ class MqttInterface:
         }
             
         # Publish discovery
+        logger.debug(f"Publishing to select discovery topic: {discovery_topic}")
+        logger.debug(f"Select discovery config: {config}")
+        
         result = self.client.publish(discovery_topic, json.dumps(config), qos=1, retain=True)
         if result.rc == 0:
             # Store entity info
@@ -431,9 +452,10 @@ class MqttInterface:
                 "config": config,
                 "options_map": options_map
             }
+            logger.debug(f"Successfully registered entity {entity_id} as select entity")
             return True
         else:
-            logger.error(f"Failed to publish discovery for {entity_id}")
+            logger.error(f"Failed to publish discovery for {entity_id}, result code: {result.rc}")
             return False
             
     def publish_state(self, entity_id: str, state: Any) -> bool:
