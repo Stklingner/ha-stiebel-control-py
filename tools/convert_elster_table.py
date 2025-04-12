@@ -12,7 +12,7 @@ import re
 import yaml
 import argparse
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Counter
 
 
 def get_type_mapping() -> Dict[str, str]:
@@ -76,7 +76,7 @@ def parse_elster_table(content: str, type_map: Dict[str, str]) -> List[Dict]:
         index_str = match.group(2)
         cpp_type = match.group(3)
         english_name = match.group(4) or name  # Use name if English name is empty
-        
+        # print("name:", name, "index:", index_str, "type:", cpp_type, "english_name:", english_name)
         # Convert hex format to int
         if index_str.startswith('0x'):
             index_val = int(index_str, 16)
@@ -227,6 +227,18 @@ def generate_yaml(elster_table: List[Dict], output_path: str) -> None:
             }
             yaml_data.append(yaml_entry)
     
+    # print summary stats
+    print(f"Total signals: {len(elster_table)}")
+    print("Entries by data type")
+    type_counts = Counter(entry['type'] for entry in yaml_data)
+    for type_name, count in type_counts.items():
+        print(f"  {type_name}: {count}")
+
+    print("Entries by entity type")
+    entity_counts = Counter(entry['ha_entity_type'] for entry in yaml_data)
+    for entity_type, count in entity_counts.items():
+        print(f"  {entity_type}: {count}")
+
     # Write to YAML file
     with open(output_path, 'w') as f:
         yaml.dump(yaml_data, f, sort_keys=False, allow_unicode=True)

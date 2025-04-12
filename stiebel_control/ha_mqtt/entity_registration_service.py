@@ -360,7 +360,7 @@ class EntityRegistrationService:
         signal_id = signal_name.lower().replace(' ', '_').replace('.', '_')
         
         # Create entity ID
-        entity_id = f"sc_{member_name.lower()}_{signal_id}"
+        entity_id = f"{member_name.lower()}_{signal_id}"
 
         # Skip if already registered
         if entity_id in self.dyn_registered_entities:
@@ -421,13 +421,11 @@ class EntityRegistrationService:
         elif "MODE" in signal_name:
             icon = "mdi:format-list-bulleted"
         else:
-            logger.warning(f"Unsupported signal type '{signal_type}' for signal {signal_name}")
-            return None
+            icon = "mdi:information-outline"
+            logger.debug(f"Unresolved signal type '{signal_type}' for signal {signal_name}")
                 
         # Generate friendly name with device context
         friendly_name = f"{signal_name.replace('_', ' ').title()} ({member_name.replace('_', ' ').title()})"
-        
-        
         
         # Register with Home Assistant
         if entity_type.lower() == "sensor" and device_class != "enum":
@@ -481,7 +479,6 @@ class EntityRegistrationService:
         # Update entity list and register signal mapping if successful
         if success:
             logger.info(f"Dynamically registered entity {entity_id} for signal {signal_name}")
-                    
             # Register the signal mapping in SignalEntityMapper
             # Use the member_name directly, no need to convert
             self.signal_mapper.add_mapping(signal_name, member_name, entity_id)
