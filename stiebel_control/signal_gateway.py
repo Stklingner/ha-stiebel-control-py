@@ -215,7 +215,7 @@ class SignalGateway:
         
         # If no match found
         return None
-        
+    
     def register_signal_callback(
         self, 
         signal_name: str, 

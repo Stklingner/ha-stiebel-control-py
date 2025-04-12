@@ -161,6 +161,18 @@ class StiebelProtocol:
         except Exception as e:
             logger.error(f"Error processing CAN message: {e}")
     
+    def get_elster_entry_by_english_name(self, signal_name: str) -> Optional[Dict[str, Any]]:
+        """
+        Get the Elster entry by English name.
+        
+        Args:
+            signal_name: Name of the signal
+            
+        Returns:
+            Optional[Dict[str, Any]]: Elster entry if found, None otherwise
+        """
+        return get_elster_entry_by_english_name(signal_name)
+
     def read_signal(self, member_index: int, signal_name: str, callback: Optional[Callable] = None) -> bool:
         """
         Read a signal from a CAN member.

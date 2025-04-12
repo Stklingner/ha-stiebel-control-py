@@ -38,7 +38,7 @@ class EntityRegistrationService:
         self.mqtt_interface = mqtt_interface
         self.signal_mapper = signal_mapper
         self.entities = {}  # Store registered entities
-        
+        self.dyn_registered_entities = set()  # Store dynamically registered entities
         # Set up device info
         self.device_info = self._create_device_info()
         
@@ -130,7 +130,7 @@ class EntityRegistrationService:
             
         if success:
             # Add to registered entities
-            self.registered_entities.add(entity_id)
+            self.dyn_registered_entities.add(entity_id)
             logger.info(f"Registered {entity_type} entity {entity_id}")
             
         return success
@@ -360,7 +360,7 @@ class EntityRegistrationService:
         entity_id = f"heatpump_{transform_name_to_id(signal_name)}"
         
         # Skip if already registered
-        if entity_id in self.registered_entities:
+        if entity_id in self.dyn_registered_entities:
             logger.debug(f"Entity {entity_id} already registered, skipping dynamic registration")
             return entity_id
         # Determine entity type and attributes based on Elster table data
