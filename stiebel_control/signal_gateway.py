@@ -124,7 +124,8 @@ class SignalGateway:
         transformed_value = self._transform_value(signal_name, entity_id, value)
         
         # Publish the update
-        success = self.mqtt_interface.publish_state(entity_id, transformed_value)
+        topic = self.entity_service.entities[entity_id].get("state_topic")
+        success = self.mqtt_interface.publish_state(topic, transformed_value)
         
         if success:
             # Execute any registered callbacks for this signal
