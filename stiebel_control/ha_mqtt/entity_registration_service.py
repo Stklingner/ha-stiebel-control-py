@@ -93,7 +93,9 @@ class EntityRegistrationService:
     def register_dynamic_entity(
         self, 
         signal_name: str,
-        member_name: str
+        value: Any,
+        member_name: str,
+        signal_type: str = None
     ) -> Optional[str]:
         """
         Register an entity dynamically based on signal information from the Elster table.
@@ -102,6 +104,7 @@ class EntityRegistrationService:
             signal_name: Name of the signal
             value: Current value of the signal
             member_name: Name of the CAN member that sent the message (e.g., 'PUMP', 'MANAGER')
+            signal_type: ElsterType of the signal as string (e.g., 'ET_DEC_VAL'), optional
             
         Returns:
             str: Generated entity ID, or None if registration failed
