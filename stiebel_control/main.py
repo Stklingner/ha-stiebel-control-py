@@ -214,7 +214,6 @@ class StiebelControl:
             name="System Status",
             icon="mdi:heart-pulse",
             device_class="enum",
-            entity_category="diagnostic",
             state_class=None,
             unit_of_measurement=None,
             options=["online", "offline", "starting", "error"]
@@ -226,7 +225,6 @@ class StiebelControl:
             name="Entities Count",
             icon="mdi:counter",
             device_class="measurement",
-            entity_category="diagnostic",
             state_class="measurement",
             unit_of_measurement="entities"
         )
