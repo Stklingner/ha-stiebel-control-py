@@ -78,7 +78,7 @@ class SignalGateway:
             value: Value of the CAN signal
             can_id: CAN ID of the message source
         """
-        logger.debug(f"Processing signal {signal_index} = {value}")
+        logger.debug(f"New signal 0x{can_id:x}:{signal_index} = {value}")
         # Skip processing if not connected to MQTT
         if not self.mqtt_interface.is_connected():
             return
@@ -94,6 +94,8 @@ class SignalGateway:
             
         signal_name = elster_entry.english_name
         
+        logger.info(f"Heard signal {member_name}:{signal_name} = {value}")
+
         # Get existing entity or create one dynamically
         entity_id = self.signal_mapper.get_entity_by_signal(signal_name, member_name)
         

@@ -510,7 +510,7 @@ class EntityRegistrationService:
             logger.warning(f"Entity {entity_id} has no state topic")
             return False
         
-        logger.debug(f"Updating state for entity {entity_id} to {state}")
+        logger.info(f"Updating state for entity {entity_id} to {state}")
         return self.mqtt_interface.publish_state(state_topic, state)
     
     def get_entity_command_topic(self, entity_id: str) -> Optional[str]:
