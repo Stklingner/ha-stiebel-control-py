@@ -167,7 +167,7 @@ class SignalGateway:
         if self.protocol:
             elster_entry = self.protocol.get_elster_entry_by_english_name(signal_name)
             if elster_entry:
-                return elster_entry.get('ha_entity_type', 'sensor')
+                return elster_entry.ha_entity_type
         return None
         
     def _get_signal_unit(self, signal_name: str) -> str:
@@ -175,7 +175,7 @@ class SignalGateway:
         if self.protocol:
             elster_entry = self.protocol.get_elster_entry_by_english_name(signal_name)
             if elster_entry:
-                return elster_entry.get('unit_of_measurement', '')
+                return elster_entry.unit_of_measurement
         return ''
         
     def get_can_member_name(self, can_id: int) -> Optional[str]:
