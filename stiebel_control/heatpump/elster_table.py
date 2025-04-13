@@ -9,8 +9,8 @@ import os
 import yaml
 import logging
 from enum import Enum, auto
+from typing import List, Dict, Any, Optional, Tuple, Union
 from pathlib import Path
-from typing import List, Dict, Any, Optional
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -229,7 +229,17 @@ def get_ha_entity_info_by_index(index):
         'unit_of_measurement': elster_entry.unit_of_measurement
     }
     
-def value_from_signal(value, value_type):
+# Define special sentinel values commonly used in the CAN protocol
+# These are values that indicate a sensor is missing, disconnected, or in error state
+SENTINEL_VALUES = {
+    # Standard sentinel values for temperatures (16-bit signed min/max)
+    0x8000: None,  # -32768 → Often indicates disconnected temperature sensor
+    0x7FFF: None,  # 32767 → Often indicates sensor error
+    
+    # Add more sentinel values as you discover them
+}
+
+def value_from_signal(value, value_type) -> Union[float, int, str, None]:
     """Convert a raw signal value to a meaningful value based on its type.
     
     Args:
@@ -237,8 +247,13 @@ def value_from_signal(value, value_type):
         value_type (ElsterType): Type of the value
         
     Returns:
-        The converted value in the appropriate type (float, int, str)
-    """
+        The converted value in the appropriate type (float, int, str, None)
+        Returns None for sentinel values indicating disconnection or errors
+    """    
+    # First check for known sentinel values
+    if value in SENTINEL_VALUES:
+        logger.debug(f"Detected sentinel value: 0x{value:04X} ({value})")
+        return SENTINEL_VALUES[value]
     if value_type == ElsterType.ET_NONE:
         return value  # Return raw value without conversion for ET_NONE type
     elif value_type == ElsterType.ET_INTEGER or value_type == ElsterType.ET_BYTE:
