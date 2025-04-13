@@ -227,7 +227,7 @@ class SignalPoller:
                 return
                 
             current_time = time.time()
-            logger.debug(f"Received response for signal {signal_index} from member {member_index}: {value}")
+            logger.info(f"Received response for signal {signal_index} from member {member.name}: {value}")
             
             # Update response count and time in polling tasks
             for priority, tasks in self.polling_tasks.items():
@@ -259,13 +259,9 @@ class SignalPoller:
         Get statistics about the polling tasks.
         
         Returns:
-            Dict with statistics about polling tasks
+            Dict with simplified statistics focusing on key metrics
         """
         current_time = time.time()
-        
-        # Calculate overall statistics
-        total_polls = sum(task[5] for priority in self.polling_tasks.values() for task in priority)
-        total_responses = sum(task[4] for priority in self.polling_tasks.values() for task in priority)
         
         # Clean up stale pending polls (older than 60 seconds)
         stale_keys = []
@@ -278,42 +274,37 @@ class SignalPoller:
                 
         for key in stale_keys:
             del self.pending_polls[key]
-        response_rate = (total_responses / total_polls) * 100 if total_polls > 0 else 0
         
+        # Calculate polled vs responsive entities
+        polled_entities = set()
+        responsive_entities = set()
+        non_responsive_entities = []
+        
+        # Collect stats across all priorities
+        for priority, tasks in self.polling_tasks.items():
+            for signal_idx, member_idx, _, last_response, response_count, poll_count in tasks:
+                if poll_count > 0:
+                    # This entity has been polled
+                    polled_entities.add((member_idx, signal_idx))
+                    
+                    if response_count > 0:
+                        # This entity has responded at least once
+                        responsive_entities.add((member_idx, signal_idx))
+                    else:
+                        # This entity has never responded
+                        try:
+                            member_name = self.can_interface.can_members[member_idx].name
+                            non_responsive_entities.append(f"{member_name}:{signal_idx}")
+                        except IndexError:
+                            # Fall back to index if member not found
+                            non_responsive_entities.append(f"Member({member_idx}):{signal_idx}")
+        
+        # Create simplified stats
         stats = {
-            'total_signals': sum(len(tasks) for tasks in self.polling_tasks.values()),
-            'total_polls': total_polls,
-            'total_responses': total_responses,
-            'response_rate': round(response_rate, 1),
-            'pending_polls': len(self.pending_polls),
-            'priorities': {}
+            'total_polled_entities': len(polled_entities),
+            'total_responsive_entities': len(responsive_entities),
+            'non_responsive_count': len(non_responsive_entities),
+            'non_responsive_entities_list': ', '.join(non_responsive_entities) if non_responsive_entities else "All entities responding"
         }
         
-        # Calculate statistics per priority
-        for priority, tasks in self.polling_tasks.items():
-            due_count = sum(1 for _, _, last_poll_time, _, _, _ in tasks 
-                          if current_time - last_poll_time >= self.polling_intervals[priority])
-            
-            # Calculate priority-specific response rates
-            priority_polls = sum(task[5] for task in tasks)
-            priority_responses = sum(task[4] for task in tasks)
-            priority_rate = (priority_responses / priority_polls) * 100 if priority_polls > 0 else 0
-            
-            # Calculate non-responsive signals
-            non_responsive = []
-            for signal_idx, member_idx, _, last_response, response_count, poll_count in tasks:
-                if poll_count > 0 and response_count == 0:
-                    non_responsive.append(f"{member_idx}:{signal_idx}")
-            
-            stats['priorities'][priority] = {
-                'count': len(tasks),
-                'interval': self.polling_intervals[priority],
-                'due_for_polling': due_count,
-                'polls': priority_polls,
-                'responses': priority_responses,
-                'response_rate': round(priority_rate, 1),
-                'non_responsive_count': len(non_responsive),
-                'non_responsive': non_responsive[:5]  # Limit to 5 to avoid overly large stats
-            }
-            
         return stats

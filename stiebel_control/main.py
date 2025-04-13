@@ -234,18 +234,32 @@ class StiebelControl:
             name="Entities Count",
             icon="mdi:counter",
             device_class="measurement",
-            state_class="measurement",
-            unit_of_measurement="entities"
+            state_class="measurement"
         )
         
-        # Register polling statistics sensor
+        # Register polling statistics sensors
         self.entity_service.register_sensor(
-            entity_id="polling_stats",
-            name="Polling Statistics",
+            entity_id="polled_entities_count",
+            name="Polled Entities Count",
             icon="mdi:refresh-auto",
+            device_class="measurement",
+            state_class="measurement"
+        )
+        
+        self.entity_service.register_sensor(
+            entity_id="responsive_entities_count",
+            name="Responsive Entities Count",
+            icon="mdi:check-circle-outline",
+            device_class="measurement",
+            state_class="measurement",
+        )
+        
+        self.entity_service.register_sensor(
+            entity_id="non_responsive_entities",
+            name="Non-Responsive Entities",
+            icon="mdi:alert-circle-outline",
             device_class=None,
-            state_class=None,
-            unit_of_measurement=None
+            state_class=None
         )
         
         # Initial entity count
@@ -314,7 +328,9 @@ class StiebelControl:
                 # Update polling statistics every 30 seconds
                 if current_time - last_poller_stats_update >= 30:
                     stats = self.signal_poller.get_stats()
-                    self.entity_service.update_entity_state("polling_stats", json.dumps(stats))
+                    self.entity_service.update_entity_state("polled_entities_count", stats['total_polled_entities'])
+                    self.entity_service.update_entity_state("responsive_entities_count", stats['total_responsive_entities'])
+                    self.entity_service.update_entity_state("non_responsive_entities", stats['non_responsive_entities_list'])
                     last_poller_stats_update = current_time
                 
                 # Short sleep to prevent CPU hogging
