@@ -23,10 +23,9 @@ priority_groups:
     - signal: OUTSIDE_TEMP
       can_member: PUMP
     - signal: FLOW_INTERNAL_TEMP
-      can_member: PUMP
+      can_member: HEATING
     - signal: RETURN_FLOW_INTERNAL_TEMP
-      can_member: PUMP
-
+      can_member: HEATING
     - signal: ROOM_SET_TEMP_I
       can_member: MANAGER
     - signal: ROOM_INTERNAL_TEMP
@@ -37,8 +36,10 @@ priority_groups:
       can_member: PUMP
     - signal: ERROR_MESSAGE
       can_member: PUMP
-    - signal: FORTLUFT_LUEFTER_DREHZAHL
+    - signal: AIR_FLOW_VENTILATOR
       can_member: PUMP
+    - signal: VOLUME_FLOW
+      can_member: HEATING
   
   # Medium priority - less quickly changing values
   medium:
@@ -49,24 +50,22 @@ priority_groups:
       can_member: PUMP
     
     # Program state
-    - signal: PROGRAM_SWITCH
+    - signal: ACTIVE_HEATING_PROGRAM
       can_member: MANAGER
   
   # Low priority - slow changing values
   low:
     # Energy statistics
     - signal: HEATING_ENERGY_DAY_KWH
-      can_member: MANAGER
+      can_member: BOILER
     - signal: ELECTRICITY_INTAKE_HEATING_DAY_KWH
-      can_member: HEATING
+      can_member: BOILER
     - signal: ELECTRICITY_INTAKE_HEATING_SUM_KWH
-      can_member: HEATING
+      can_member: BOILER
     - signal: BOILER_PERFORMANCE
       can_member: BOILER
-    - signal: VOLUME_FLOW
-      can_member: MIXER
     - signal: DAY_OUTPUT_KW
-      can_member: HEATING
+      can_member: BOILER
     
     # System info
     # - signal: SOFTWARE_NUMBER

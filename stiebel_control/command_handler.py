@@ -49,6 +49,12 @@ class CommandHandler:
             logger.warning(f"Invalid command: entity_id={entity_id}, payload={payload}")
             return
             
+        # Skip special Home Assistant values that shouldn't be processed
+        SKIP_VALUES = ['unknown', 'unavailable', 'null', 'none', '']
+        if payload.lower() in SKIP_VALUES:
+            logger.warning(f"Skipping special Home Assistant value '{payload}' for entity {entity_id}")
+            return
+            
         logger.info(f"Received command for entity {entity_id}: {payload}")
         
         # Find entity configuration

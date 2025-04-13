@@ -6,56 +6,57 @@
 # Entity definitions for sensors, buttons, and selects
 entities:  
   # Select controls
-  selects:
-    program_switch:
-      name: Program Switch
-      signal: PROGRAM_SWITCH
-      can_member: MANAGER
-      options:
-        - Emergency
-        - Standby
-        - Automatic
-        - Day mode
-        - Night mode
-        - Summer mode
-        - Off
-      icon: mdi:tune-vertical
+  program_switch:
+    type: select
+    name: Program Switch
+    signal: ACTIVE_HEATING_PROGRAM
+    can_member: MANAGER
+    options:
+      - Emergency
+      - Standby
+      - Automatic
+      - Day mode
+      - Night mode
+      - Summer mode
+      - Off
+    icon: mdi:tune-vertical
   
   # Button controls
-  buttons:
-    refresh_all:
-      name: Refresh Values
-      icon: mdi:refresh
-      action: refresh_all
-    
-    update_time:
-      name: Update Time
-      icon: mdi:clock-outline
-      action: custom
-      custom_action:
-        type: sequence
-        actions:
-          - type: write_signal
-            signal: HOUR
-            can_member: MANAGER
-            value: "${%H}"  # Current hour
-            delay: 0.5
-          - type: write_signal
-            signal: MINUTE
-            can_member: MANAGER
-            value: "${%M}"  # Current minute
-            delay: 0.5
-          - type: write_signal
-            signal: DAY
-            can_member: MANAGER
-            value: "${%d}"  # Current day
-            delay: 0.5
-          - type: write_signal
-            signal: MONTH
-            can_member: MANAGER
-            value: "${%m}"  # Current month
-            delay: 0.5
-          - type: write_signal
-            signal: YEAR
-            can_member: MANAGER
-            value: "${%Y}"  # Current year
+  refresh_all:
+    type: button
+    name: Refresh Values
+    icon: mdi:refresh
+    action: refresh_all
+  
+  update_time:
+    type: button
+    name: Update Time
+    icon: mdi:clock-outline
+    action: custom
+    custom_action:
+      type: sequence
+      actions:
+        - type: write_signal
+          signal: HOUR
+          can_member: MANAGER
+          value: "${%H}"  # Current hour
+          delay: 0.5
+        - type: write_signal
+          signal: MINUTE
+          can_member: MANAGER
+          value: "${%M}"  # Current minute
+          delay: 0.5
+        - type: write_signal
+          signal: DAY
+          can_member: MANAGER
+          value: "${%d}"  # Current day
+          delay: 0.5
+        - type: write_signal
+          signal: MONTH
+          can_member: MANAGER
+          value: "${%m}"  # Current month
+          delay: 0.5
+        - type: write_signal
+          signal: YEAR
+          can_member: MANAGER
+          value: "${%Y}"  # Current year
