@@ -1,5 +1,6 @@
 
 /*
+ * THIS IS A REDUCED EXCERPT FROM ElsterTable.h FOR TESTING PURPOSES
  *  Copyright (C) 2023 Bastian Stahmer, based heavily on the great work of Jürg Müller, CH-5524 (see below)
  *  Copyright (C) 2014 Jürg Müller, CH-5524
  *
@@ -16,16 +17,6 @@
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program. If not, see http://www.gnu.org/licenses/ .
  */
-
-// Achtung: Die Tabelle befindet sich im Aufbau! Nicht alle Indizes sind korrekt.
-//
-// Die Indizes muessen zwingend vor einem produktiven Einsatz ueberprueft werden.
-// Die beste Ueberpruefung erhaelt man mit der ComfortSoft und der Simulation
-// der eigenen WP. Da werden die Telegramme der Schnittstelle protokolliert.
-//
-// Die Indizes, die ich mittels ComfortSoft zu meiner WP ueberpruefen konnte,
-// sind korrekt. Da ich eine WPL33 ohne PV nutze, gibt es viele Indizes, die Ihr
-// selbst ueberpruefen muesst.
 
 // 19.10.2014: et_double_val und et_triple_val umgestellt
 #if !defined(ElsterTable_H)

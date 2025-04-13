@@ -76,14 +76,17 @@ class EntityConfig:
     """Configuration for entities and dynamic registration."""
     entities: Dict[str, Dict[str, Any]] = field(default_factory=dict)
     dynamic_registration_enabled: bool = False
+    permissive_signal_handling: bool = False
     
     @classmethod
     def from_dict(cls, entity_config: Dict[str, Dict[str, Any]], 
-                 dynamic_registration: bool) -> 'EntityConfig':
+                 dynamic_registration: bool,
+                 permissive_signal_handling: bool = False) -> 'EntityConfig':
         """Create an EntityConfig instance from entity configuration."""
         return cls(
             entities=entity_config or {},
-            dynamic_registration_enabled=dynamic_registration
+            dynamic_registration_enabled=dynamic_registration,
+            permissive_signal_handling=permissive_signal_handling
         )
         
     def get_entity_def(self, entity_id: str) -> Dict[str, Any]:

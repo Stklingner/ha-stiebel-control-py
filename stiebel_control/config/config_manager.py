@@ -119,7 +119,8 @@ class ConfigManager:
         self.logging_config = LoggingConfig.from_dict(self.service_config.get('logging', {}))
         self.entity_config = EntityConfig.from_dict(
             self.raw_entity_config,
-            self.service_config.get('dynamic_entity_registration', False)
+            self.service_config.get('dynamic_entity_registration', False),
+            self.service_config.get('permissive_signal_handling', False)
         )
         
         # Store other common settings

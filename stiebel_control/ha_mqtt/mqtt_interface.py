@@ -113,10 +113,9 @@ class MqttInterface:
         """Disconnect from the MQTT broker."""
         logger.info("Stopping MQTT client loop")
         self.client.loop_stop()
-        logger.info("Disconnecting from MQTT broker")
         self.client.disconnect()
         self.connected = False
-        logger.info("Disconnected from MQTT broker")
+        logger.info("Disconnection completed")
         
     def _on_connect(self, client, userdata, flags, rc):
         """Callback for when the client connects to the broker."""

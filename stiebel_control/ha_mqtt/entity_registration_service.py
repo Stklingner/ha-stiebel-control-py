@@ -355,8 +355,13 @@ class EntityRegistrationService:
             logger.warning(f"Signal {signal_name} not found in Elster table, skipping dynamic registration")
             return None
         elif elster_entry.type == ElsterType.ET_NONE:
-            logger.warning(f"Signal {signal_name} has unknown type, skipping dynamic registration")
-            return None
+            # Check if permissive signal handling is enabled
+            if self.config_manager.get_entity_config().permissive_signal_handling:
+                logger.info(f"Signal {signal_name} has unknown type, but registering anyway due to permissive mode")
+                # Will continue with registration below
+            else:
+                logger.warning(f"Signal {signal_name} has unknown type, skipping dynamic registration")
+                return None
         
         # Clean up signal name for use in entity ID
         signal_id = signal_name.lower().replace(' ', '_').replace('.', '_')
@@ -473,9 +478,30 @@ class EntityRegistrationService:
                 )
         else:
             # Unknown type, register as generic sensor
+            is_permissive = self.config_manager.get_entity_config().permissive_signal_handling
+            permissive_info = " (permissive mode)" if is_permissive else ""
+            logger.info(f"Registering {entity_id} as generic sensor{permissive_info}")
+            
+            # In permissive mode, try to guess better defaults based on signal name
+            if is_permissive and elster_entry.type == ElsterType.ET_NONE:
+                # Add a special icon for permissive mode signals
+                if not icon:
+                    icon = "mdi:test-tube"
+                    
+                # Try to extract unit from signal name if not set
+                if not unit_of_measurement:
+                    if "TEMP" in signal_name:
+                        unit_of_measurement = "°C"
+                    elif "PERCENT" in signal_name:
+                        unit_of_measurement = "%"
+                    elif "TIME" in signal_name or "HOUR" in signal_name:
+                        unit_of_measurement = "h"
+            
             success = self.mqtt_interface.register_sensor(
                 entity_id=entity_id,
-                name=friendly_name
+                name=friendly_name,
+                icon=icon,
+                unit_of_measurement=unit_of_measurement
             )
                 
         # Update entity list and register signal mapping if successful
