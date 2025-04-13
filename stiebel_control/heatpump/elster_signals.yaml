@@ -11973,7 +11973,7 @@
   index: 2337
   type: ET_DEC_VAL
   ha_entity_type: sensor.power
-  unit_of_measurement: kW
+  unit_of_measurement: MW
 - name: WAERMEERTRAG_2WE_WW_TAG_WH
   english_name: HEATING_DHW_2WE_DAY_WH
   index: 2338
