@@ -463,7 +463,7 @@ class EntityRegistrationService:
                 options_map = list(ERRORLIST.values())
                 
             if options_map:
-                success = self.mqtt_interface.register_sensor(
+                success = self.register_sensor(
                     entity_id=entity_id,
                     name=friendly_name,
                     device_class=device_class,
@@ -472,7 +472,7 @@ class EntityRegistrationService:
                 )
             else:
                 # No options available, register as regular sensor
-                success = self.mqtt_interface.register_sensor(
+                success = self.register_sensor(
                     entity_id=entity_id,
                     name=friendly_name,
                     device_class=device_class,
@@ -498,7 +498,7 @@ class EntityRegistrationService:
                     elif "TIME" in signal_name or "HOUR" in signal_name:
                         unit_of_measurement = "h"
             
-            success = self.mqtt_interface.register_sensor(
+            success = self.register_sensor(
                 entity_id=entity_id,
                 name=friendly_name,
                 icon=icon,
