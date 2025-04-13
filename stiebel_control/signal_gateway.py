@@ -53,6 +53,7 @@ class SignalGateway:
         self.signal_mapper = signal_mapper
         self.entity_config = entity_config
         self.protocol = protocol
+        self.permissive_signal_handling = entity_config.permissive_signal_handling if entity_config else False
         self.signal_callbacks = {}
         
         # Initialize the command handler without a transformation service
@@ -108,7 +109,8 @@ class SignalGateway:
             entity_id = self.entity_service.register_dynamic_entity(
                 signal_name=signal_name,
                 value=value,
-                member_name=member_name
+                member_name=member_name,
+                permissive_signal_handling=self.permissive_signal_handling
             )
             
             if not entity_id:

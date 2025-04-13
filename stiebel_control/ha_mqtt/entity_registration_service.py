@@ -333,7 +333,8 @@ class EntityRegistrationService:
         signal_name: str,
         value: Any,
         member_name: str,
-        signal_type: str = None
+        signal_type: Optional[str] = None,
+        permissive_signal_handling: bool = False
     ) -> Optional[str]:
         """
         Register an entity dynamically based on signal information from the Elster table.
@@ -343,6 +344,7 @@ class EntityRegistrationService:
             value: Current value of the signal
             member_name: Name of the CAN member that sent the message (e.g., 'PUMP', 'MANAGER')
             signal_type: ElsterType of the signal as string (e.g., 'ET_DEC_VAL'), optional
+            permissive_signal_handling: If True, attempt to register signals even with unknown types
             
         Returns:
             str: Generated entity ID, or None if registration failed
@@ -356,7 +358,7 @@ class EntityRegistrationService:
             return None
         elif elster_entry.type == ElsterType.ET_NONE:
             # Check if permissive signal handling is enabled
-            if self.config_manager.get_entity_config().permissive_signal_handling:
+            if permissive_signal_handling:
                 logger.info(f"Signal {signal_name} has unknown type, but registering anyway due to permissive mode")
                 # Will continue with registration below
             else:
