@@ -480,12 +480,11 @@ class EntityRegistrationService:
                 )
         else:
             # Unknown type, register as generic sensor
-            is_permissive = self.config_manager.get_entity_config().permissive_signal_handling
-            permissive_info = " (permissive mode)" if is_permissive else ""
+            permissive_info = " (permissive mode)" if permissive_signal_handling else ""
             logger.info(f"Registering {entity_id} as generic sensor{permissive_info}")
             
             # In permissive mode, try to guess better defaults based on signal name
-            if is_permissive and elster_entry.type == ElsterType.ET_NONE:
+            if permissive_signal_handling and elster_entry.type == ElsterType.ET_NONE:
                 # Add a special icon for permissive mode signals
                 if not icon:
                     icon = "mdi:test-tube"

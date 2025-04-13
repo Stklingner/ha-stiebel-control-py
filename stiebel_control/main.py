@@ -242,7 +242,6 @@ class StiebelControl:
             entity_id="polled_entities_count",
             name="Polled Entities Count",
             icon="mdi:refresh-auto",
-            device_class="measurement",
             state_class="measurement"
         )
         
@@ -250,8 +249,7 @@ class StiebelControl:
             entity_id="responsive_entities_count",
             name="Responsive Entities Count",
             icon="mdi:check-circle-outline",
-            device_class="measurement",
-            state_class="measurement",
+            state_class="measurement"
         )
         
         self.entity_service.register_sensor(

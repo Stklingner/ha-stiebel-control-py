@@ -17,7 +17,7 @@ polling_intervals:
 
 # Define signals to poll in each priority group
 priority_groups:
-  # High priority - Critical operational signals
+  # High priority - quickly changing values
   high:
     # Temperatures
     - signal: OUTSIDE_TEMP
@@ -26,14 +26,21 @@ priority_groups:
       can_member: PUMP
     - signal: RETURN_FLOW_INTERNAL_TEMP
       can_member: PUMP
-    
+
+    - signal: ROOM_SET_TEMP_I
+      can_member: MANAGER
+    - signal: ROOM_INTERNAL_TEMP
+      can_member: MANAGER
+
     # Operating status
     - signal: OPERATING_STATUS
       can_member: PUMP
     - signal: ERROR_MESSAGE
       can_member: PUMP
+    - signal: FORTLUFT_LUEFTER_DREHZAHL
+      can_member: PUMP
   
-  # Medium priority - Important but not critical
+  # Medium priority - less quickly changing values
   medium:
     # DHW related
     - signal: STORAGE_TANK_INTERNAL_TEMP
@@ -41,30 +48,26 @@ priority_groups:
     - signal: STORAGE_TANK_SETPOINT_TEMP
       can_member: PUMP
     
-    # Room control
-    - signal: ROOM_INTERNAL_TEMP
-      can_member: PUMP
-    - signal: ROOM_SET_TEMP_I
-      can_member: MANAGER
-    
     # Program state
     - signal: PROGRAM_SWITCH
       can_member: MANAGER
   
-  # Low priority - Informational only
+  # Low priority - slow changing values
   low:
     # Energy statistics
     - signal: HEATING_ENERGY_DAY_KWH
-      can_member: PUMP
+      can_member: MANAGER
     - signal: ELECTRICITY_INTAKE_DHW_DAY_KWH
-      can_member: PUMP
+      can_member: MANAGER
     - signal: ELECTRICITY_INTAKE_HEATING_DAY_KWH
-      can_member: PUMP
+      can_member: MANAGER
+    - signal: ZAHL_VERDICHTERSTARTS
+      can_member: HEATING
     
-    # System info
-    - signal: SOFTWARE_NUMBER
-      can_member: PUMP
-    - signal: COMFORT_STORAGE_TANK_SETPOINT
-      can_member: PUMP
-    - signal: ECO_STORAGE_TANK_SETPOINT
-      can_member: PUMP
+    # # System info
+    # - signal: SOFTWARE_NUMBER
+    #   can_member: PUMP
+    # - signal: COMFORT_STORAGE_TANK_SETPOINT
+    #   can_member: PUMP
+    # - signal: ECO_STORAGE_TANK_SETPOINT
+    #   can_member: PUMP
