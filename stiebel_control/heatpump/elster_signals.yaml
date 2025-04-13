@@ -1910,14 +1910,14 @@
   english_name: HEATING_RETURN_ACTUAL
   index: 470
   type: ET_DEC_VAL
-  ha_entity_type: sensor
-  unit_of_measurement: null
+  ha_entity_type: sensor.temperature
+  unit_of_measurement: °C
 - name: HILFSKESSELSOLL
   english_name: AUXILIARY_BOILER_SETPOINT
   index: 471
   type: ET_DEC_VAL
-  ha_entity_type: sensor
-  unit_of_measurement: null
+  ha_entity_type: sensor.temperature
+  unit_of_measurement: °C
 - name: FUEHLER_1
   english_name: SENSOR_1
   index: 472

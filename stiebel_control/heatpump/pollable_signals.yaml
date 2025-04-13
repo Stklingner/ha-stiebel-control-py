@@ -1,0 +1,70 @@
+# Pollable signals configuration
+# This file defines which signals should be periodically polled from the heat pump
+#
+# Structure:
+#   priority_groups:
+#     high:     # Poll every minute
+#       - signal: SIGNAL_NAME
+#         can_member: MEMBER_NAME
+#     medium:   # Poll every 5 minutes
+#     low:      # Poll every 15 minutes
+
+# Define custom polling intervals in seconds
+polling_intervals:
+  high: 60      # Poll every 1 minute
+  medium: 300   # Poll every 5 minutes
+  low: 900      # Poll every 15 minutes
+
+# Define signals to poll in each priority group
+priority_groups:
+  # High priority - Critical operational signals
+  high:
+    # Temperatures
+    - signal: OUTSIDE_TEMP
+      can_member: PUMP
+    - signal: FLOW_INTERNAL_TEMP
+      can_member: PUMP
+    - signal: RETURN_FLOW_INTERNAL_TEMP
+      can_member: PUMP
+    
+    # Operating status
+    - signal: OPERATING_STATUS
+      can_member: PUMP
+    - signal: ERROR_MESSAGE
+      can_member: PUMP
+  
+  # Medium priority - Important but not critical
+  medium:
+    # DHW related
+    - signal: STORAGE_TANK_INTERNAL_TEMP
+      can_member: PUMP
+    - signal: STORAGE_TANK_SETPOINT_TEMP
+      can_member: PUMP
+    
+    # Room control
+    - signal: ROOM_INTERNAL_TEMP
+      can_member: PUMP
+    - signal: ROOM_SET_TEMP_I
+      can_member: MANAGER
+    
+    # Program state
+    - signal: PROGRAM_SWITCH
+      can_member: MANAGER
+  
+  # Low priority - Informational only
+  low:
+    # Energy statistics
+    - signal: HEATING_ENERGY_DAY_KWH
+      can_member: PUMP
+    - signal: ELECTRICITY_INTAKE_DHW_DAY_KWH
+      can_member: PUMP
+    - signal: ELECTRICITY_INTAKE_HEATING_DAY_KWH
+      can_member: PUMP
+    
+    # System info
+    - signal: SOFTWARE_NUMBER
+      can_member: PUMP
+    - signal: COMFORT_STORAGE_TANK_SETPOINT
+      can_member: PUMP
+    - signal: ECO_STORAGE_TANK_SETPOINT
+      can_member: PUMP

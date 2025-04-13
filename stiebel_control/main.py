@@ -6,16 +6,19 @@ import sys
 import time
 import logging
 import signal
+import json
 from typing import Any
 
 # Import the components from their packages
 from stiebel_control.can.interface import CanInterface
 from stiebel_control.ha_mqtt.mqtt_interface import MqttInterface
-from stiebel_control.ha_mqtt.entity_registration_service import EntityRegistrationService
-from stiebel_control.ha_mqtt.signal_entity_mapper import SignalEntityMapper
-from stiebel_control.signal_gateway import SignalGateway
 from stiebel_control.config.config_manager import ConfigManager
+from stiebel_control.config.config_models import EntityConfig
+from stiebel_control.ha_mqtt.signal_entity_mapper import SignalEntityMapper
+from stiebel_control.ha_mqtt.entity_registration_service import EntityRegistrationService
+from stiebel_control.signal_gateway import SignalGateway
 from stiebel_control.utils.logging_utils import configure_logging
+from stiebel_control.heatpump.signal_poller import SignalPoller
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +67,19 @@ class StiebelControl:
         
         # Now set the signal gateway's process_signal method as the CAN interface callback
         self.can_interface.callback = self.signal_gateway.process_signal
+        
+        # Initialize the signal poller
+        self.signal_poller = SignalPoller(self.can_interface)
+        
+        # Register a sensor for polling statistics
+        self.entity_service.register_sensor(
+            entity_id="polling_stats",
+            name="Polling Statistics",
+            icon="mdi:refresh-auto",
+            device_class=None,
+            state_class=None,
+            unit_of_measurement=None
+        )
         
         # Set up signal handlers for graceful shutdown
         signal.signal(signal.SIGINT, self._handle_signal)
@@ -274,17 +290,33 @@ class StiebelControl:
         update_interval = self.config_manager.get_update_interval()
         logger.info(f"Starting update loop with interval of {update_interval} seconds")
         
+        # Track time for different update frequencies
+        last_poller_check = 0
+        last_entity_count_update = 0
+        last_poller_stats_update = 0
+        
         try:
             while self.running:
-                # The CAN interface is already sending updates asynchronously
-                # via the callback. This loop can be used for periodic tasks
-                # like polling values that don't automatically update.
+                current_time = time.time()
                 
-                # Update entity count periodically
-                self.signal_gateway.update_entities_count(None)
+                # Run the signal poller every second
+                if current_time - last_poller_check >= 1:
+                    self.signal_poller.update()
+                    last_poller_check = current_time
                 
-                # Sleep for the configured interval
-                time.sleep(update_interval)
+                # Update entity count every 60 seconds
+                if current_time - last_entity_count_update >= 60:
+                    self.signal_gateway.update_entities_count(None)
+                    last_entity_count_update = current_time
+                
+                # Update polling statistics every 30 seconds
+                if current_time - last_poller_stats_update >= 30:
+                    stats = self.signal_poller.get_stats()
+                    self.entity_service.update_entity_state("polling_stats", json.dumps(stats))
+                    last_poller_stats_update = current_time
+                
+                # Short sleep to prevent CPU hogging
+                time.sleep(0.1)
                 
         except KeyboardInterrupt:
             logger.info("Update loop interrupted by user")
