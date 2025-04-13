@@ -23,7 +23,7 @@ from typing import Optional, Dict, Any, Tuple, List
 # Ensure proper path for imports regardless of where the script is run from
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from stiebel_control.can.interface import CanInterface
-from stiebel_control.can.socketcan import SocketCanTransport
+from stiebel_control.can.transport import CanTransport
 from stiebel_control.can.protocol import StiebelProtocol, CanMember
 from stiebel_control.heatpump.elster_table import get_elster_entry_by_index, get_elster_entry_by_english_name
 from stiebel_control.heatpump.elster_table import ElsterType, value_from_signal
@@ -55,7 +55,7 @@ class CanScanner:
             logging.getLogger().setLevel(logging.DEBUG)
         
         # Initialize CAN interface
-        self.transport = SocketCanTransport(self.can_device)
+        self.transport = CanTransport(self.can_device)
         self.protocol = StiebelProtocol(self.transport)
         self.can_interface = CanInterface(self.protocol)
         

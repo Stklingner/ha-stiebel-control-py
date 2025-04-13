@@ -239,7 +239,7 @@ class StiebelProtocol:
                 
             # Send the message using the transport layer
             success = self.transport.send_message(
-                arbitration_id=self.can_members[self.CM_ESPCLIENT].can_id,
+                arbitration_id=self.can_members[self.CM_HACLIENT].can_id,
                 data=data,
                 is_extended_id=False
             )
@@ -311,7 +311,7 @@ class StiebelProtocol:
                 
             # Send the message using the transport layer
             success = self.transport.send_message(
-                arbitration_id=self.can_members[self.CM_ESPCLIENT].can_id,
+                arbitration_id=self.can_members[self.CM_HACLIENT].can_id,
                 data=data,
                 is_extended_id=False
             )
