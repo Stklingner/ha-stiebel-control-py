@@ -9,7 +9,7 @@ import time
 import yaml
 import logging
 import os
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, List, Tuple, Optional, Any, Callable
 from pathlib import Path
 
 from stiebel_control.heatpump.elster_table import get_elster_entry_by_english_name
@@ -45,12 +45,16 @@ class SignalPoller:
         }
         
         # Polling tasks by priority
-        # Structure: {priority: [(signal_index, member_index, last_poll_time), ...]}
-        self.polling_tasks: Dict[str, List[Tuple[int, int, float]]] = {
+        # Structure: {priority: [(signal_index, member_index, last_poll_time, last_response_time, response_count, poll_count), ...]}
+        self.polling_tasks: Dict[str, List[Tuple[int, int, float, float, int, int]]] = {
             'high': [],
             'medium': [],
             'low': []
         }
+        
+        # Track pending poll requests to match with responses
+        # Structure: {(member_index, signal_index): (request_time, callback)}
+        self.pending_polls: Dict[Tuple[int, int], Tuple[float, Callable]] = {}
         
         # Load configuration
         self._load_config()
@@ -103,8 +107,9 @@ class SignalPoller:
                         logger.warning(f"Unknown CAN member: {can_member}")
                         continue
                     
-                    # Add to polling tasks with initial last_poll_time of 0
-                    self.polling_tasks[priority].append((signal_index, member_index, 0))
+                    # Add to polling tasks with initial values
+                    # (signal_index, member_index, last_poll_time, last_response_time, response_count, poll_count)
+                    self.polling_tasks[priority].append((signal_index, member_index, 0, 0, 0, 0))
                     logger.debug(f"Added {signal_name} ({signal_index}) from {can_member} to {priority} priority group")
                 
         except Exception as e:
@@ -144,20 +149,110 @@ class SignalPoller:
         for priority, tasks in self.polling_tasks.items():
             interval = self.polling_intervals[priority]
             
-            for i, (signal_index, member_index, last_poll_time) in enumerate(tasks):
+            for i, (signal_index, member_index, last_poll_time, last_response_time, response_count, poll_count) in enumerate(tasks):
                 # Check if it's time to poll this signal
                 if current_time - last_poll_time >= interval:
+                    # First, clean up any previous pending poll for this signal
+                    poll_key = (member_index, signal_index)
+                    if poll_key in self.pending_polls:
+                        prev_time, prev_callback = self.pending_polls[poll_key]
+                        member = self.can_interface.can_members[member_index]
+                        self.can_interface.remove_signal_callback(signal_index, member.can_id, prev_callback)
+                        del self.pending_polls[poll_key]
+                    
+                    # Create the callback for this signal
+                    response_callback = self._create_response_callback(member_index, signal_index)
+                    
+                    # Register for all responses from this member
+                    member = self.can_interface.can_members[member_index]
+                    self.can_interface.add_signal_callback(signal_index, member.can_id, response_callback)
+                    
                     # Send read request
                     success = self.can_interface.read_signal(member_index, signal_index)
                     
-                    # Update last poll time regardless of success
+                    # Update poll count and last poll time regardless of success
                     # (to avoid flooding with requests if there's an issue)
-                    self.polling_tasks[priority][i] = (signal_index, member_index, current_time)
+                    new_poll_count = poll_count + 1 if success else poll_count
                     
+                    # Update task with new poll time and count
+                    self.polling_tasks[priority][i] = (
+                        signal_index, 
+                        member_index, 
+                        current_time,  # last_poll_time 
+                        last_response_time, 
+                        response_count, 
+                        new_poll_count
+                    )
+                    
+                    # Track this poll in pending polls
                     if success:
+                        self.pending_polls[(member_index, signal_index)] = (current_time, response_callback)
                         logger.debug(f"Polled signal index {signal_index} from member index {member_index}")
                     else:
                         logger.warning(f"Failed to poll signal index {signal_index} from member index {member_index}")
+    
+    def _create_response_callback(self, member_index: int, signal_index: int) -> Callable[[int, Any, int], None]:
+        """
+        Create a callback function for handling a specific signal response.
+        
+        Args:
+            member_index: Index of the CAN member
+            signal_index: Index of the signal
+            
+        Returns:
+            Callback function that handles the response
+        """
+        def callback(received_signal_index: int, value: Any, can_id: int) -> None:
+            """
+            Handle response from signal poll.
+            
+            Args:
+                received_signal_index: Index of the signal received
+                value: The value received from the signal
+                can_id: CAN ID of the sender
+            """
+            # Only process if this is the signal we're waiting for
+            if received_signal_index != signal_index:
+                return
+                
+            # Get member_index from CAN ID to verify it matches
+            can_member_idx = None
+            for idx, member in enumerate(self.can_interface.can_members):
+                if member.can_id == can_id:
+                    can_member_idx = idx
+                    break
+                    
+            # Only proceed if member matches
+            if can_member_idx != member_index:
+                return
+                
+            current_time = time.time()
+            logger.debug(f"Received response for signal {signal_index} from member {member_index}: {value}")
+            
+            # Update response count and time in polling tasks
+            for priority, tasks in self.polling_tasks.items():
+                for i, (s_idx, m_idx, last_poll, last_resp, resp_count, poll_count) in enumerate(tasks):
+                    if s_idx == signal_index and m_idx == member_index:
+                        # Update task with response information
+                        self.polling_tasks[priority][i] = (
+                            s_idx,
+                            m_idx,
+                            last_poll,
+                            current_time,  # update last_response_time
+                            resp_count + 1,  # increment response count
+                            poll_count
+                        )
+                        break
+            
+            # Remove from pending polls and clean up the callback
+            poll_key = (member_index, signal_index)
+            if poll_key in self.pending_polls:
+                _, callback_ref = self.pending_polls[poll_key]
+                member = self.can_interface.can_members[member_index]
+                self.can_interface.remove_signal_callback(signal_index, member.can_id, callback_ref)
+                del self.pending_polls[poll_key]
+                
+        return callback
     
     def get_stats(self) -> Dict[str, Any]:
         """
@@ -167,19 +262,58 @@ class SignalPoller:
             Dict with statistics about polling tasks
         """
         current_time = time.time()
+        
+        # Calculate overall statistics
+        total_polls = sum(task[5] for priority in self.polling_tasks.values() for task in priority)
+        total_responses = sum(task[4] for priority in self.polling_tasks.values() for task in priority)
+        
+        # Clean up stale pending polls (older than 60 seconds)
+        stale_keys = []
+        for poll_key, (req_time, callback) in self.pending_polls.items():
+            if current_time - req_time > 60:  # 60 seconds timeout
+                member_idx, signal_idx = poll_key
+                member = self.can_interface.can_members[member_idx]
+                self.can_interface.remove_signal_callback(signal_idx, member.can_id, callback)
+                stale_keys.append(poll_key)
+                
+        for key in stale_keys:
+            del self.pending_polls[key]
+        response_rate = (total_responses / total_polls) * 100 if total_polls > 0 else 0
+        
         stats = {
             'total_signals': sum(len(tasks) for tasks in self.polling_tasks.values()),
+            'total_polls': total_polls,
+            'total_responses': total_responses,
+            'response_rate': round(response_rate, 1),
+            'pending_polls': len(self.pending_polls),
             'priorities': {}
         }
         
+        # Calculate statistics per priority
         for priority, tasks in self.polling_tasks.items():
-            due_count = sum(1 for _, _, last_poll_time in tasks 
+            due_count = sum(1 for _, _, last_poll_time, _, _, _ in tasks 
                           if current_time - last_poll_time >= self.polling_intervals[priority])
+            
+            # Calculate priority-specific response rates
+            priority_polls = sum(task[5] for task in tasks)
+            priority_responses = sum(task[4] for task in tasks)
+            priority_rate = (priority_responses / priority_polls) * 100 if priority_polls > 0 else 0
+            
+            # Calculate non-responsive signals
+            non_responsive = []
+            for signal_idx, member_idx, _, last_response, response_count, poll_count in tasks:
+                if poll_count > 0 and response_count == 0:
+                    non_responsive.append(f"{member_idx}:{signal_idx}")
             
             stats['priorities'][priority] = {
                 'count': len(tasks),
                 'interval': self.polling_intervals[priority],
-                'due_for_polling': due_count
+                'due_for_polling': due_count,
+                'polls': priority_polls,
+                'responses': priority_responses,
+                'response_rate': round(priority_rate, 1),
+                'non_responsive_count': len(non_responsive),
+                'non_responsive': non_responsive[:5]  # Limit to 5 to avoid overly large stats
             }
             
         return stats
