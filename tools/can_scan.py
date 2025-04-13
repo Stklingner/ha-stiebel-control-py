@@ -17,10 +17,11 @@ import asyncio
 import sys
 import time
 import logging
+import os
 from typing import Optional, Dict, Any, Tuple, List
 
-# Import existing components
-sys.path.append("/Users/d434795/Programming/ha-stiebel-control-py")
+# Ensure proper path for imports regardless of where the script is run from
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from stiebel_control.can.interface import CanInterface
 from stiebel_control.can.socketcan import SocketCanTransport
 from stiebel_control.can.protocol import StiebelProtocol, CanMember
