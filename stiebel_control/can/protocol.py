@@ -243,7 +243,7 @@ class StiebelProtocol:
             )
             
             if success:
-                logger.debug(f"Sent read request for {signal_name} to {member.name}")
+                logger.debug(f"Sent read request for {ei.english_name} to {member.name}")
             
             return success
             

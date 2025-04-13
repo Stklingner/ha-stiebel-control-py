@@ -68,19 +68,6 @@ class StiebelControl:
         # Now set the signal gateway's process_signal method as the CAN interface callback
         self.can_interface.callback = self.signal_gateway.process_signal
         
-        # Initialize the signal poller
-        self.signal_poller = SignalPoller(self.can_interface)
-        
-        # Register a sensor for polling statistics
-        self.entity_service.register_sensor(
-            entity_id="polling_stats",
-            name="Polling Statistics",
-            icon="mdi:refresh-auto",
-            device_class=None,
-            state_class=None,
-            unit_of_measurement=None
-        )
-        
         # Set up signal handlers for graceful shutdown
         signal.signal(signal.SIGINT, self._handle_signal)
         signal.signal(signal.SIGTERM, self._handle_signal)
@@ -168,17 +155,25 @@ class StiebelControl:
         logger.info("Starting Stiebel Control")
         
         try:
-            # Connect to MQTT broker
+            # Connect to MQTT broker and initialize sensors first
             if not self.mqtt_interface.connect():
                 logger.error("Failed to connect to MQTT broker")
-                self.signal_gateway.update_system_status("error")
                 return
+            
+            # Register system sensors
+            self._register_system_sensors()
+            
+            # Update initial system status
+            self.signal_gateway.update_system_status("starting")
                 
             # Start CAN interface
             self.can_interface.start()
             
             # Register pre-configured entities
             self._register_configured_entities()
+            
+            # Initialize the signal poller (after entities are registered)
+            self.signal_poller = SignalPoller(self.can_interface)
             
             # Update status to online
             self.signal_gateway.update_system_status("online")
@@ -201,8 +196,6 @@ class StiebelControl:
         """
         Register pre-configured entities from the configuration.
         """
-        # Register system status sensors first
-        self._register_system_sensors()
         
         entity_config = self.config_manager.get_entity_config()
         
@@ -245,12 +238,21 @@ class StiebelControl:
             unit_of_measurement="entities"
         )
         
+        # Register polling statistics sensor
+        self.entity_service.register_sensor(
+            entity_id="polling_stats",
+            name="Polling Statistics",
+            icon="mdi:refresh-auto",
+            device_class=None,
+            state_class=None,
+            unit_of_measurement=None
+        )
+        
+        # Initial entity count
         try:
-            # Initial states
-            self.signal_gateway.update_system_status("starting")
             self.signal_gateway.update_entities_count(0)
         except Exception as e:
-            logger.warning(f"Unable to set initial system status: {e}")
+            logger.warning(f"Unable to set initial entity count: {e}")
             
     def stop(self) -> None:
         """
