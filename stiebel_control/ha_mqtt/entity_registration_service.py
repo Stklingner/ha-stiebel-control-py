@@ -121,8 +121,7 @@ class EntityRegistrationService:
                 entity_id=entity_id,
                 name=name,
                 options=options,
-                icon=entity_def.get('icon'),
-                options_map=entity_def.get('options_map')
+                icon=entity_def.get('icon')
             )
         else:
             logger.warning(f"Unsupported entity type '{entity_type}' for entity {entity_id}")
@@ -130,7 +129,10 @@ class EntityRegistrationService:
             
         if success:
             # Add to registered entities
-            self.dyn_registered_entities.add(entity_id)
+            self.entities[entity_id] = {
+                "type": entity_type,
+                "config": entity_def
+            }
             logger.info(f"Registered {entity_type} entity {entity_id}")
             
         return success
@@ -320,7 +322,7 @@ class EntityRegistrationService:
                 "state_topic": state_topic,
                 "command_topic": command_topic,
                 "config": config,
-                "options_map": options_map
+                "options": options
             }
             logger.debug(f"Successfully registered entity {entity_id} as select entity")
             return True

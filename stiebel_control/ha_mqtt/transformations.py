@@ -40,7 +40,7 @@ def transform_value(
     if entity_type == 'binary_sensor':
         return transform_to_binary_state(value, signal_type)
     elif entity_type == 'select':
-        return transform_to_select_state(value)
+        return transform_to_select_state(value, signal_name)
     else:  # Default to sensor transformation
         return transform_to_sensor_state(value, signal_type, unit)
 
@@ -134,17 +134,52 @@ def transform_to_binary_state(value: Any, signal_type: str) -> str:
     return "OFF"
 
 
-def transform_to_select_state(value: Any) -> str:
+def transform_to_select_state(value: Any, signal_name: str = None) -> str:
     """
-    Transform a value to a select state.
+    Transform a value to a select state, applying appropriate list lookups for modes and errors.
     
     Args:
         value: The original value
+        signal_name: The name of the signal, used to determine signal type
         
     Returns:
         String representation of the state
     """
-    # Ensure we have a string representation
+    # Handle None/unavailable values
+    if value is None:
+        return "unknown"
+    
+    # If we have a signal name, check if this is a special value type (mode or error)
+    if signal_name:
+        from stiebel_control.heatpump.elster_table import (
+            get_elster_entry_by_english_name, 
+            ElsterType, 
+            MODELIST, 
+            ERRORLIST
+        )
+        
+        # Get the signal's ElsterType
+        elster_entry = get_elster_entry_by_english_name(signal_name)
+        
+        if elster_entry and elster_entry.type:
+            # Try to convert value to int for lookup
+            try:
+                int_value = int(float(value))
+                
+                # Check if it's an operating mode
+                if elster_entry.type == ElsterType.ET_MODE:
+                    return MODELIST.get(int_value, f"Mode {int_value}")
+                    
+                # Check if it's an error code
+                elif elster_entry.type == ElsterType.ET_ERR_CODE:
+                    if int_value == 0:
+                        return "No Error"
+                    return ERRORLIST.get(int_value, f"Error {int_value}")
+            except (ValueError, TypeError):
+                # If conversion fails, just continue to default behavior
+                logger.debug(f"Could not convert {value} to int for {signal_name}")
+    
+    # Default: ensure we have a string representation
     return str(value)
 
 

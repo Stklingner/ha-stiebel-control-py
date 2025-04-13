@@ -141,7 +141,7 @@ MODELIST = {
     3: "Day mode",
     4: "Night mode",
     5: "Summer mode",
-    6: "Off",
+    6: "Off"
 }
 
 # ErrorList from original C++ code
