@@ -39,7 +39,7 @@ priority_groups:
     - signal: AIR_FLOW_VENTILATOR
       can_member: PUMP
     - signal: VOLUME_FLOW
-      can_member: HEATING
+      can_member: PUMP
   
   # Medium priority - less quickly changing values
   medium:
@@ -54,6 +54,10 @@ priority_groups:
       can_member: MANAGER
     - signal: PROGRAM_SWITCH
       can_member: MANAGER
+    - signal: ACTIVE_HEATING_PROGRAM
+      can_member: HEATING
+    - signal: PROGRAM_SWITCH
+      can_member: HEATING
   # Low priority - slow changing values
   low:
     # Energy statistics
@@ -67,7 +71,17 @@ priority_groups:
       can_member: BOILER
     - signal: DAY_OUTPUT_KW
       can_member: BOILER
-    
+
+    - signal: HEATING_ENERGY_DAY_KWH
+      can_member: PUMP
+    - signal: ELECTRICITY_INTAKE_HEATING_DAY_KWH
+      can_member: PUMP
+    - signal: ELECTRICITY_INTAKE_HEATING_SUM_KWH
+      can_member: PUMP
+    - signal: BOILER_PERFORMANCE
+      can_member: PUMP
+    - signal: DAY_OUTPUT_KW
+      can_member: PUMP
     # System info
     # - signal: SOFTWARE_NUMBER
     #   can_member: PUMP
