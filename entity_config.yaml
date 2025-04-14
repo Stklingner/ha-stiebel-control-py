@@ -21,13 +21,6 @@ entities:
       - Off
     icon: mdi:tune-vertical
   
-  # Button controls
-  refresh_all:
-    type: button
-    name: Refresh Values
-    icon: mdi:refresh
-    action: refresh_all
-  
   update_time:
     type: button
     name: Update Time

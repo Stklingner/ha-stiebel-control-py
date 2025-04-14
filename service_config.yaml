@@ -4,7 +4,7 @@
 
 # Logging configuration
 logging:
-  level: DEBUG  # INFO, DEBUG, WARNING, ERROR
+  level: INFO  # INFO, DEBUG, WARNING, ERROR
 
 # CAN bus configuration
 can:

@@ -95,7 +95,7 @@ class SignalGateway:
             
         signal_name = elster_entry.english_name
         
-        logger.info(f"Heard signal {member_name}:{signal_name} = {value}")
+        logger.info(f"Translated signal {member_name}:{signal_name} = {value}")
 
         # Get existing entity or create one dynamically
         entity_id = self.signal_mapper.get_entity_by_signal(signal_name, member_name)

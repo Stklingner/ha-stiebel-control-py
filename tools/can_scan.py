@@ -54,10 +54,10 @@ class CanScanner:
         if self.trace:
             logging.getLogger().setLevel(logging.DEBUG)
         
-        # Initialize CAN interface
-        self.transport = CanTransport(self.can_device)
-        self.protocol = StiebelProtocol(self.transport)
-        self.can_interface = CanInterface(self.protocol)
+        # Initialize CAN interface correctly
+        self.can_interface = CanInterface(can_interface=self.can_device)
+        self.transport = self.can_interface.transport
+        self.protocol = self.can_interface.protocol
         
         # Set up sender as client
         self.sender_member = CanMember("SCANNER", self.sender_id, (0x00, 0x00), (0x00, 0x00), (0xE2, 0x00))
@@ -71,11 +71,13 @@ class CanScanner:
         
     async def start(self):
         """Start the CAN interface"""
-        await self.can_interface.start()
+        success = self.can_interface.start()
+        if not success:
+            raise RuntimeError("Failed to start CAN interface")
     
     async def stop(self):
         """Stop the CAN interface"""
-        await self.can_interface.stop()
+        self.can_interface.stop()
 
     def _signal_callback(self, signal_index: int, value: Any, can_id: int):
         """Callback for signal responses"""
