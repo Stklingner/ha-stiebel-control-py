@@ -52,7 +52,8 @@ priority_groups:
     # Program state
     - signal: ACTIVE_HEATING_PROGRAM
       can_member: MANAGER
-  
+    - signal: PROGRAM_SWITCH
+      can_member: MANAGER
   # Low priority - slow changing values
   low:
     # Energy statistics

@@ -21,35 +21,35 @@ entities:
       - Off
     icon: mdi:tune-vertical
   
-  update_time:
-    type: button
-    name: Update Time
-    icon: mdi:clock-outline
-    action: custom
-    custom_action:
-      type: sequence
-      actions:
-        - type: write_signal
-          signal: HOUR
-          can_member: MANAGER
-          value: "${%H}"  # Current hour
-          delay: 0.5
-        - type: write_signal
-          signal: MINUTE
-          can_member: MANAGER
-          value: "${%M}"  # Current minute
-          delay: 0.5
-        - type: write_signal
-          signal: DAY
-          can_member: MANAGER
-          value: "${%d}"  # Current day
-          delay: 0.5
-        - type: write_signal
-          signal: MONTH
-          can_member: MANAGER
-          value: "${%m}"  # Current month
-          delay: 0.5
-        - type: write_signal
-          signal: YEAR
-          can_member: MANAGER
-          value: "${%Y}"  # Current year
+  # update_time:
+  #   type: button
+  #   name: Update Time
+  #   icon: mdi:clock-outline
+  #   action: custom
+  #   custom_action:
+  #     type: sequence
+  #     actions:
+  #       - type: write_signal
+  #         signal: HOUR
+  #         can_member: MANAGER
+  #         value: "${%H}"  # Current hour
+  #         delay: 0.5
+  #       - type: write_signal
+  #         signal: MINUTE
+  #         can_member: MANAGER
+  #         value: "${%M}"  # Current minute
+  #         delay: 0.5
+  #       - type: write_signal
+  #         signal: DAY
+  #         can_member: MANAGER
+  #         value: "${%d}"  # Current day
+  #         delay: 0.5
+  #       - type: write_signal
+  #         signal: MONTH
+  #         can_member: MANAGER
+  #         value: "${%m}"  # Current month
+  #         delay: 0.5
+  #       - type: write_signal
+  #         signal: YEAR
+  #         can_member: MANAGER
+  #         value: "${%Y}"  # Current year

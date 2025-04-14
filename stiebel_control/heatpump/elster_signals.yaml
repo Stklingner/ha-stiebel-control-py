@@ -805,7 +805,7 @@
 - name: AKTIVES_HEIZPROGRAMM
   english_name: ACTIVE_HEATING_PROGRAM
   index: 276
-  type: ET_NONE
+  type: ET_MODE
   ha_entity_type: sensor
   unit_of_measurement: null
 - name: HEIZKURVENADAPTION
@@ -839,7 +839,7 @@
   ha_entity_type: sensor.temperature
   unit_of_measurement: °C
 - name: ESTRICHFUNKTION
-  english_name: SCreed_FUNCTION
+  english_name: SCREED_FUNCTION
   index: 282
   type: ET_LITTLE_ENDIAN
   ha_entity_type: sensor
