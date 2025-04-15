@@ -73,15 +73,15 @@ priority_groups:
       can_member: BOILER
 
     - signal: HEATING_ENERGY_DAY_KWH
-      can_member: PUMP
+      can_member: HEATING
     - signal: ELECTRICITY_INTAKE_HEATING_DAY_KWH
-      can_member: PUMP
+      can_member: HEATING
     - signal: ELECTRICITY_INTAKE_HEATING_SUM_KWH
-      can_member: PUMP
+      can_member: HEATING
     - signal: BOILER_PERFORMANCE
-      can_member: PUMP
+      can_member: HEATING
     - signal: DAY_OUTPUT_KW
-      can_member: PUMP
+      can_member: HEATING
     # System info
     # - signal: SOFTWARE_NUMBER
     #   can_member: PUMP
