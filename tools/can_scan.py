@@ -138,17 +138,18 @@ class CanScanner:
         
         count = 0
         for signal_idx in range(start_index, end_index + 1):
-            # Register callback for this signal
-            self.protocol.register_signal_callback(signal_idx, receiver_id, self._signal_callback)
-            
             # Reset event
             self.response_event.clear()
             
-            # Request the signal
+            # Request the signal with a callback
             if self.trace:
                 logger.debug(f"Requesting CAN ID 0x{receiver_id:x}, index 0x{signal_idx:04x}")
             
-            success = self.protocol.read_signal(member_idx, signal_idx)
+            # Define a callback function that will handle the response
+            def callback(value):
+                self._signal_callback(signal_idx, value, receiver_id)
+            
+            success = self.protocol.read_signal(member_idx, signal_idx, callback)
             
             if not success:
                 logger.error(f"Failed to send request for index 0x{signal_idx:04x}")
@@ -198,15 +199,16 @@ class CanScanner:
             member_idx = len(self.protocol.can_members)
             self.protocol.can_members.append(member)
         
-        # Register callback for this signal
-        self.protocol.register_signal_callback(signal_idx, receiver_id, self._signal_callback)
-        
         # Reset event
         self.response_event.clear()
         self.current_value = None
         
-        # Request the signal
-        success = self.protocol.read_signal(member_idx, signal_idx)
+        # Define a callback function that will handle the response
+        def callback(value):
+            self._signal_callback(signal_idx, value, receiver_id)
+        
+        # Request the signal with a callback
+        success = self.protocol.read_signal(member_idx, signal_idx, callback)
         
         if not success:
             logger.error(f"Failed to send request for index 0x{signal_idx:04x}")
