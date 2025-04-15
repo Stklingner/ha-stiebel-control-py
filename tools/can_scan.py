@@ -38,13 +38,15 @@ logger = logging.getLogger("can_scan")
 class CanScanner:
     """Scanner for Stiebel CAN bus devices"""
     
-    def __init__(self, can_device: str, sender_id: int, labels_file: str = None, trace: bool = False):
+    def __init__(self, can_device: str, sender_id: int, labels_file: str = None, signals_file: str = None, trace: bool = False):
         """
         Initialize the CAN scanner
         
         Args:
             can_device: CAN device name (e.g., 'can0')
             sender_id: CAN ID to use as sender
+            labels_file: Optional file with custom labels (format: 0xXXXX:Label)
+            signals_file: Optional file with signal names to scan (one per line)
             trace: Whether to enable trace logging
         """
         self.can_device = can_device
@@ -73,7 +75,42 @@ class CanScanner:
         self.custom_labels = {}
         if labels_file:
             self._load_custom_labels(labels_file)
+            
+        # Specific signals to scan
+        self.signal_indexes_to_scan = []
+        if signals_file:
+            self._load_signals_to_scan(signals_file)
         
+    def _load_signals_to_scan(self, signals_file):
+        """Load signal names to scan from a file
+        
+        Format: One signal name per line, matching the English names in the Elster table
+        Example:
+            OUTSIDE_TEMP
+            ROOM_INTERNAL_TEMP
+        """
+        try:
+            with open(signals_file, 'r') as f:
+                signal_names = [line.strip() for line in f if line.strip() and not line.strip().startswith('#')]
+                
+            indexes = []
+            # Convert signal names to indexes using the Elster table
+            from stiebel_control.heatpump.elster_table import get_elster_entry_by_english_name
+            for name in signal_names:
+                entry = get_elster_entry_by_english_name(name)
+                if entry and entry.index > 0:  # Skip the unknown entry (index 0)
+                    indexes.append(entry.index)
+                    logger.info(f"Will scan signal: {name} (index: 0x{entry.index:04x})")
+                else:
+                    logger.warning(f"Unknown signal name: {name}")
+            
+            self.signal_indexes_to_scan = indexes
+            logger.info(f"Loaded {len(indexes)} signal indexes to scan from {signals_file}")
+            
+        except (IOError, OSError) as e:
+            logger.error(f"Failed to load signals file: {e}")
+            self.signal_indexes_to_scan = []
+    
     def _load_custom_labels(self, labels_file):
         """Load custom labels from a file
         
@@ -199,7 +236,13 @@ class CanScanner:
             start_index: Starting Elster index (default: 0)
             end_index: Ending Elster index (default: 0x1FFF)
         """
-        logger.info(f"Scanning CAN ID 0x{receiver_id:x} from index 0x{start_index:04x} to 0x{end_index:04x}")
+        # If we have specific signal indexes to scan, use those instead of the range
+        if self.signal_indexes_to_scan:
+            logger.info(f"Scanning CAN ID 0x{receiver_id:x} for {len(self.signal_indexes_to_scan)} specific signals")
+            indexes_to_scan = self.signal_indexes_to_scan
+        else:
+            logger.info(f"Scanning CAN ID 0x{receiver_id:x} from index 0x{start_index:04x} to 0x{end_index:04x}")
+            indexes_to_scan = range(start_index, end_index + 1)
         
         # Find the member index for this CAN ID
         member_idx = None
@@ -218,7 +261,7 @@ class CanScanner:
             self.protocol.can_members.append(member)
         
         count = 0
-        for signal_idx in range(start_index, end_index + 1):
+        for signal_idx in indexes_to_scan:
             # Reset event
             self.response_event.clear()
             
@@ -480,6 +523,7 @@ async def main():
     parser.add_argument("--trace", action="store_true", help="Enable detailed logging")
     parser.add_argument("--range", type=str, help="Scan index range in format 'start-end' (default: '0-1fff')")
     parser.add_argument("--labels", type=str, help="Path to a file with custom labels for Elster indexes (format: 0xXXXX:Label)")
+    parser.add_argument("--signals", type=str, help="Path to a file with signal names to scan (one per line)")
     
     args = parser.parse_args()
     
@@ -489,7 +533,7 @@ async def main():
         return 1
     
     # Initialize scanner
-    scanner = CanScanner(args.can_device, args.sender_id, args.labels, args.trace)
+    scanner = CanScanner(args.can_device, args.sender_id, args.labels, args.signals, args.trace)
     await scanner.start()
     
     try:
