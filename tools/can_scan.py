@@ -30,7 +30,7 @@ from stiebel_control.heatpump.elster_table import ElsterType, value_from_signal
 
 # Set up logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
 )
 logger = logging.getLogger("can_scan")
@@ -68,6 +68,15 @@ class CanScanner:
         self.response_event = asyncio.Event()
         self.current_value = None
         self.scan_complete = False
+        
+    def _ensure_int(self, value):
+        """Ensure a value is an integer"""
+        if isinstance(value, str):
+            # Try to convert to int, assuming hex if starts with 0x
+            if value.startswith('0x'):
+                return int(value, 16)
+            return int(value)
+        return int(value)
         
     async def start(self):
         """Start the CAN interface"""
@@ -130,6 +139,7 @@ class CanScanner:
         
         if member_idx is None:
             # Add it temporarily
+            receiver_id = self._ensure_int(receiver_id)
             member = CanMember(f"DEVICE_{receiver_id:x}", receiver_id, 
                               ((receiver_id//0x80) & 0xFF, (receiver_id % 8) & 0xFF),
                               (0x00, 0x00), (0x00, 0x00))
@@ -193,6 +203,7 @@ class CanScanner:
         
         if member_idx is None:
             # Add it temporarily
+            receiver_id = self._ensure_int(receiver_id)
             member = CanMember(f"DEVICE_{receiver_id:x}", receiver_id, 
                               ((receiver_id//0x80) & 0xFF, (receiver_id % 8) & 0xFF),
                               (0x00, 0x00), (0x00, 0x00))
@@ -366,6 +377,20 @@ class CanScanner:
 
 async def main():
     """Main entry point for the CAN scanner utility"""
+    # Set up handler for graceful termination
+    loop = asyncio.get_running_loop()
+    signals = (signal.SIGINT, signal.SIGTERM)
+    for s in signals:
+        loop.add_signal_handler(s, lambda: asyncio.create_task(shutdown()))
+        
+    async def shutdown():
+        """Handle graceful shutdown on keyboard interrupt"""
+        logger.info("Shutting down scanner...")
+        tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+        loop.stop()
     parser = argparse.ArgumentParser(
         description="Elster-Kromschröder CAN-bus address scanner and test utility"
     )
@@ -467,8 +492,13 @@ async def main():
 
 if __name__ == "__main__":
     try:
+        # Import signal module locally to avoid issues if not available
+        import signal
         exit_code = asyncio.run(main())
         sys.exit(exit_code)
     except KeyboardInterrupt:
         logger.info("Scan interrupted by user")
         sys.exit(130)  # Standard exit code for SIGINT
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")
+        sys.exit(1)
