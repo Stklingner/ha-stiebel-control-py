@@ -38,7 +38,7 @@ logger = logging.getLogger("can_scan")
 class CanScanner:
     """Scanner for Stiebel CAN bus devices"""
     
-    def __init__(self, can_device: str, sender_id: int, trace: bool = False):
+    def __init__(self, can_device: str, sender_id: int, labels_file: str = None, trace: bool = False):
         """
         Initialize the CAN scanner
         
@@ -69,6 +69,45 @@ class CanScanner:
         self.current_value = None
         self.scan_complete = False
         
+        # Custom labels
+        self.custom_labels = {}
+        if labels_file:
+            self._load_custom_labels(labels_file)
+        
+    def _load_custom_labels(self, labels_file):
+        """Load custom labels from a file
+        
+        Format: <index_hex>:<label>
+        Example: 0x0126:Outside Temperature
+        """
+        try:
+            with open(labels_file, 'r') as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith('#'):
+                        continue
+                    
+                    parts = line.split(':', 1)
+                    if len(parts) != 2:
+                        logger.warning(f"Invalid label format: {line}")
+                        continue
+                        
+                    index_str, label = parts
+                    try:
+                        # Convert hex string to int
+                        if index_str.lower().startswith('0x'):
+                            index = int(index_str, 16)
+                        else:
+                            index = int(index_str)
+                            
+                        self.custom_labels[index] = label.strip()
+                    except ValueError:
+                        logger.warning(f"Invalid index format: {index_str}")
+                        
+            logger.info(f"Loaded {len(self.custom_labels)} custom labels from {labels_file}")
+        except (IOError, OSError) as e:
+            logger.error(f"Failed to load labels file: {e}")
+    
     def _ensure_int(self, value):
         """Ensure a value is an integer"""
         if isinstance(value, str):
@@ -90,14 +129,44 @@ class CanScanner:
 
     def _signal_callback(self, signal_index: int, value: Any, can_id: int):
         """Callback for signal responses"""
-        if self.trace:
-            logger.debug(f"Response received: CAN ID 0x{can_id:x}, index 0x{signal_index:04x}, value: {value}")
-        
+        # Find member name
         member_name = "unknown"
         for member in self.protocol.can_members:
             if member and member.can_id == can_id:
                 member_name = member.name
                 break
+        
+        # Get signal name (from custom labels or Elster table)
+        signal_name = None
+        converted_value = None
+        type_name = "Unknown"
+        
+        # Check custom labels first
+        if signal_index in self.custom_labels:
+            signal_name = self.custom_labels[signal_index]
+        
+        # Then try Elster table
+        elster_entry = get_elster_entry_by_index(signal_index)
+        if elster_entry:
+            if not signal_name:  # Only use Elster name if no custom label
+                signal_name = elster_entry.english_name
+            type_name = elster_entry.type.name
+            # Convert value according to type
+            if value is not None:
+                converted_value = value_from_signal(value, elster_entry.type)
+        
+        # Final fallback
+        if not signal_name:
+            signal_name = f"Unknown-0x{signal_index:04x}"
+        
+        # Format raw/converted value for display
+        if converted_value is not None:
+            value_str = f"{converted_value} ({value:04x}h)"
+        else:
+            value_str = f"0x{value:04x}"
+        
+        # Log every response at INFO level
+        logger.info(f"SIGNAL: CAN 0x{can_id:X} [0x{signal_index:04x}] {signal_name} = {value_str}")
         
         # Store result
         self.results[(can_id, signal_index)] = {
@@ -107,14 +176,16 @@ class CanScanner:
             'signal_index': signal_index
         }
         
-        # Add additional information if we have it
-        elster_entry = get_elster_entry_by_index(signal_index)
-        if elster_entry:
-            self.results[(can_id, signal_index)]['name'] = elster_entry.english_name
-            self.results[(can_id, signal_index)]['type'] = elster_entry.type.name
-            # Convert value according to type
-            if value is not None:
-                self.results[(can_id, signal_index)]['value'] = value_from_signal(value, elster_entry.type)
+        # Add additional information if we have it - using what we already determined above
+        if signal_name:
+            self.results[(can_id, signal_index)]['name'] = signal_name
+        
+        # Add type information
+        self.results[(can_id, signal_index)]['type'] = type_name
+        
+        # Add converted value
+        if converted_value is not None:
+            self.results[(can_id, signal_index)]['value'] = converted_value
         
         self.current_value = value
         self.response_event.set()
@@ -362,18 +433,17 @@ class CanScanner:
         for can_id, results in sorted(by_can_id.items()):
             logger.info(f"\nCAN ID: 0x{can_id:x} ({results[0].get('can_member', 'unknown')})")
             logger.info("-" * 80)
-            logger.info(f"{'Index':^8} | {'Value (HEX)':^12} | {'Value':^15} | {'Name':<30} | {'Type':<15}")
+            logger.info(f"{'Value':^15} | {'Name':<50} | {'Type':<15}")
             logger.info("-" * 80)
             
             for result in sorted(results, key=lambda x: x['signal_index']):
+                # Store index in case we need to include it in the name for unknown signals
                 idx = result['signal_index']
-                raw = result.get('value_raw')
-                raw_hex = f"0x{raw:04x}" if raw is not None else "N/A"
                 val = result.get('value', "N/A")
-                name = result.get('name', "Unknown")
+                name = result.get('name', f"Unknown-0x{idx:04x}")
                 type_name = result.get('type', "Unknown")
                 
-                logger.info(f"0x{idx:04x} | {raw_hex:^12} | {val!s:^15} | {name:<30} | {type_name:<15}")
+                logger.info(f"{val!s:^15} | {name:<50} | {type_name:<15}")
 
 async def main():
     """Main entry point for the CAN scanner utility"""
@@ -409,6 +479,7 @@ async def main():
     # Additional options
     parser.add_argument("--trace", action="store_true", help="Enable detailed logging")
     parser.add_argument("--range", type=str, help="Scan index range in format 'start-end' (default: '0-1fff')")
+    parser.add_argument("--labels", type=str, help="Path to a file with custom labels for Elster indexes (format: 0xXXXX:Label)")
     
     args = parser.parse_args()
     
@@ -418,7 +489,7 @@ async def main():
         return 1
     
     # Initialize scanner
-    scanner = CanScanner(args.can_device, args.sender_id, args.trace)
+    scanner = CanScanner(args.can_device, args.sender_id, args.labels, args.trace)
     await scanner.start()
     
     try:
