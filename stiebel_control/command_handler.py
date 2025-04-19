@@ -130,6 +130,45 @@ class CommandHandler:
         if elster_entry:
             return elster_entry.index
         return None
+        
+    def get_signal_info_for_entity(self, entity_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Get signal information for a given entity ID.
+        
+        Used by the SignalGateway to track which signals should be monitored.
+        
+        Args:
+            entity_id: Entity ID to lookup
+            
+        Returns:
+            Dict with signal information or None if not found
+        """
+        # Find entity configuration
+        entity_def = self.entity_config.get(entity_id)
+        if not entity_def:
+            return None
+            
+        # Extract signal info
+        signal_name = entity_def.get('signal')
+        if not signal_name:
+            return None
+            
+        signal_index = self._get_signal_index_by_name(signal_name)
+        if signal_index is None:
+            return None
+            
+        can_member = entity_def.get('can_member')
+        can_member_ids = entity_def.get('can_member_ids', [])
+        
+        # Get CAN ID for the command
+        can_id = self._resolve_can_id(can_member, can_member_ids)
+        
+        return {
+            'signal_name': signal_name,
+            'signal_index': signal_index,
+            'can_member': can_member,
+            'can_id': can_id
+        }
 
     def is_pending_command(self, entity_id: str, value: Any) -> bool:
         """

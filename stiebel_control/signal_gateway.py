@@ -5,7 +5,8 @@ Serves as a bidirectional gateway between CAN signals and MQTT entities.
 Routes data between the CAN bus and Home Assistant via MQTT.
 """
 import logging
-from typing import Dict, Any, Optional
+import time
+from typing import Dict, Any, Optional, List, Tuple
 
 from stiebel_control.ha_mqtt.entity_registration_service import EntityRegistrationService
 from stiebel_control.ha_mqtt.mqtt_interface import MqttInterface
@@ -35,7 +36,8 @@ class SignalGateway:
                  can_interface: CanInterface,
                  signal_mapper: SignalEntityMapper,
                  entity_config: EntityConfig,
-                 protocol: Optional[StiebelProtocol] = None):
+                 protocol: Optional[StiebelProtocol] = None,
+                 ignore_unsolicited_signals: bool = False):
         """
         Initialize the signal gateway.
         
@@ -46,6 +48,7 @@ class SignalGateway:
             signal_mapper: Maps between signals and entities
             entity_config: Entity configuration
             protocol: Optional StiebelProtocol instance for CAN member lookups
+            ignore_unsolicited_signals: If True, only process signals that were explicitly polled or commanded
         """
         self.entity_service = entity_service
         self.mqtt_interface = mqtt_interface
@@ -55,6 +58,16 @@ class SignalGateway:
         self.protocol = protocol
         self.permissive_signal_handling = entity_config.permissive_signal_handling if entity_config else False
         self.signal_callbacks = {}
+        
+        # Track polled signal indices with timestamps
+        # Format: {signal_index: last_poll_time}
+        self.polled_signals = {}
+        
+        # How long to consider a signal as "polled" in seconds
+        self.polled_signal_timeout = 300  # 5 minutes
+        
+        # Whether to ignore signals that weren't explicitly polled
+        self.ignore_unsolicited_signals = ignore_unsolicited_signals
         
         # Initialize the command handler without a transformation service
         self.command_handler = CommandHandler(
@@ -80,9 +93,33 @@ class SignalGateway:
             can_id: CAN ID of the message source
         """
         logger.debug(f"New signal 0x{can_id:x}:{signal_index} = {value}")
+        
         # Skip processing if not connected to MQTT
         if not self.mqtt_interface.is_connected():
             return
+            
+        # If ignoring unsolicited signals, check if this signal was polled or commanded
+        if self.ignore_unsolicited_signals:
+            import time
+            current_time = time.time()
+            
+            # Check if this signal is in the polled signals list
+            if signal_index in self.polled_signals:
+                last_poll_time = self.polled_signals[signal_index]
+                
+                # Check if the polled signal has expired
+                if current_time - last_poll_time > self.polled_signal_timeout:
+                    # Signal has expired, remove it from the list
+                    del self.polled_signals[signal_index]
+                    logger.debug(f"Signal {signal_index} poll expired after {self.polled_signal_timeout}s")
+                else:
+                    # Update timestamp and process
+                    self.polled_signals[signal_index] = current_time
+                    logger.debug(f"Processing previously polled signal {signal_index}")
+            else:
+                # Not a polled signal, skip processing
+                logger.debug(f"Ignoring unsolicited signal {signal_index} from CAN ID 0x{can_id:X}")
+                return None
             
         # Get the CAN member name from ID
         member_name = self.get_can_member_name(can_id) or f"device_{can_id:x}"
@@ -158,6 +195,15 @@ class SignalGateway:
         """
         # Delegate directly to command handler
         try:
+            # Get signal info for tracking purposes
+            signal_info = self.command_handler.get_signal_info_for_entity(entity_id)
+            if signal_info and 'signal_index' in signal_info:
+                # Mark this signal as polled/commanded - we expect updates
+                import time
+                self.polled_signals[signal_info['signal_index']] = time.time()
+                logger.debug(f"Marked signal {signal_info['signal_index']} as polled due to command")
+                
+            # Handle the command
             self.command_handler.handle_command(entity_id, command)
         except Exception as e:
             logger.error(f"Error handling command for {entity_id}: {e}")

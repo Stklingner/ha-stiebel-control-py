@@ -56,13 +56,15 @@ class StiebelControl:
         )
         
         # Initialize signal gateway
+        can_config = self.config_manager.get_can_config()
         self.signal_gateway = SignalGateway(
             entity_service=self.entity_service,
             mqtt_interface=self.mqtt_interface,
             can_interface=self.can_interface,
             signal_mapper=self.signal_mapper,
             entity_config=self.config_manager.get_entity_config(),
-            protocol=self.can_interface.protocol
+            protocol=self.can_interface.protocol,
+            ignore_unsolicited_signals=can_config.ignore_unpolled_messages
         )
         
         # Now set the signal gateway's process_signal method as the CAN interface callback
@@ -85,8 +87,7 @@ class StiebelControl:
             # Initialize without a callback - we'll set it after signal_gateway is created
             self.can_interface = CanInterface(
                 can_interface=can_config.interface,
-                bitrate=can_config.bitrate,
-                ignore_unpolled_messages=can_config.ignore_unpolled_messages
+                bitrate=can_config.bitrate
             )
         except Exception as e:
             logger.error(f"Failed to initialize CAN interface: {e}")
