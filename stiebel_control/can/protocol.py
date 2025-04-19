@@ -87,6 +87,13 @@ class StiebelProtocol:
         # Dictionary of pending requests, keyed by (can_id, index)
         self.pending_requests = {}
         
+        # Track recently seen signal indices (with timestamps) to allow updates
+        # even with ignore_unpolled_messages enabled
+        self.recently_seen_signals = {}
+        
+        # How long to consider a signal as "recently seen" in seconds
+        self.recently_seen_timeout = 300  # 5 minutes
+        
     def add_signal_handler(self, handler: Callable[[str, Any, int], None]):
         """
         Add a signal handler function that will be called when signals are received.
@@ -150,15 +157,33 @@ class StiebelProtocol:
             
             # If this is a response to a pending request, handle it
             request_key = (can_id, index)
+            current_time = time.time()
             handled = False
+            
             if request_key in self.pending_requests:
                 request_info = self.pending_requests.pop(request_key)
                 # If there's a callback, invoke it
                 if request_info.get('callback'):
                     request_info['callback'](typed_value)
                 handled = True
+                
+                # Add this signal to recently seen signals
+                self.recently_seen_signals[index] = current_time
+                logger.debug(f"Added signal index {index} to recently seen signals for {self.recently_seen_timeout} seconds")
             
-            # If ignore_unpolled_messages is enabled, skip messages not in pending_requests
+            # Also check if this signal index was recently seen (even if from a different CAN ID)
+            elif index in self.recently_seen_signals:
+                last_seen = self.recently_seen_signals[index]
+                if current_time - last_seen <= self.recently_seen_timeout:
+                    handled = True
+                    # Update the timestamp
+                    self.recently_seen_signals[index] = current_time
+                    logger.debug(f"Allowing signal index {index} from CAN ID 0x{can_id:X} because it was recently polled")
+                else:
+                    # Expired, remove it
+                    del self.recently_seen_signals[index]
+            
+            # If ignore_unpolled_messages is enabled, skip messages not handled or recently seen
             if self.ignore_unpolled_messages and not handled:
                 logger.debug(f"Ignoring CAN message 0x{can_id:X}:{index} not matching any pending request due to ignore_unpolled_messages option.")
                 return
