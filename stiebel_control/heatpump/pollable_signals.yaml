@@ -11,7 +11,7 @@
 
 # Define custom polling intervals in seconds
 polling_intervals:
-  high: 60      # Poll every 1 minute
+  high: 30      # Poll every 30 seconds
   medium: 300   # Poll every 5 minutes
   low: 900      # Poll every 15 minutes
 
@@ -24,13 +24,15 @@ priority_groups:
       can_member: PUMP
     - signal: FLOW_INTERNAL_TEMP
       can_member: HEATING
-    - signal: RETURN_FLOW_INTERNAL_TEMP
+    - signal: HEATING_RETURN_ACTUAL
       can_member: HEATING
     - signal: ROOM_SET_TEMP_I
       can_member: MANAGER
     - signal: ROOM_INTERNAL_TEMP
       can_member: MANAGER
 
+    - signal: COMPRESSOR
+      can_member: HEATING
     # Operating status
     - signal: OPERATING_STATUS
       can_member: PUMP
@@ -40,7 +42,9 @@ priority_groups:
       can_member: PUMP
     - signal: VOLUME_FLOW
       can_member: PUMP
-  
+
+    - signal: MINUTE
+      can_member: MANAGER
   # Medium priority - less quickly changing values
   medium:
     # DHW related
@@ -48,6 +52,9 @@ priority_groups:
       can_member: PUMP
     - signal: STORAGE_TANK_SETPOINT_TEMP
       can_member: PUMP
+    
+    - signal: DEFROST_ACTIVE
+      can_member: HEATING
     
     # Program state
     - signal: ACTIVE_HEATING_PROGRAM
@@ -59,6 +66,8 @@ priority_groups:
     - signal: PROGRAM_SWITCH
       can_member: HEATING
   # Low priority - slow changing values
+    - signal: HOUR
+      can_member: MANAGER
   low:
     # Energy statistics
     - signal: HEATING_ENERGY_DAY_KWH
@@ -71,6 +80,8 @@ priority_groups:
       can_member: BOILER
     - signal: DAY_OUTPUT_KW
       can_member: BOILER
+    - signal: AUXILIARY_BOILER_SETPOINT
+      can_member: BOILER
 
     - signal: HEATING_ENERGY_DAY_KWH
       can_member: HEATING
@@ -82,10 +93,11 @@ priority_groups:
       can_member: HEATING
     - signal: DAY_OUTPUT_KW
       can_member: HEATING
-    # System info
-    # - signal: SOFTWARE_NUMBER
-    #   can_member: PUMP
-    # - signal: COMFORT_STORAGE_TANK_SETPOINT
-    #   can_member: PUMP
-    # # - signal: ECO_STORAGE_TANK_SETPOINT
-    #   can_member: PUMP
+    
+    - signal: DAY
+      can_member: MANAGER
+    - signal: MONTH
+      can_member: MANAGER
+    - signal: YEAR
+      can_member: MANAGER
+

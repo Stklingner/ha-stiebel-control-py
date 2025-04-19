@@ -4,7 +4,7 @@
 
 # Logging configuration
 logging:
-  level: INFO  # INFO, DEBUG, WARNING, ERROR
+  level: DEBUG  # INFO, DEBUG, WARNING, ERROR
 
 # CAN bus configuration
 can:
@@ -37,3 +37,8 @@ dynamic_entity_registration: true
 # an unknown type (ET_NONE). This can be useful for experimental signals or
 # when working with undocumented signals on the CAN bus.
 permissive_signal_handling: true
+
+# Ignore unpolled messages
+# When enabled, the system will ignore CAN messages that are not responses to a poll or command.
+# This can help reduce noise in the logs and improve performance.
+ignore_unpolled_messages: true
