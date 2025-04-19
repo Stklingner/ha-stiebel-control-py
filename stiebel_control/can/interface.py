@@ -26,7 +26,8 @@ class CanInterface:
     def __init__(self, can_interface: str = 'can0', 
                  can_members: List[CanMember] = None, 
                  bitrate: int = 20000, 
-                 callback: Optional[Callable[[int, Any, int], None]] = None):
+                 callback: Optional[Callable[[int, Any, int], None]] = None,
+                 ignore_unpolled_messages: bool = False):
         """Initialize the CAN interface.
         
         Args:
@@ -34,10 +35,11 @@ class CanInterface:
             can_members: Optional list of CanMember objects; defaults to DEFAULT_CAN_MEMBERS
             bitrate: CAN bus bitrate, default is 20000 for Stiebel Eltron heat pumps
             callback: Optional callback function for value updates (signal_index, value, can_id)
+            ignore_unpolled_messages: If True, ignore CAN messages that are not responses to a poll or command
         """
         # Create the layered components
         self.transport = CanTransport(can_interface, bitrate)
-        self.protocol = StiebelProtocol(self.transport, can_members)
+        self.protocol = StiebelProtocol(self.transport, can_members, ignore_unpolled_messages=ignore_unpolled_messages)
         
         # Register with the protocol as a signal handler
         self.protocol.add_signal_handler(self._on_signal_update)

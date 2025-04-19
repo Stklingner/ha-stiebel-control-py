@@ -85,7 +85,8 @@ class StiebelControl:
             # Initialize without a callback - we'll set it after signal_gateway is created
             self.can_interface = CanInterface(
                 can_interface=can_config.interface,
-                bitrate=can_config.bitrate
+                bitrate=can_config.bitrate,
+                ignore_unpolled_messages=can_config.ignore_unpolled_messages
             )
         except Exception as e:
             logger.error(f"Failed to initialize CAN interface: {e}")

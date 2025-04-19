@@ -65,16 +65,18 @@ class StiebelProtocol:
     CM_MIXER = 6
     CM_FE7 = 7
     
-    def __init__(self, transport: CanTransport, can_members: List[CanMember] = None):
+    def __init__(self, transport: CanTransport, can_members: List[CanMember] = None, ignore_unpolled_messages: bool = False):
         """
         Initialize the protocol layer.
         
         Args:
             transport: The CAN transport layer to use
             can_members: Optional list of CanMember objects; defaults to DEFAULT_CAN_MEMBERS
+            ignore_unpolled_messages: If True, ignore CAN messages that are not responses to a poll or command
         """
         self.transport = transport
         self.can_members = can_members or self.DEFAULT_CAN_MEMBERS
+        self.ignore_unpolled_messages = ignore_unpolled_messages
         
         # Set up the transport to use our message processor
         self.transport.message_processor = self._process_can_message
@@ -148,12 +150,19 @@ class StiebelProtocol:
             
             # If this is a response to a pending request, handle it
             request_key = (can_id, index)
+            handled = False
             if request_key in self.pending_requests:
                 request_info = self.pending_requests.pop(request_key)
                 # If there's a callback, invoke it
                 if request_info.get('callback'):
                     request_info['callback'](typed_value)
+                handled = True
             
+            # If ignore_unpolled_messages is enabled, skip messages not in pending_requests
+            if self.ignore_unpolled_messages and not handled:
+                logger.debug(f"Ignoring CAN message 0x{can_id:X}:{index} not matching any pending request due to ignore_unpolled_messages option.")
+                return
+
             # Notify all signal handlers
             for handler in self.signal_handlers:
                 handler(ei.index, typed_value, can_id)
