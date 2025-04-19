@@ -174,8 +174,11 @@ class StiebelControl:
             # Register pre-configured entities
             self._register_configured_entities()
             
-            # Initialize the signal poller (after entities are registered)
+            # Initialize the signal poller
             self.signal_poller = SignalPoller(self.can_interface)
+            
+            # Connect signal poller to signal gateway for polled signals tracking
+            self.signal_gateway.set_signal_poller(self.signal_poller)
             
             # Update status to online
             self.signal_gateway.update_system_status("online")
@@ -310,6 +313,7 @@ class StiebelControl:
         last_poller_check = 0
         last_entity_count_update = 0
         last_poller_stats_update = 0
+        last_polled_signals_update = 0
         
         try:
             while self.running:
@@ -319,7 +323,7 @@ class StiebelControl:
                 if current_time - last_poller_check >= 1:
                     self.signal_poller.update()
                     last_poller_check = current_time
-                
+                    
                 # Update entity count every 60 seconds
                 if current_time - last_entity_count_update >= 60:
                     self.signal_gateway.update_entities_count(None)
@@ -332,12 +336,16 @@ class StiebelControl:
                     self.entity_service.update_entity_state("responsive_entities_count", stats['total_responsive_entities'])
                     self.entity_service.update_entity_state("non_responsive_entities", stats['non_responsive_entities_list'])
                     last_poller_stats_update = current_time
+                    
+                # Update the polled signals tracking every 15 seconds
+                # This keeps the signal gateway aware of what's been polled by the poller
+                if current_time - last_polled_signals_update >= 15:
+                    self.signal_gateway.track_polled_signals()
+                    last_polled_signals_update = current_time
                 
                 # Short sleep to prevent CPU hogging
                 time.sleep(0.1)
                 
-        except KeyboardInterrupt:
-            logger.info("Update loop interrupted by user")
             self.stop()
             
         except Exception as e:

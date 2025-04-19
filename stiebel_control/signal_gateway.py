@@ -77,6 +77,9 @@ class SignalGateway:
             transformation_service=None # TODO: Add transformation service
         )
         
+        # Reference to the signal poller (will be set by main.py)
+        self.signal_poller = None
+        
         logger.info("Signal gateway initialized")
     
     def process_signal(self, signal_index: int, value: Any, can_id: int) -> Optional[str]:
@@ -343,13 +346,46 @@ class SignalGateway:
     def update_entities_count(self, count: Optional[int] = None) -> None:
         """
         Update the entities count sensor.
-        
+            
         Args:
             count: Number of entities or None to count automatically
         """
         if count is None:
             # Count the number of registered entities
             count = len(self.entity_service.entities) + len(self.entity_service.dyn_registered_entities)
-            
+                
         logger.debug(f"Entities count: {count}")
         self.entity_service.update_entity_state("entities_count", count)
+        
+    def set_signal_poller(self, signal_poller):
+        """
+        Set the signal poller reference for tracking polled signals.
+        
+        Args:
+            signal_poller: SignalPoller instance
+        """
+        self.signal_poller = signal_poller
+        logger.info("Signal poller reference set in SignalGateway")
+        
+    def track_polled_signals(self):
+        """
+        Scan the SignalPoller for signals being polled and track them in our polled_signals dictionary.
+        Should be called periodically to keep the polled signals list up to date.
+        """
+        if not self.signal_poller:
+            return
+            
+        current_time = time.time()
+        
+        # Track all signals in the polling tasks
+        for priority, tasks in self.signal_poller.polling_tasks.items():
+            for task in tasks:
+                signal_index = task[0]  # signal_index is the first element in the task tuple
+                # Add or update this signal in our polled signals tracking
+                self.polled_signals[signal_index] = current_time
+                
+        # Also scan pending polls
+        for (member_index, signal_index), (request_time, _) in self.signal_poller.pending_polls.items():
+            # Only track recent polls (within the last 60 seconds)
+            if current_time - request_time < 60:
+                self.polled_signals[signal_index] = current_time

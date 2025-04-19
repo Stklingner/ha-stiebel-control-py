@@ -123,7 +123,7 @@ class ConfigManager:
             self.raw_entity_config,
             self.service_config.get('dynamic_entity_registration', False),
             self.service_config.get('permissive_signal_handling', False),
-            self.service_config.get('ignore_unsolicited_signals', False)
+            self.service_config.get('ignore_unsolicited_messages', False)
         )
         
         # Store other common settings

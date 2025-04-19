@@ -899,7 +899,7 @@
   ha_entity_type: sensor.date
   unit_of_measurement: null
 - name: JAHR
-  english_name: JAHR
+  english_name: YEAR
   index: 292
   type: ET_LITTLE_ENDIAN
   ha_entity_type: sensor.date

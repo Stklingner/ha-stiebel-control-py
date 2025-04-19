@@ -33,14 +33,8 @@ priority_groups:
     - signal: COMPRESSOR
       can_member: HEATING
     # Operating status
-    - signal: OPERATING_STATUS
-      can_member: BOILER
-    - signal: ERROR_MESSAGE
-      can_member: BOILER
-    - signal: AIR_FLOW_VENTILATOR
-      can_member: BOILER
     - signal: VOLUME_FLOW
-      can_member: PUMP
+      can_member: HEATING
 
     - signal: MINUTE
       can_member: MANAGER
