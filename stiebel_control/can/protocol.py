@@ -144,7 +144,7 @@ class StiebelProtocol:
             typed_value = value_from_signal(raw_value, ei.type)
             
             # Log the received signal
-            logger.debug(f"CAN 0x{can_id:X}:{index} = {typed_value}")
+            logger.debug(f"CAN 0x{can_id:X}:{index} = {typed_value} ({raw_value})")
             
             # If this is a response to a pending request, handle it
             request_key = (can_id, index)
