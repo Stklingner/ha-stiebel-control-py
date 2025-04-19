@@ -24,13 +24,15 @@ class SignalPoller:
     polling intervals for each group.
     """
     
-    def __init__(self, can_interface, config_path: Optional[str] = None):
+    def __init__(self, can_interface, config_path: Optional[str] = None, poll_jitter_fraction: float = 0.1, poll_jitter_seconds: Optional[float] = None):
         """
         Initialize the signal poller.
         
         Args:
             can_interface: Interface for sending read requests to the CAN bus
             config_path: Optional path to the pollable signals config file
+            poll_jitter_fraction: Fraction of the interval to use as jitter (default 0.1 = 10%)
+            poll_jitter_seconds: If set, use this many seconds as jitter instead of fraction
         """
         self.can_interface = can_interface
         self.config_path = config_path or os.path.join(
@@ -55,6 +57,10 @@ class SignalPoller:
         # Track pending poll requests to match with responses
         # Structure: {(member_index, signal_index): (request_time, callback)}
         self.pending_polls: Dict[Tuple[int, int], Tuple[float, Callable]] = {}
+        
+        # Jitter configuration
+        self.poll_jitter_fraction = poll_jitter_fraction
+        self.poll_jitter_seconds = poll_jitter_seconds
         
         # Load configuration
         self._load_config()
@@ -148,10 +154,17 @@ class SignalPoller:
         # Process each priority group
         for priority, tasks in self.polling_tasks.items():
             interval = self.polling_intervals[priority]
+            # Calculate jitter for this interval
+            if self.poll_jitter_seconds is not None:
+                jitter = self.poll_jitter_seconds
+            else:
+                jitter = interval * self.poll_jitter_fraction
             
             for i, (signal_index, member_index, last_poll_time, last_response_time, response_count, poll_count) in enumerate(tasks):
+                # Add jitter to each poll schedule
+                next_poll_time = last_poll_time + interval + random.uniform(-jitter, jitter)
                 # Check if it's time to poll this signal
-                if current_time - last_poll_time >= interval:
+                if current_time >= next_poll_time:
                     # First, clean up any previous pending poll for this signal
                     poll_key = (member_index, signal_index)
                     if poll_key in self.pending_polls:

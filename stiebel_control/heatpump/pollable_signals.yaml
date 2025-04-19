@@ -10,10 +10,10 @@
 #     low:      # Poll every 15 minutes
 
 # Define custom polling intervals in seconds
-polling_intervals:
-  high: 30      # Poll every 30 seconds
-  medium: 300   # Poll every 5 minutes
-  low: 900      # Poll every 15 minutes
+polling_intervals: # Poll every x seconds
+  high: 60      
+  medium: 300   
+  low: 900      
 
 # Define signals to poll in each priority group
 priority_groups:
@@ -30,7 +30,6 @@ priority_groups:
       can_member: MANAGER
     - signal: ROOM_INTERNAL_TEMP
       can_member: MANAGER
-
     - signal: COMPRESSOR
       can_member: HEATING
     # Operating status
