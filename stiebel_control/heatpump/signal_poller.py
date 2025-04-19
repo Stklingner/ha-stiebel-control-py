@@ -166,11 +166,32 @@ class SignalPoller:
                 next_poll_time = last_poll_time + interval + random.uniform(-jitter, jitter)
                 # Check if it's time to poll this signal
                 if current_time >= next_poll_time:
+                    # Get the CAN member
+                    member = self.can_interface.can_members[member_index]
+                    
+                    # Calculate an appropriate fresh threshold (half the polling interval)
+                    fresh_threshold = interval / 2
+                    
+                    # Check if we already have a fresh value
+                    fresh_value = self.can_interface.get_latest_value(signal_index, member.can_id, fresh_threshold)
+                    
+                    if fresh_value is not None:
+                        # We already have a fresh value, just update the poll time without sending a request
+                        logger.debug(f"Skipping poll for signal {signal_index} from {member.name} - already fresh: {fresh_value}")
+                        self.polling_tasks[priority][i] = (
+                            signal_index,
+                            member_index,
+                            current_time,  # Update last poll time
+                            last_response_time,  # Keep last response time unchanged
+                            response_count,  # Keep response count unchanged
+                            poll_count  # Keep poll count unchanged
+                        )
+                        continue
+                    
                     # First, clean up any previous pending poll for this signal
                     poll_key = (member_index, signal_index)
                     if poll_key in self.pending_polls:
                         prev_time, prev_callback = self.pending_polls[poll_key]
-                        member = self.can_interface.can_members[member_index]
                         self.can_interface.remove_signal_callback(signal_index, member.can_id, prev_callback)
                         del self.pending_polls[poll_key]
                     
@@ -178,7 +199,6 @@ class SignalPoller:
                     response_callback = self._create_response_callback(member_index, signal_index)
                     
                     # Register for all responses from this member
-                    member = self.can_interface.can_members[member_index]
                     self.can_interface.add_signal_callback(signal_index, member.can_id, response_callback)
                     
                     # Send read request

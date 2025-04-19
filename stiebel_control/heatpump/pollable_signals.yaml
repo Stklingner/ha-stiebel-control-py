@@ -21,7 +21,7 @@ priority_groups:
   high:
     # Temperatures
     - signal: OUTSIDE_TEMP
-      can_member: PUMP
+      can_member: BOILER
     - signal: FLOW_INTERNAL_TEMP
       can_member: HEATING
     - signal: HEATING_RETURN_ACTUAL
@@ -34,11 +34,11 @@ priority_groups:
       can_member: HEATING
     # Operating status
     - signal: OPERATING_STATUS
-      can_member: PUMP
+      can_member: BOILER
     - signal: ERROR_MESSAGE
-      can_member: PUMP
+      can_member: BOILER
     - signal: AIR_FLOW_VENTILATOR
-      can_member: PUMP
+      can_member: BOILER
     - signal: VOLUME_FLOW
       can_member: PUMP
 
@@ -48,9 +48,9 @@ priority_groups:
   medium:
     # DHW related
     - signal: STORAGE_TANK_INTERNAL_TEMP
-      can_member: PUMP
+      can_member: BOILER
     - signal: STORAGE_TANK_SETPOINT_TEMP
-      can_member: PUMP
+      can_member: BOILER
     
     - signal: DEFROST_ACTIVE
       can_member: HEATING

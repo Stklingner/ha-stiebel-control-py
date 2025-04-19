@@ -6,6 +6,7 @@ interacting with Stiebel Eltron heat pump components.
 """
 
 import logging
+import time
 from typing import Dict, List, Optional, Callable, Any, Tuple
 
 from stiebel_control.can.transport import CanTransport
@@ -49,8 +50,9 @@ class CanInterface:
         self.can_members = can_members or self.protocol.DEFAULT_CAN_MEMBERS
         self.bitrate = bitrate
         
-        # Dictionary to store latest values, keyed by (can_id, signal_index)
-        self.latest_values: Dict[Tuple[int, int], Any] = {}
+        # Dictionary to store latest values with timestamps, keyed by (can_id, signal_index)
+        # Structure: {(can_id, signal_index): (value, timestamp)}
+        self.latest_values: Dict[Tuple[int, int], Tuple[Any, float]] = {}
         
         # Dictionary to store per-signal callbacks, keyed by (can_id, signal_index)
         self.signal_callbacks: Dict[Tuple[int, int], List[Callable[[int, Any, int], None]]] = {}
@@ -96,9 +98,10 @@ class CanInterface:
             value: New value of the signal
             can_id: CAN ID of the source
         """
-        # Store the latest value
+        # Store the latest value with a timestamp
         key = (can_id, signal_index)
-        self.latest_values[key] = value
+        current_time = time.time()
+        self.latest_values[key] = (value, current_time)
         
         # Process callbacks
         self._process_callbacks(key, signal_index, value, can_id)
@@ -237,19 +240,36 @@ class CanInterface:
                 return member.name
         return None
         
-    def get_latest_value(self, signal_index: int, can_id: int) -> Optional[Any]:
+    def get_latest_value(self, signal_index: int, can_id: int, fresh_threshold: Optional[float] = None) -> Tuple[Optional[Any], Optional[float], bool]:
         """
-        Get the latest value for a signal.
+        Get the latest value for a signal, with freshness information.
         
         Args:
             signal_index: Index of the signal
             can_id: CAN ID of the member
+            fresh_threshold: Optional seconds threshold for considering value "fresh"
             
         Returns:
-            The latest value if available, None otherwise
+            Tuple of (value, timestamp, is_fresh): 
+            - The latest value if available, None otherwise
+            - The timestamp when the value was last updated, None if no value
+            - Boolean indicating if the value is considered fresh (True) or stale (False)
         """
         key = (can_id, signal_index)
-        return self.latest_values.get(key)
+        if key not in self.latest_values:
+            return None, None, False
+            
+        value, timestamp = self.latest_values.get(key)
+        
+        # If no fresh_threshold provided, just return the value as is
+        if fresh_threshold is None:
+            return value, timestamp, True
+            
+        # Check if the value is fresh enough
+        current_time = time.time()
+        is_fresh = (current_time - timestamp) <= fresh_threshold
+        
+        return value, timestamp, is_fresh
         
     def set_value(self, can_id: int, signal_index: int, value: Any) -> bool:
         """
