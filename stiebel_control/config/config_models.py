@@ -13,7 +13,7 @@ class CanConfig:
     ignore_unpolled_messages: bool = False
     
     @classmethod
-    def from_dict(cls, config_dict: Dict[str, Any]) -> 'CanConfig':
+    def from_dict(cls, config_dict: Dict[str, Any], ignore_unpolled_messages: bool = False) -> 'CanConfig':
         """Create a CanConfig instance from a dictionary."""
         if not config_dict:
             return cls()
@@ -22,7 +22,7 @@ class CanConfig:
             interface=config_dict.get('interface', cls.interface),
             bitrate=config_dict.get('bitrate', cls.bitrate),
             mock=config_dict.get('mock', cls.mock),
-            ignore_unpolled_messages=config_dict.get('ignore_unpolled_messages', cls.ignore_unpolled_messages)
+            ignore_unpolled_messages=ignore_unpolled_messages
         )
         
 @dataclass
