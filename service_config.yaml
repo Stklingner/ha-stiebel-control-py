@@ -38,7 +38,7 @@ dynamic_entity_registration: true
 # when working with undocumented signals on the CAN bus.
 permissive_signal_handling: true
 
-# Ignore unpolled messages
+# Ignore unsolicited messages
 # When enabled, the system will ignore CAN messages that are not responses to a poll or command.
 # This can help reduce noise in the logs and improve performance.
-ignore_unpolled_messages: true
+ignore_unsolicited_messages: true

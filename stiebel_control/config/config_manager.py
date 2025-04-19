@@ -115,8 +115,7 @@ class ConfigManager:
     def _init_specialized_configs(self):
         # Initialize specialized configuration objects
         self.can_config = CanConfig.from_dict(
-            self.service_config.get('can', {}),
-            self.service_config.get('ignore_unpolled_messages', False)
+            self.service_config.get('can', {})
         )
         self.mqtt_config = MqttConfig.from_dict(self.service_config.get('mqtt', {}))
         self.logging_config = LoggingConfig.from_dict(self.service_config.get('logging', {}))
@@ -124,6 +123,7 @@ class ConfigManager:
             self.raw_entity_config,
             self.service_config.get('dynamic_entity_registration', False),
             self.service_config.get('permissive_signal_handling', False),
+            self.service_config.get('ignore_unsolicited_signals', False)
         )
         
         # Store other common settings

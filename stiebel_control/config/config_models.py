@@ -10,10 +10,9 @@ class CanConfig:
     interface: str = "can0"
     bitrate: int = 20000
     mock: bool = False
-    ignore_unpolled_messages: bool = False
     
     @classmethod
-    def from_dict(cls, config_dict: Dict[str, Any], ignore_unpolled_messages: bool = False) -> 'CanConfig':
+    def from_dict(cls, config_dict: Dict[str, Any]) -> 'CanConfig':
         """Create a CanConfig instance from a dictionary."""
         if not config_dict:
             return cls()
@@ -21,8 +20,7 @@ class CanConfig:
         return cls(
             interface=config_dict.get('interface', cls.interface),
             bitrate=config_dict.get('bitrate', cls.bitrate),
-            mock=config_dict.get('mock', cls.mock),
-            ignore_unpolled_messages=ignore_unpolled_messages
+            mock=config_dict.get('mock', cls.mock)
         )
         
 @dataclass
@@ -79,16 +77,19 @@ class EntityConfig:
     entities: Dict[str, Dict[str, Any]] = field(default_factory=dict)
     dynamic_registration_enabled: bool = False
     permissive_signal_handling: bool = False
+    ignore_unsolicited_signals: bool = False
     
     @classmethod
     def from_dict(cls, entity_config: Dict[str, Dict[str, Any]], 
                  dynamic_registration: bool,
-                 permissive_signal_handling: bool = False) -> 'EntityConfig':
+                 permissive_signal_handling: bool = False,
+                 ignore_unsolicited_signals: bool = False) -> 'EntityConfig':
         """Create an EntityConfig instance from entity configuration."""
         return cls(
             entities=entity_config or {},
             dynamic_registration_enabled=dynamic_registration,
-            permissive_signal_handling=permissive_signal_handling
+            permissive_signal_handling=permissive_signal_handling,
+            ignore_unsolicited_signals=ignore_unsolicited_signals
         )
         
     def get_entity_def(self, entity_id: str) -> Dict[str, Any]:

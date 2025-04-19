@@ -56,15 +56,15 @@ class StiebelControl:
         )
         
         # Initialize signal gateway
-        can_config = self.config_manager.get_can_config()
+        entity_config = self.config_manager.get_entity_config()
         self.signal_gateway = SignalGateway(
             entity_service=self.entity_service,
             mqtt_interface=self.mqtt_interface,
             can_interface=self.can_interface,
             signal_mapper=self.signal_mapper,
-            entity_config=self.config_manager.get_entity_config(),
+            entity_config=entity_config,
             protocol=self.can_interface.protocol,
-            ignore_unsolicited_signals=can_config.ignore_unpolled_messages
+            ignore_unsolicited_signals=entity_config.ignore_unsolicited_signals
         )
         
         # Now set the signal gateway's process_signal method as the CAN interface callback

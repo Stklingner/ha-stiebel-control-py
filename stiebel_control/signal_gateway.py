@@ -98,28 +98,7 @@ class SignalGateway:
         if not self.mqtt_interface.is_connected():
             return
             
-        # If ignoring unsolicited signals, check if this signal was polled or commanded
-        if self.ignore_unsolicited_signals:
-            import time
-            current_time = time.time()
-            
-            # Check if this signal is in the polled signals list
-            if signal_index in self.polled_signals:
-                last_poll_time = self.polled_signals[signal_index]
-                
-                # Check if the polled signal has expired
-                if current_time - last_poll_time > self.polled_signal_timeout:
-                    # Signal has expired, remove it from the list
-                    del self.polled_signals[signal_index]
-                    logger.debug(f"Signal {signal_index} poll expired after {self.polled_signal_timeout}s")
-                else:
-                    # Update timestamp and process
-                    self.polled_signals[signal_index] = current_time
-                    logger.debug(f"Processing previously polled signal {signal_index}")
-            else:
-                # Not a polled signal, skip processing
-                logger.debug(f"Ignoring unsolicited signal {signal_index} from CAN ID 0x{can_id:X}")
-                return None
+
             
         # Get the CAN member name from ID
         member_name = self.get_can_member_name(can_id) or f"device_{can_id:x}"
@@ -134,6 +113,34 @@ class SignalGateway:
         
         logger.info(f"Translated signal {member_name}:{signal_name} = {value}")
 
+        # Check if this is an unsolicited signal that should be filtered
+        is_unsolicited = False
+        if self.ignore_unsolicited_signals:
+            current_time = time.time()
+            
+            # Check if this signal is in the polled signals list
+            if signal_index in self.polled_signals:
+                last_poll_time = self.polled_signals[signal_index]
+                
+                # Check if the polled signal has expired
+                if current_time - last_poll_time > self.polled_signal_timeout:
+                    # Signal has expired, remove it from the list
+                    del self.polled_signals[signal_index]
+                    logger.debug(f"Signal {signal_index} poll expired after {self.polled_signal_timeout}s")
+                    is_unsolicited = True
+                else:
+                    # Update timestamp and process
+                    self.polled_signals[signal_index] = current_time
+                    logger.debug(f"Processing previously polled signal {signal_index}")
+            else:
+                # Not a polled signal
+                is_unsolicited = True
+                logger.debug(f"Signal {signal_index} from CAN ID 0x{can_id:X} is unsolicited")
+        
+        # Skip entity registration and MQTT publishing for unsolicited signals
+        if is_unsolicited:
+            return None
+            
         # Get existing entity or create one dynamically
         entity_id = self.signal_mapper.get_entity_by_signal(signal_name, member_name)
         
