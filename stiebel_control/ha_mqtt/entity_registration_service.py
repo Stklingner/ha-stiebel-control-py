@@ -166,13 +166,17 @@ class EntityRegistrationService:
             "payload_not_available": "offline",
         }
         
+        if attributes:
+            config.update({
+                "json_attributes_topic": state_topic.replace("state", "attributes"),
+                "json_attributes_template": "{{ value_json | tojson }}"
+            })
+
         # Add optional fields only if they have values
         for key, value in {
             "device_class": device_class,
             "state_class": state_class,
             "unit_of_measurement": unit_of_measurement,
-            "json_attributes_topic": state_topic.replace("state", "attributes") if attributes else None,
-            "json_attributes_template": "{{ value_json | tojson }}" if attributes else None,
             "icon": icon,
             "options": options,
             "value_template": value_template
