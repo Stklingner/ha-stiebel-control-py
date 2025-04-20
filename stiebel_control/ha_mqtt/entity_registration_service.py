@@ -9,7 +9,10 @@ from typing import Dict, Any, Optional, List, Tuple
 
 from stiebel_control.ha_mqtt.mqtt_interface import MqttInterface
 from stiebel_control.ha_mqtt.signal_entity_mapper import SignalEntityMapper
-from stiebel_control.ha_mqtt.entity_rules import classify_signal, get_entity_id_from_signal, create_entity_config, format_value
+from stiebel_control.ha_mqtt.entity_rules import (
+    classify_signal, get_entity_id_from_signal, create_entity_config, 
+    format_value, format_friendly_name
+)
 from stiebel_control.ha_mqtt.transformations import transform_value
 from stiebel_control.heatpump.elster_table import get_elster_entry_by_english_name, ElsterType
 
@@ -362,7 +365,9 @@ class EntityRegistrationService:
         config = entity_config['config']
         
         # Create friendly name for the entity
-        friendly_name = f"{member_name} {signal_name}"
+        formatted_signal = format_friendly_name(signal_name)
+        formatted_member = format_friendly_name(member_name)
+        friendly_name = f"{formatted_signal} ({formatted_member})"
         
         # Create discovery configuration
         discovery_config, state_topic = create_entity_config(

@@ -115,6 +115,31 @@ def classify_signal(signal_name: str, signal_type: Optional[str] = None, value: 
         "config": entity_config
     }
 
+def format_friendly_name(text: str) -> str:
+    """
+    Format a name to be more human-readable.
+    
+    Args:
+        text: Text to format
+        
+    Returns:
+        Formatted text with spaces instead of underscores and title case
+    """
+    # Replace underscores with spaces
+    text = text.replace("_", " ")
+    
+    # Handle special cases for common abbreviations that should remain uppercase
+    words = text.split()
+    formatted_words = []
+    for word in words:
+        if word.upper() in ["ID", "CAN", "MQTT", "IP", "URL", "WPS", "PIN", "HTTP", "CRC"]:
+            formatted_words.append(word.upper())
+        else:
+            # Capitalize only the first letter, keeping the rest lowercase
+            formatted_words.append(word.capitalize())
+    
+    return " ".join(formatted_words)
+
 def get_entity_id_from_signal(signal_name: str, member_name: str) -> str:
     """
     Generate an entity ID from signal and member names.
