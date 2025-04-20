@@ -9,7 +9,8 @@ from stiebel_control.config.config_models import (
     CanConfig, 
     MqttConfig, 
     LoggingConfig, 
-    EntityConfig
+    EntityConfig,
+    ControlsConfig
 )
 
 logger = logging.getLogger(__name__)
@@ -50,15 +51,15 @@ class ConfigManager:
             # Reload service config
             self.service_config = self._load_yaml(self.service_config_path)
             
-            # Reload entity config
-            entity_config_path = self.service_config.get('entity_config')
-            if entity_config_path:
-                if not os.path.isabs(entity_config_path):
+            # Load controls configuration
+            controls_config_path = self.service_config.get('controls_config')
+            if controls_config_path:
+                if not os.path.isabs(controls_config_path):
                     base_dir = os.path.dirname(os.path.abspath(self.service_config_path))
-                    entity_config_path = os.path.join(base_dir, entity_config_path)
-                self.raw_entity_config = self._load_yaml(entity_config_path)
+                    controls_config_path = os.path.join(base_dir, controls_config_path)
+                self.raw_controls_config = self._load_yaml(controls_config_path)
             else:
-                self.raw_entity_config = {}
+                self.raw_controls_config = {}
                 
             # Reinitialize specialized configs
             self._init_specialized_configs()
@@ -119,15 +120,17 @@ class ConfigManager:
         )
         self.mqtt_config = MqttConfig.from_dict(self.service_config.get('mqtt', {}))
         self.logging_config = LoggingConfig.from_dict(self.service_config.get('logging', {}))
-        self.entity_config = EntityConfig.from_dict(
-            self.raw_entity_config,
-            self.service_config.get('dynamic_entity_registration', False),
-            self.service_config.get('permissive_signal_handling', False),
-            self.service_config.get('ignore_unsolicited_messages', False)
-        )
+        
+        # Initialize controls configuration
+        self.controls_config = ControlsConfig.from_dict(self.raw_controls_config)
         
         # Store other common settings
         self.update_interval = int(self.service_config.get('update_interval', 60))
+        
+        # Store system settings
+        self.dynamic_registration_enabled = self.service_config.get('dynamic_entity_registration', False)
+        self.permissive_signal_handling = self.service_config.get('permissive_signal_handling', False)
+        self.ignore_unsolicited_signals = self.service_config.get('ignore_unsolicited_messages', False)
         
     def get_can_config(self) -> CanConfig:
         """
@@ -156,14 +159,41 @@ class ConfigManager:
         """
         return self.logging_config
         
-    def get_entity_config(self) -> EntityConfig:
+    def get_controls_config(self) -> Dict[str, Dict[str, Any]]:
         """
-        Get entity configuration.
+        Get controls configuration.
         
         Returns:
-            Entity configuration object
+            Dictionary of control configurations
         """
-        return self.entity_config
+        return self.controls_config.controls if self.controls_config else {}
+    
+    def is_dynamic_registration_enabled(self) -> bool:
+        """
+        Check if dynamic entity registration is enabled.
+        
+        Returns:
+            True if dynamic registration is enabled, False otherwise
+        """
+        return self.dynamic_registration_enabled
+    
+    def is_permissive_signal_handling(self) -> bool:
+        """
+        Check if permissive signal handling is enabled.
+        
+        Returns:
+            True if permissive signal handling is enabled, False otherwise
+        """
+        return self.permissive_signal_handling
+    
+    def should_ignore_unsolicited_signals(self) -> bool:
+        """
+        Check if unsolicited signals should be ignored.
+        
+        Returns:
+            True if unsolicited signals should be ignored, False otherwise
+        """
+        return self.ignore_unsolicited_signals
         
     def get_update_interval(self) -> int:
         """

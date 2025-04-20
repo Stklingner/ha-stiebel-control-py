@@ -13,7 +13,6 @@ from stiebel_control.ha_mqtt.mqtt_interface import MqttInterface
 from stiebel_control.ha_mqtt.signal_entity_mapper import SignalEntityMapper
 from stiebel_control.command_handler import CommandHandler
 from stiebel_control.can.interface import CanInterface
-from stiebel_control.config.config_models import EntityConfig
 from stiebel_control.can.protocol import StiebelProtocol
 from stiebel_control.heatpump.elster_table import get_elster_entry_by_index, get_elster_entry_by_english_name
 from stiebel_control.ha_mqtt.transformations import transform_value
@@ -35,7 +34,7 @@ class SignalGateway:
                  mqtt_interface: MqttInterface,
                  can_interface: CanInterface,
                  signal_mapper: SignalEntityMapper,
-                 entity_config: EntityConfig,
+                 controls_config: Dict[str, Dict[str, Any]] = None,
                  protocol: Optional[StiebelProtocol] = None,
                  ignore_unsolicited_signals: bool = False):
         """
@@ -46,7 +45,7 @@ class SignalGateway:
             mqtt_interface: MQTT interface for publishing states
             can_interface: CAN interface for reading signal values
             signal_mapper: Maps between signals and entities
-            entity_config: Entity configuration
+            controls_config: Controls configuration dictionary
             protocol: Optional StiebelProtocol instance for CAN member lookups
             ignore_unsolicited_signals: If True, only process signals that were explicitly polled or commanded
         """
@@ -54,9 +53,9 @@ class SignalGateway:
         self.mqtt_interface = mqtt_interface
         self.can_interface = can_interface
         self.signal_mapper = signal_mapper
-        self.entity_config = entity_config
+        self.controls_config = controls_config or {}
         self.protocol = protocol
-        self.permissive_signal_handling = entity_config.permissive_signal_handling if entity_config else False
+        self.permissive_signal_handling = False  # Now set directly at initialization
         self.signal_callbacks = {}
         
         # Track polled signal indices with timestamps
@@ -69,12 +68,13 @@ class SignalGateway:
         # Whether to ignore signals that weren't explicitly polled
         self.ignore_unsolicited_signals = ignore_unsolicited_signals
         
-        # Initialize the command handler without a transformation service
+        # Initialize the command handler with the controls configuration
         self.command_handler = CommandHandler(
             can_interface=can_interface,
-            entity_config=entity_config.entities if hasattr(entity_config, 'entities') else {},
+            entity_config={},  # Legacy, using empty dict
             get_elster_entry_by_english_name=get_elster_entry_by_english_name,
-            transformation_service=None # TODO: Add transformation service
+            transformation_service=None,  # TODO: Add transformation service
+            controls_config=self.controls_config
         )
         
         # Reference to the signal poller (will be set by main.py)

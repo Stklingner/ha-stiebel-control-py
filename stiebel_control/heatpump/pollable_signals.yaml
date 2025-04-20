@@ -22,53 +22,50 @@ priority_groups:
     # Temperatures
     - signal: OUTSIDE_TEMP
       can_member: BOILER
-    - signal: FLOW_INTERNAL_TEMP
-      can_member: HEATING
+    # - signal: FLOW_INTERNAL_TEMP
+    #   can_member: HEATING
     - signal: HEATING_RETURN_ACTUAL
       can_member: HEATING
     - signal: ROOM_SET_TEMP_I
       can_member: MANAGER
-    - signal: ROOM_INTERNAL_TEMP
+    - signal: ROOM_SET_TEMP_II
+      can_member: MANAGER
+    - signal: ROOM_SET_TEMP_III
+      can_member: MANAGER
+    - signal: ROOM_SET_TEMP_NIGHT
       can_member: MANAGER
     - signal: COMPRESSOR
       can_member: HEATING
     # Operating status
-    - signal: VOLUME_FLOW
-      can_member: HEATING
-
+    # - signal: VOLUME_FLOW
+    #   can_member: HEATING
     - signal: MINUTE
       can_member: MANAGER
   # Medium priority - less quickly changing values
   medium:
-    # DHW related
-    - signal: STORAGE_TANK_INTERNAL_TEMP
-      can_member: BOILER
-    - signal: STORAGE_TANK_SETPOINT_TEMP
-      can_member: BOILER
-    
+    # - signal: STORAGE_TANK_INTERNAL_TEMP
+    #   can_member: BOILER
+    # - signal: STORAGE_TANK_SETPOINT_TEMP
+    #   can_member: BOILER
     - signal: DEFROST_ACTIVE
       can_member: HEATING
     
     # Program state
-    - signal: ACTIVE_HEATING_PROGRAM
-      can_member: MANAGER
     - signal: PROGRAM_SWITCH
       can_member: MANAGER
     - signal: ACTIVE_HEATING_PROGRAM
-      can_member: HEATING
-    - signal: PROGRAM_SWITCH
       can_member: HEATING
   # Low priority - slow changing values
     - signal: HOUR
       can_member: MANAGER
   low:
     # Energy statistics
-    - signal: HEATING_ENERGY_DAY_KWH
-      can_member: BOILER
-    - signal: ELECTRICITY_INTAKE_HEATING_DAY_KWH
-      can_member: BOILER
-    - signal: ELECTRICITY_INTAKE_HEATING_SUM_KWH
-      can_member: BOILER
+    # - signal: HEATING_ENERGY_DAY_KWH
+    #   can_member: BOILER
+    # - signal: ELECTRICITY_INTAKE_HEATING_DAY_KWH
+    #   can_member: BOILER
+    # - signal: ELECTRICITY_INTAKE_HEATING_SUM_KWH
+    #   can_member: BOILER
     - signal: BOILER_PERFORMANCE
       can_member: BOILER
     - signal: DAY_OUTPUT_KW
@@ -82,10 +79,10 @@ priority_groups:
       can_member: HEATING
     - signal: ELECTRICITY_INTAKE_HEATING_SUM_KWH
       can_member: HEATING
-    - signal: BOILER_PERFORMANCE
-      can_member: HEATING
-    - signal: DAY_OUTPUT_KW
-      can_member: HEATING
+    # - signal: BOILER_PERFORMANCE
+    #   can_member: HEATING
+    # - signal: DAY_OUTPUT_KW
+    #   can_member: HEATING
     
     - signal: DAY
       can_member: MANAGER

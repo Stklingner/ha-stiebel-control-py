@@ -18,6 +18,7 @@ HA_ENTITY_TYPES = {
     "sensor.power": {"entity_type": "sensor","device_class": "power", "unit_of_measurement": "kW", "state_class": "measurement", "icon": "mdi:light-bulb"},
     "sensor.energy": {"entity_type": "sensor","device_class": "energy", "unit_of_measurement": "kWh", "state_class": "total_increasing", "icon": "mdi:lightning-bolt"},
     "sensor.pressure": {"entity_type": "sensor","device_class": "pressure", "unit_of_measurement": "bar", "state_class": "measurement", "icon": "mdi:gauge"},
+    "sensor.flow": {"entity_type": "sensor","device_class": "flow", "unit_of_measurement": "m³/h", "state_class": "measurement", "icon": "mdi:thermometer"},
     "sensor.percent": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "%", "state_class": "", "icon": "mdi:percent"},
     "sensor.hour": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "h", "state_class": "", "icon": "mdi:clock-outline"},
     "sensor.day": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "d", "state_class": "", "icon": "mdi:calendar"},
@@ -260,7 +261,8 @@ def create_entity_config(entity_type: str, entity_id: str, name: str,
         config["payload_on"] = "ON"
         config["payload_off"] = "OFF"
     elif entity_type == "select":
-        config["command_topic"] = f"{base_topic}/{entity_id}/set"
+        # Use the same command_topic format as in register_select method
+        config["command_topic"] = f"{base_topic}/{entity_id}/command"
         if "options" in kwargs:
             config["options"] = kwargs["options"]
     

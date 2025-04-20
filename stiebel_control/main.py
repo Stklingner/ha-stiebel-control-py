@@ -55,16 +55,15 @@ class StiebelControl:
             signal_mapper=self.signal_mapper
         )
         
-        # Initialize signal gateway
-        entity_config = self.config_manager.get_entity_config()
+        # Initialize signal gateway with new controls-focused approach
         self.signal_gateway = SignalGateway(
             entity_service=self.entity_service,
             mqtt_interface=self.mqtt_interface,
             can_interface=self.can_interface,
             signal_mapper=self.signal_mapper,
-            entity_config=entity_config,
+            controls_config=self.config_manager.get_controls_config(),
             protocol=self.can_interface.protocol,
-            ignore_unsolicited_signals=entity_config.ignore_unsolicited_signals
+            ignore_unsolicited_signals=self.config_manager.should_ignore_unsolicited_signals()
         )
         
         # Now set the signal gateway's process_signal method as the CAN interface callback
@@ -202,22 +201,54 @@ class StiebelControl:
             
     def _register_configured_entities(self) -> None:
         """
-        Register pre-configured entities from the configuration.
+        Register controls from the controls configuration.
         """
+        controls_config = self.config_manager.get_controls_config()
         
-        entity_config = self.config_manager.get_entity_config()
-        
-        if not entity_config or not hasattr(entity_config, 'entities'):
-            logger.warning("No entity configuration found")
+        if not controls_config:
+            logger.warning("No controls configuration found")
             return
             
-        logger.info(f"Registering {len(entity_config.entities)} configured entities")
+        logger.info(f"Registering {len(controls_config)} controls")
         
-        for entity_id, entity_def in entity_config.entities.items():
+        for control_id, control_def in controls_config.items():
             try:
-                self.entity_service.register_entity_from_config(entity_id, entity_def)
+                control_type = control_def.get('type')
+                name = control_def.get('name', control_id)
+                icon = control_def.get('icon')
+                
+                if control_type == 'select':
+                    options = control_def.get('options', [])
+                    self.entity_service.register_select(
+                        entity_id=control_id,
+                        name=name,
+                        options=options,
+                        icon=icon
+                    )
+                elif control_type == 'number':
+                    min_value = control_def.get('min')
+                    max_value = control_def.get('max')
+                    step = control_def.get('step')
+                    unit = control_def.get('unit_of_measurement')
+                    self.entity_service.register_number(
+                        entity_id=control_id,
+                        name=name,
+                        min_value=min_value,
+                        max_value=max_value,
+                        step=step,
+                        unit_of_measurement=unit,
+                        icon=icon
+                    )
+                elif control_type == 'button':
+                    self.entity_service.register_button(
+                        entity_id=control_id,
+                        name=name,
+                        icon=icon
+                    )
+                else:
+                    logger.warning(f"Unknown control type '{control_type}' for control {control_id}")
             except Exception as e:
-                logger.error(f"Error registering entity {entity_id}: {e}")
+                logger.error(f"Error registering control {control_id}: {e}", exc_info=True)
                 
     def _register_system_sensors(self) -> None:
         """

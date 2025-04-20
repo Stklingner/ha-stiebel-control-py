@@ -1,16 +1,15 @@
 ###############################################
-# Stiebel Eltron Heat Pump Control - Entity Configuration
-# These will override or be added to the dynamically generated entities
+# Stiebel Eltron Heat Pump Control - Controls Configuration
+# Configuration for interactive controls that can change heat pump settings
 ###############################################
 
-# Entity definitions for sensors, buttons, and selects
-entities:  
-  # Select controls
+controls:  
+  # Mode controls
   program_switch:
     type: select
-    name: Program Switch
-    signal: ACTIVE_HEATING_PROGRAM
+    name: Heat Pump Operating Mode
     can_member: MANAGER
+    write_signal: ACTIVE_HEATING_PROGRAM
     options:
       - Emergency
       - Standby
@@ -20,14 +19,44 @@ entities:
       - Summer mode
       - Off
     icon: mdi:tune-vertical
-  
-  # update_time:
+    
+  # Temperature controls
+  day_temp:
+    type: number
+    name: Target Temperature
+    can_member: MANAGER
+    write_signal: ROOM_SET_TEMP_I
+    min: 12
+    max: 30
+    step: 0.5
+    unit_of_measurement: "°C"
+    icon: mdi:thermometer
+
+  night_temp:
+    type: number
+    name: Target Temperature
+    can_member: MANAGER
+    write_signal: ROOM_SET_TEMP_NIGHT
+    min: 12
+    max: 30
+    step: 0.5
+    unit_of_measurement: "°C"
+    icon: mdi:thermometer
+
+  # Button controls
+  update_time:
+    type: button
+    name: Update Heat Pump Time
+    icon: mdi:clock-outline
+    action_type: system_time
+    can_member: MANAGER
+    
+  # reset_error:
   #   type: button
-  #   name: Update Time
-  #   icon: mdi:clock-outline
-  #   action: custom
-  #   custom_action:
-  #     type: sequence
+  #   name: Reset Error State
+  #   icon: mdi:alert-circle-outline
+  #   action_type: reset_error
+  #   can_member: MANAGER
   #     actions:
   #       - type: write_signal
   #         signal: HOUR

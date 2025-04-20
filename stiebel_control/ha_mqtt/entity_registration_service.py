@@ -327,6 +327,130 @@ class EntityRegistrationService:
             logger.error(f"Failed to publish discovery for {entity_id}")
             return False
             
+    def register_number(self, entity_id: str, name: str, min_value: float = None, 
+                      max_value: float = None, step: float = None,
+                      unit_of_measurement: str = None, icon: str = None) -> bool:
+        """
+        Register a number entity with Home Assistant.
+        
+        Args:
+            entity_id: Unique ID for the entity
+            name: Display name for the entity
+            min_value: Minimum allowed value
+            max_value: Maximum allowed value
+            step: Step value for UI controls
+            unit_of_measurement: Unit of measurement (e.g., "°C")
+            icon: Material Design Icon to use
+            
+        Returns:
+            bool: True if registered successfully, False otherwise
+        """
+        logger.debug(f"Registering number entity: {entity_id}, name='{name}', "
+                  f"min={min_value}, max={max_value}, step={step}, "
+                  f"unit={unit_of_measurement}, icon={icon}")
+        
+        # Generate discovery topic
+        discovery_topic = f"{self.mqtt_interface.discovery_prefix}/number/{entity_id}/config"
+        
+        # Generate topics
+        state_topic = f"{self.mqtt_interface.base_topic}/{entity_id}/state"
+        command_topic = f"{self.mqtt_interface.base_topic}/{entity_id}/command"
+        
+        # Create config payload
+        config = {
+            "name": name,
+            "unique_id": f"{self.mqtt_interface.client_id}_{entity_id}",
+            "state_topic": state_topic,
+            "command_topic": command_topic,
+            "availability_topic": f"{self.mqtt_interface.base_topic}/status",
+            "payload_available": "online",
+            "payload_not_available": "offline"
+        }
+        
+        # Add the number-specific configuration
+        if min_value is not None:
+            config["min"] = min_value
+        if max_value is not None:
+            config["max"] = max_value
+        if step is not None:
+            config["step"] = step
+        if unit_of_measurement is not None:
+            config["unit_of_measurement"] = unit_of_measurement
+            
+        # Add icon if provided
+        if icon:
+            config["icon"] = icon
+            
+        # Add device info
+        config["device"] = self.device_info
+        
+        # Publish discovery through MQTT interface
+        if self.mqtt_interface.publish_discovery(discovery_topic, config):
+            # Store entity info
+            self.entities[entity_id] = {
+                "type": "number",
+                "state_topic": state_topic,
+                "command_topic": command_topic,
+                "config": config
+            }
+            logger.debug(f"Successfully registered entity {entity_id} as number entity")
+            return True
+        else:
+            logger.error(f"Failed to publish discovery for {entity_id}")
+            return False
+            
+    def register_button(self, entity_id: str, name: str, icon: str = None) -> bool:
+        """
+        Register a button entity with Home Assistant.
+        
+        Args:
+            entity_id: Unique ID for the entity
+            name: Display name for the entity
+            icon: Material Design Icon to use
+            
+        Returns:
+            bool: True if registered successfully, False otherwise
+        """
+        logger.debug(f"Registering button entity: {entity_id}, name='{name}', icon={icon}")
+        
+        # Generate discovery topic
+        discovery_topic = f"{self.mqtt_interface.discovery_prefix}/button/{entity_id}/config"
+        
+        # Generate command topic
+        command_topic = f"{self.mqtt_interface.base_topic}/{entity_id}/command"
+        
+        # Create config payload
+        config = {
+            "name": name,
+            "unique_id": f"{self.mqtt_interface.client_id}_{entity_id}",
+            "command_topic": command_topic,
+            "availability_topic": f"{self.mqtt_interface.base_topic}/status",
+            "payload_available": "online",
+            "payload_not_available": "offline",
+            "payload_press": "PRESS"
+        }
+        
+        # Add icon if provided
+        if icon:
+            config["icon"] = icon
+            
+        # Add device info
+        config["device"] = self.device_info
+        
+        # Publish discovery through MQTT interface
+        if self.mqtt_interface.publish_discovery(discovery_topic, config):
+            # Store entity info
+            self.entities[entity_id] = {
+                "type": "button",
+                "command_topic": command_topic,
+                "config": config
+            }
+            logger.debug(f"Successfully registered entity {entity_id} as button entity")
+            return True
+        else:
+            logger.error(f"Failed to publish discovery for {entity_id}")
+            return False
+            
     def register_dynamic_entity(
         self, 
         signal_name: str,

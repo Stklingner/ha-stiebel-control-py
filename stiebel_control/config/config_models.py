@@ -72,9 +72,29 @@ class LoggingConfig:
         )
         
 @dataclass
+class ControlsConfig:
+    """Configuration for interactive controls that change heat pump settings."""
+    controls: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    
+    @classmethod
+    def from_dict(cls, config_dict: Dict[str, Any]) -> 'ControlsConfig':
+        """Create a ControlsConfig instance from a dictionary."""
+        if not config_dict:
+            return cls()
+        
+        return cls(
+            controls=config_dict.get('controls', {})
+        )
+    
+    def get_control_def(self, control_id: str) -> Optional[Dict[str, Any]]:
+        """Get control definition by ID."""
+        return self.controls.get(control_id)
+
+@dataclass
 class EntityConfig:
     """Configuration for entities and dynamic registration."""
     entities: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    controls_config: Optional[ControlsConfig] = None
     dynamic_registration_enabled: bool = False
     permissive_signal_handling: bool = False
     ignore_unsolicited_signals: bool = False
@@ -83,15 +103,29 @@ class EntityConfig:
     def from_dict(cls, entity_config: Dict[str, Dict[str, Any]], 
                  dynamic_registration: bool,
                  permissive_signal_handling: bool = False,
-                 ignore_unsolicited_signals: bool = False) -> 'EntityConfig':
+                 ignore_unsolicited_signals: bool = False,
+                 controls_config: Optional[ControlsConfig] = None) -> 'EntityConfig':
         """Create an EntityConfig instance from entity configuration."""
+        if not entity_config:
+            return cls(dynamic_registration_enabled=dynamic_registration,
+                      permissive_signal_handling=permissive_signal_handling,
+                      ignore_unsolicited_signals=ignore_unsolicited_signals,
+                      controls_config=controls_config)
+            
         return cls(
-            entities=entity_config or {},
+            entities=entity_config.get('entities', {}),
             dynamic_registration_enabled=dynamic_registration,
             permissive_signal_handling=permissive_signal_handling,
-            ignore_unsolicited_signals=ignore_unsolicited_signals
+            ignore_unsolicited_signals=ignore_unsolicited_signals,
+            controls_config=controls_config
         )
         
-    def get_entity_def(self, entity_id: str) -> Dict[str, Any]:
+    def get_entity_def(self, entity_id: str) -> Optional[Dict[str, Any]]:
         """Get entity definition by ID."""
-        return self.entities.get(entity_id, {})
+        return self.entities.get(entity_id)
+    
+    def get_control_def(self, control_id: str) -> Optional[Dict[str, Any]]:
+        """Get control definition by ID."""
+        if self.controls_config:
+            return self.controls_config.get_control_def(control_id)
+        return None
