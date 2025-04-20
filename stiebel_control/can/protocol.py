@@ -117,6 +117,10 @@ class StiebelProtocol:
             can_member = self._get_can_member(can_id)
             data = msg.data
             
+            # Debug log the raw CAN message
+            hex_data = ' '.join([f'{b:02X}' for b in data])
+            logger.debug(f"RAW CAN 0x{can_id:X}: {hex_data}")
+            
             # Check message length
             if len(data) < 7:
                 logger.debug(f"Ignoring short message from ID 0x{can_id:X}")
