@@ -34,19 +34,19 @@ def classify_signal(signal_name: str, signal_type: Optional[str] = None, value: 
             signal_type = elster_entry.type
     
     # Classify based on signal name and type
-    if signal_type == ElsterType.ET_ENUM.name:
-        entity_type = "select"
-        # For select entities, we'd need options which aren't determined here
-    elif signal_type == ElsterType.ET_BOOL.name:
+    if signal_type == ElsterType.ET_MODE.name or signal_type == ElsterType.ET_ERR_CODE.name:
+        # For dynamically registered entities, always use sensor with enum device_class
+        # instead of select to match existing behavior
+        entity_type = "sensor"
+        entity_config["device_class"] = "enum"
+    elif signal_type in [ElsterType.ET_BOOLEAN.name, ElsterType.ET_LITTLE_BOOL.name]:
         entity_type = "binary_sensor"
     elif "STATUS" in signal_name or "STATE" in signal_name:
         # Status or state signals could be binary sensors or select entities
         if isinstance(value, bool) or (isinstance(value, (int, float)) and (value == 0 or value == 1)):
             entity_type = "binary_sensor"
         else:
-            # Could be a status enum with multiple values
             entity_type = "sensor"
-            entity_config["device_class"] = "enum"
     elif "TEMP" in signal_name:
         entity_type = "sensor"
         entity_config["device_class"] = "temperature"
@@ -68,6 +68,12 @@ def classify_signal(signal_name: str, signal_type: Optional[str] = None, value: 
     elif "COUNT" in signal_name or "COUNTER" in signal_name:
         entity_type = "sensor"
         entity_config["state_class"] = "total_increasing"
+    
+    # Add state class for numeric values if not already set
+    if entity_type == "sensor" and "state_class" not in entity_config:
+        # For raw numeric values, adding a state class helps with history/graphing
+        if isinstance(value, (int, float)):
+            entity_config["state_class"] = "measurement"
     
     # Add icon based on entity type
     entity_config["icon"] = get_icon_for_entity(entity_type, signal_name)
