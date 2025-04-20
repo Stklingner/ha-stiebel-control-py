@@ -169,7 +169,7 @@ class EntityRegistrationService:
         if attributes:
             config.update({
                 "json_attributes_topic": state_topic.replace("state", "attributes"),
-                "json_attributes_template": "{{ value_json | tojson }}"
+                #"json_attributes_template": "{{ value_json | tojson }}"
             })
 
         # Add optional fields only if they have values
