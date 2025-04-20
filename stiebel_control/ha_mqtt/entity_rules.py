@@ -23,7 +23,8 @@ HA_ENTITY_TYPES = {
     "sensor.day": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "d", "state_class": "", "icon": "mdi:calendar"},
     "sensor.month": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "m", "state_class": "", "icon": "mdi:calendar-month-outline"},
     "sensor.year": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "y", "state_class": "", "icon": "mdi:calendar-year-outline"},
-    "binary_sensor": {"entity_type": "binary_sensor"}
+    "binary_sensor": {"entity_type": "binary_sensor"},
+    "binary_sensor.power": {"entity_type": "binary_sensor","device_class": "power"},
 }
 
 def classify_signal(signal_name: str, signal_type: Optional[str] = None, value: Any = None) -> Dict[str, Any]:
@@ -60,6 +61,7 @@ def classify_signal(signal_name: str, signal_type: Optional[str] = None, value: 
             for key, value in config.items():
                 if value:  # Only add non-empty values
                     entity_config[key] = value
+            # Override the units if we have one from the Elster entry
             if hasattr(elster_entry, 'unit_of_measurement'):
                 entity_config['unit_of_measurement'] = elster_entry.unit_of_measurement
 
