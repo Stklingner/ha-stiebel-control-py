@@ -193,6 +193,8 @@ def get_icon_for_entity(entity_type: str, device_class: str, signal_name: str) -
             return "mdi:gauge"
         elif "PERCENT" in signal_name or signal_name.endswith("_PCT") or device_class == "enum":
             return "mdi:percent"
+        elif "MINUTE" in signal_name or device_class == "timestamp":
+            return "mdi:clock-outline"
         elif "HOUR" in signal_name or "TIME" in signal_name or device_class == "timestamp":
             return "mdi:clock-outline"
         elif "DAY" in signal_name or device_class == "date":
