@@ -156,6 +156,9 @@ class StiebelControl:
         """
         logger.info("Starting Stiebel Control")
         
+        # Initialize start time for uptime tracking
+        self.start_time = time.time()
+        
         try:
             # Connect to MQTT broker and initialize sensors first
             if not self.mqtt_interface.connect():
@@ -219,10 +222,13 @@ class StiebelControl:
     def _register_system_sensors(self) -> None:
         """
         Register system status sensors that track the application state.
-        """
-        logger.info("Registering system status sensors")
         
-        # Register device status sensor
+        Only the main system_status entity is registered as a sensor, and all other
+        monitoring metrics will be added as attributes to this entity.
+        """
+        logger.info("Registering system status entity")
+        
+        # Register device status sensor - this will be our main monitoring entity
         self.entity_service.register_sensor(
             entity_id="system_status",
             name="System Status",
@@ -231,38 +237,6 @@ class StiebelControl:
             state_class=None,
             unit_of_measurement=None,
             options=["online", "offline", "starting", "error"]
-        )
-        
-        # Register entities count sensor
-        self.entity_service.register_sensor(
-            entity_id="entities_count",
-            name="Entities Count",
-            icon="mdi:counter",
-            device_class="measurement",
-            state_class="measurement"
-        )
-        
-        # Register polling statistics sensors
-        self.entity_service.register_sensor(
-            entity_id="polled_entities_count",
-            name="Polled Entities Count",
-            icon="mdi:refresh-auto",
-            state_class="measurement"
-        )
-        
-        self.entity_service.register_sensor(
-            entity_id="responsive_entities_count",
-            name="Responsive Entities Count",
-            icon="mdi:check-circle-outline",
-            state_class="measurement"
-        )
-        
-        self.entity_service.register_sensor(
-            entity_id="non_responsive_entities",
-            name="Non-Responsive Entities",
-            icon="mdi:alert-circle-outline",
-            device_class=None,
-            state_class=None
         )
         
         # Initial entity count
@@ -324,18 +298,27 @@ class StiebelControl:
                     self.signal_poller.update()
                     last_poller_check = current_time
                     
-                # Update entity count every 60 seconds
-                if current_time - last_entity_count_update >= 60:
-                    self.signal_gateway.update_entities_count(None)
-                    last_entity_count_update = current_time
-                
-                # Update polling statistics every 30 seconds
+                # Update system monitoring statistics every 30 seconds
                 if current_time - last_poller_stats_update >= 30:
+                    # Get polling stats
                     stats = self.signal_poller.get_stats()
-                    self.entity_service.update_entity_state("polled_entities_count", stats['total_polled_entities'])
-                    self.entity_service.update_entity_state("responsive_entities_count", stats['total_responsive_entities'])
-                    self.entity_service.update_entity_state("non_responsive_entities", stats['non_responsive_entities_list'])
+                    
+                    # Get entity counts
+                    entity_count = len(self.entity_service.entities)
+                    
+                    # Consolidate all monitoring metrics as attributes on system_status entity
+                    system_attributes = {
+                        "entities_count": entity_count,
+                        "polled_entities_count": stats['total_polled_entities'],
+                        "responsive_entities_count": stats['total_responsive_entities'],
+                        "non_responsive_entities": stats['non_responsive_entities_list'],
+                        "uptime_seconds": int(current_time - self.start_time)
+                    }
+                    
+                    # Update attributes
+                    self.entity_service.update_entity_attributes("system_status", system_attributes)
                     last_poller_stats_update = current_time
+                    last_entity_count_update = current_time  # Both are now handled together
                     
                 # Update the polled signals tracking every 15 seconds
                 # This keeps the signal gateway aware of what's been polled by the poller

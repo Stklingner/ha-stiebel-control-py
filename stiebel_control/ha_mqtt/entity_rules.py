@@ -1,0 +1,221 @@
+"""
+Entity classification and configuration rules for Home Assistant MQTT integration.
+
+This module contains pure functions for determining entity types and configurations
+based on signal characteristics. It handles the classification logic separate from
+the registration process.
+"""
+import logging
+from typing import Dict, Any, Optional, List, Tuple
+
+from stiebel_control.heatpump.elster_table import get_elster_entry_by_english_name, ElsterType
+
+logger = logging.getLogger(__name__)
+
+def classify_signal(signal_name: str, signal_type: Optional[str] = None, value: Any = None) -> Dict[str, Any]:
+    """
+    Determine the appropriate entity type and attributes for a signal.
+    
+    Args:
+        signal_name: Name of the signal
+        signal_type: Type of the signal from the elster table (optional)
+        value: Current value of the signal (optional)
+        
+    Returns:
+        Dictionary with entity type and configuration
+    """
+    entity_type = "sensor"  # Default entity type
+    entity_config = {}
+    
+    # If no signal type provided, try to get it from elster table
+    if not signal_type:
+        elster_entry = get_elster_entry_by_english_name(signal_name)
+        if elster_entry:
+            signal_type = elster_entry.type
+    
+    # Classify based on signal name and type
+    if signal_type == ElsterType.ET_ENUM.name:
+        entity_type = "select"
+        # For select entities, we'd need options which aren't determined here
+    elif signal_type == ElsterType.ET_BOOL.name:
+        entity_type = "binary_sensor"
+    elif "STATUS" in signal_name or "STATE" in signal_name:
+        # Status or state signals could be binary sensors or select entities
+        if isinstance(value, bool) or (isinstance(value, (int, float)) and (value == 0 or value == 1)):
+            entity_type = "binary_sensor"
+        else:
+            # Could be a status enum with multiple values
+            entity_type = "sensor"
+            entity_config["device_class"] = "enum"
+    elif "TEMP" in signal_name:
+        entity_type = "sensor"
+        entity_config["device_class"] = "temperature"
+        entity_config["unit_of_measurement"] = "°C"
+        entity_config["state_class"] = "measurement"
+    elif "PRESSURE" in signal_name:
+        entity_type = "sensor"
+        entity_config["device_class"] = "pressure"
+        entity_config["unit_of_measurement"] = "bar"
+        entity_config["state_class"] = "measurement"
+    elif "PERCENT" in signal_name or signal_name.endswith("_PCT"):
+        entity_type = "sensor"
+        entity_config["unit_of_measurement"] = "%"
+        entity_config["state_class"] = "measurement"
+    elif "HOUR" in signal_name or "TIME" in signal_name:
+        entity_type = "sensor"
+        entity_config["unit_of_measurement"] = "h"
+        entity_config["state_class"] = "total_increasing"
+    elif "COUNT" in signal_name or "COUNTER" in signal_name:
+        entity_type = "sensor"
+        entity_config["state_class"] = "total_increasing"
+    
+    # Add icon based on entity type
+    entity_config["icon"] = get_icon_for_entity(entity_type, signal_name)
+    
+    return {
+        "entity_type": entity_type,
+        "config": entity_config
+    }
+
+def get_entity_id_from_signal(signal_name: str, member_name: str) -> str:
+    """
+    Generate an entity ID from signal and member names.
+    
+    Args:
+        signal_name: Name of the signal
+        member_name: Name of the CAN member
+        
+    Returns:
+        Valid entity ID string
+    """
+    # Clean member name (lowercase, replace spaces)
+    clean_member = member_name.lower().replace(" ", "_")
+    
+    # Clean signal name (lowercase, replace spaces)
+    clean_signal = signal_name.lower().replace(" ", "_")
+    
+    # Create entity ID
+    entity_id = f"{clean_member}_{clean_signal}"
+    
+    # Ensure it's valid (no special chars except underscore)
+    entity_id = "".join(c for c in entity_id if c.isalnum() or c == "_")
+    
+    return entity_id
+
+def get_icon_for_entity(entity_type: str, signal_name: str) -> str:
+    """
+    Determine an appropriate icon for the entity.
+    
+    Args:
+        entity_type: Type of entity (sensor, binary_sensor, select)
+        signal_name: Name of the signal
+        
+    Returns:
+        mdi icon string
+    """
+    if entity_type == "binary_sensor":
+        if "STATUS" in signal_name:
+            return "mdi:information-outline"
+        elif "ALARM" in signal_name or "ERROR" in signal_name:
+            return "mdi:alert-circle-outline"
+        else:
+            return "mdi:toggle-switch"
+    elif entity_type == "select":
+        return "mdi:format-list-bulleted"
+    elif entity_type == "sensor":
+        if "TEMP" in signal_name:
+            return "mdi:thermometer"
+        elif "PRESSURE" in signal_name:
+            return "mdi:gauge"
+        elif "PERCENT" in signal_name or signal_name.endswith("_PCT"):
+            return "mdi:percent"
+        elif "HOUR" in signal_name or "TIME" in signal_name:
+            return "mdi:clock-outline"
+        elif "COUNT" in signal_name or "COUNTER" in signal_name:
+            return "mdi:counter"
+        else:
+            return "mdi:chart-line"
+            
+    # Default fallback icon
+    return "mdi:information-outline"
+
+def create_entity_config(entity_type: str, entity_id: str, name: str, 
+                        discovery_prefix: str, base_topic: str, client_id: str,
+                        device_info: Dict[str, Any], **kwargs) -> Tuple[Dict[str, Any], str]:
+    """
+    Create discovery configuration based on entity type.
+    
+    Args:
+        entity_type: Type of entity (sensor, binary_sensor, select)
+        entity_id: Entity ID
+        name: Friendly name of the entity
+        discovery_prefix: MQTT discovery prefix
+        base_topic: Base topic for MQTT
+        client_id: Client ID for MQTT
+        device_info: Device information dictionary
+        **kwargs: Additional entity-specific configuration
+        
+    Returns:
+        Tuple of (discovery_config, state_topic)
+    """
+    # Generate discovery topic
+    discovery_topic = f"{discovery_prefix}/{entity_type}/{entity_id}/config"
+    
+    # Generate state topic
+    state_topic = f"{base_topic}/{entity_id}/state"
+    
+    # Base configuration for all entity types
+    config = {
+        "name": name,
+        "unique_id": f"{client_id}_{entity_id}",
+        "state_topic": state_topic,
+        "availability_topic": f"{base_topic}/status",
+        "payload_available": "online",
+        "payload_not_available": "offline",
+    }
+    
+    # Add device info
+    config["device"] = device_info
+    
+    # Add entity-specific configuration
+    if entity_type == "binary_sensor":
+        config["payload_on"] = "ON"
+        config["payload_off"] = "OFF"
+    elif entity_type == "select":
+        config["command_topic"] = f"{base_topic}/{entity_id}/set"
+        if "options" in kwargs:
+            config["options"] = kwargs["options"]
+    
+    # Add additional attributes from kwargs
+    for key, value in kwargs.items():
+        if key not in ["options"] and value is not None:  # options already handled for select
+            config[key] = value
+    
+    return config, state_topic
+
+def format_value(value: Any, entity_type: str) -> Any:
+    """
+    Format a value based on entity type for MQTT publishing.
+    
+    Args:
+        value: The value to format
+        entity_type: Type of entity
+        
+    Returns:
+        Formatted value ready for MQTT publishing
+    """
+    if entity_type == "binary_sensor":
+        # Convert to ON/OFF
+        return "ON" if value else "OFF"
+    elif isinstance(value, bool):
+        # Convert boolean to ON/OFF for other entity types
+        return "ON" if value else "OFF"
+    elif value is None:
+        # Convert None to unknown
+        return "unknown"
+    elif isinstance(value, dict):
+        # For attributes or other JSON data, leave as dict for MQTT interface to handle
+        return value
+    else:
+        # Convert other types to string
+        return str(value)

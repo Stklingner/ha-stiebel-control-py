@@ -333,15 +333,22 @@ class SignalGateway:
             return elster_entry.index
         return None
         
-    def update_system_status(self, status: str) -> None:
+    def update_system_status(self, status: str, attributes: Dict[str, Any] = None) -> None:
         """
-        Update the system status sensor.
+        Update the system status sensor and optionally its attributes.
         
         Args:
             status: Current system status (online, offline, starting, error)
+            attributes: Optional dictionary of attributes to update alongside the status
         """
         logger.info(f"System status: {status}")
+        
+        # Update the main state
         self.entity_service.update_entity_state("system_status", status)
+        
+        # If attributes are provided, update them as well
+        if attributes:
+            self.entity_service.update_entity_attributes("system_status", attributes)
         
     def update_entities_count(self, count: Optional[int] = None) -> None:
         """

@@ -1,15 +1,16 @@
-"""
-Service for registering entities with Home Assistant via MQTT.
+"""Service for registering entities with Home Assistant via MQTT.
 
 This service manages entity registration, tracking, and state updates.
 It provides methods for registering different types of entities (sensors,
 binary sensors, selects) and updating their states.
 """
 import logging
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List, Tuple
 
 from stiebel_control.ha_mqtt.mqtt_interface import MqttInterface
 from stiebel_control.ha_mqtt.signal_entity_mapper import SignalEntityMapper
+from stiebel_control.ha_mqtt.entity_rules import classify_signal, get_entity_id_from_signal, create_entity_config, format_value
+from stiebel_control.ha_mqtt.transformations import transform_value
 from stiebel_control.heatpump.elster_table import get_elster_entry_by_english_name, ElsterType
 
 logger = logging.getLogger(__name__)
@@ -39,49 +40,43 @@ class EntityRegistrationService:
         self.signal_mapper = signal_mapper
         self.entities = {}  # Store registered entities
         self.dyn_registered_entities = set()  # Store dynamically registered entities
-        # Set up device info
-        self.device_info = self._create_device_info()
         
         logger.info("Entity registration service initialized")
         
-    def _create_device_info(self) -> Dict[str, Any]:
+    @property
+    def device_info(self) -> Dict[str, Any]:
         """
-        Create device info for Home Assistant.
+        Get device information to include in discovery messages.
         
         Returns:
-            Dict[str, Any]: Device info
+            Dict with device information
         """
-        device_info = {
-            "identifiers": [self.mqtt_interface.client_id],
+        return {
+            "identifiers": [f"stiebel_control_{self.mqtt_interface.client_id}"],
             "name": "Stiebel Eltron Heat Pump",
-            "model": "CAN Interface",
+            "model": "WPL",
             "manufacturer": "Stiebel Eltron",
             "sw_version": "1.0.0"
         }
         
-        return device_info
         
     def register_entity_from_config(self, entity_id: str, entity_def: Dict[str, Any]) -> bool:
         """
-        Register an entity with Home Assistant based on configuration.
+        Register an entity from configuration.
         
         Args:
-            entity_id: Unique entity ID
-            entity_def: Entity definition from configuration
-            
+            entity_id: ID for the entity
+            entity_def: Entity definition from config file
+        
         Returns:
             bool: True if registration was successful, False otherwise
         """
-        # Skip if already registered
-        if entity_id in self.entities:
-            logger.debug(f"Entity {entity_id} already registered, skipping")
-            return True
-            
         entity_type = entity_def.get('type', 'sensor')
         name = entity_def.get('name', entity_id)
-        success = False
         
-        # Store signal mapping if provided
+        logger.info(f"Registering entity {entity_id} of type {entity_type}")
+        
+        # Store signal mapping if provided - critical for SignalGateway to route signals
         signal_name = entity_def.get('signal')
         can_member = entity_def.get('can_member')
         can_member_ids = entity_def.get('can_member_ids', [])
@@ -96,46 +91,38 @@ class EntityRegistrationService:
                 # The actual CAN ID will be resolved later
                 self.signal_mapper.add_mapping(signal_name, can_member, entity_id)
         
-        if entity_type == 'sensor':
-            # Register a sensor entity
-            success = self.register_sensor(
-                entity_id=entity_id,
-                name=name,
-                device_class=entity_def.get('device_class'),
-                state_class=entity_def.get('state_class'),
-                unit_of_measurement=entity_def.get('unit_of_measurement'),
-                icon=entity_def.get('icon')
-            )
-        elif entity_type == 'binary_sensor':
-            # Register a binary sensor entity
-            success = self.register_binary_sensor(
-                entity_id=entity_id,
-                name=name,
-                device_class=entity_def.get('device_class'),
-                icon=entity_def.get('icon')
-            )
-        elif entity_type == 'select':
-            # Register a select entity
-            options = entity_def.get('options', [])
-            success = self.register_select(
-                entity_id=entity_id,
-                name=name,
-                options=options,
-                icon=entity_def.get('icon')
-            )
-        else:
-            logger.warning(f"Unsupported entity type '{entity_type}' for entity {entity_id}")
-            return False
-            
-        if success:
-            # Add to registered entities
+        # Create a dictionary of kwargs for entity configuration
+        kwargs = {}
+        for key, value in entity_def.items():
+            if key not in ['type', 'name', 'signal', 'can_member', 'can_member_ids']:
+                kwargs[key] = value
+        
+        # Create discovery configuration
+        config, state_topic = create_entity_config(
+            entity_type=entity_type,
+            entity_id=entity_id,
+            name=name,
+            discovery_prefix=self.mqtt_interface.discovery_prefix,
+            base_topic=self.mqtt_interface.base_topic,
+            client_id=self.mqtt_interface.client_id,
+            device_info=self.device_info,
+            **kwargs
+        )
+        
+        # Publish discovery through MQTT interface
+        discovery_topic = f"{self.mqtt_interface.discovery_prefix}/{entity_type}/{entity_id}/config"
+        if self.mqtt_interface.publish_discovery(discovery_topic, config):
+            # Store entity info
             self.entities[entity_id] = {
                 "type": entity_type,
-                "config": entity_def
+                "state_topic": state_topic,
+                "config": config
             }
-            logger.info(f"Registered {entity_type} entity {entity_id}")
-            
-        return success
+            logger.info(f"Successfully registered entity {entity_id} as {entity_type}")
+            return True
+        else:
+            logger.error(f"Failed to publish discovery for {entity_id}")
+            return False
         
     def register_sensor(self, entity_id: str, name: str, device_class: str = None,
                        state_class: str = None, unit_of_measurement: str = None,
@@ -351,174 +338,70 @@ class EntityRegistrationService:
         Returns:
             str: Generated entity ID, or None if registration failed
         """
-        # Get signal info from Elster table
+        # Get signal info from Elster table if not provided
         elster_entry = get_elster_entry_by_english_name(signal_name)
-        
-        # Skip if we don't have valid values to register with
-        if elster_entry.name == "UNKNOWN":
-            logger.warning(f"Signal {signal_name} not found in Elster table, skipping dynamic registration")
+        if not elster_entry and not permissive_signal_handling:
+            logger.warning(f"Cannot register entity for unknown signal: {signal_name}")
             return None
-        elif elster_entry.type == ElsterType.ET_NONE:
-            # Check if permissive signal handling is enabled
-            if permissive_signal_handling:
-                logger.info(f"Signal {signal_name} has unknown type, but registering anyway due to permissive mode")
-                # Will continue with registration below
-            else:
-                logger.warning(f"Signal {signal_name} has unknown type, skipping dynamic registration")
-                return None
         
-        # Clean up signal name for use in entity ID
-        signal_id = signal_name.lower().replace(' ', '_').replace('.', '_')
+        # Use signal_type from elster_entry if not provided
+        if signal_type is None and elster_entry:
+            signal_type = elster_entry.type
+            
+        # Generate entity ID
+        entity_id = get_entity_id_from_signal(signal_name, member_name)
         
-        # Create entity ID
-        entity_id = f"{member_name.lower()}_{signal_id}"
-
         # Skip if already registered
-        if entity_id in self.dyn_registered_entities:
-            logger.debug(f"Entity {entity_id} already registered, skipping dynamic registration")
+        if entity_id in self.entities or entity_id in self.dyn_registered_entities:
+            logger.debug(f"Entity {entity_id} already registered")
             return entity_id
-        # Determine entity type and attributes based on Elster table data
-        entity_type = "sensor"  # Default entity type
-        device_class = None
-        state_class = "measurement"
-        unit_of_measurement = None
-        icon = None
         
-        # Get HA entity type and unit from Elster table when available
-        if hasattr(elster_entry, 'ha_entity_type') and elster_entry.ha_entity_type:
-            ha_entity_parts = elster_entry.ha_entity_type.split('.')
-            entity_type = ha_entity_parts[0]  # e.g., 'sensor' from 'sensor.temperature'
-            logger.debug(f"Entity type from Elster table: {entity_type}")
-            
-            # Extract device class if specified
-            if len(ha_entity_parts) > 1:
-                device_class = ha_entity_parts[1]  # e.g., 'temperature' from 'sensor.temperature'
-                logger.debug(f"Device class from Elster table: {device_class}")
+        # Get entity classification from rules module
+        entity_config = classify_signal(signal_name, signal_type, value)
+        entity_type = entity_config['entity_type']
+        config = entity_config['config']
         
-        # Get unit from Elster table
-        if hasattr(elster_entry, 'unit_of_measurement') and elster_entry.unit_of_measurement:
-            unit_of_measurement = elster_entry.unit_of_measurement
-            logger.debug(f"Unit of measurement from Elster table: {unit_of_measurement}")
+        # Create friendly name for the entity
+        friendly_name = f"{member_name} {signal_name}"
         
-        # Map icons based on device class and entity type
-        if device_class == "temperature" or unit_of_measurement == "°C":
-            icon = "mdi:thermometer-lines"
-        elif device_class == "humidity":
-            icon = "mdi:water-percent"
-        elif device_class == "pressure":
-            icon = "mdi:gauge"
-        elif device_class == "power" or unit_of_measurement == "W":
-            icon = "mdi:flash"
-        elif device_class == "energy" or unit_of_measurement == "Wh":
-            icon = "mdi:lightning-bolt"
-        elif "PERCENT" in signal_name or unit_of_measurement == "%":
-            icon = "mdi:percent"
-        elif "HOUR" in signal_name or unit_of_measurement == "h":
-            icon = "mdi:timer"
-        elif "MINUTE" in signal_name or unit_of_measurement == "min":
-            icon = "mdi:timer-outline"
-        elif "TIME" in signal_name:
-            icon = "mdi:clock-outline"
-        elif "DAY" in signal_name or unit_of_measurement == "d":
-            icon = "mdi:calendar-today"
-        elif "MONTH" in signal_name:
-            icon = "mdi:calendar-month"
-        elif "YEAR" in signal_name:
-            icon = "mdi:calendar"
-        elif entity_type == "enum" or entity_type == "select":
-            icon = "mdi:format-list-bulleted"
-        elif "ERROR" in signal_name or "FAULT" in signal_name:
-            icon = "mdi:alert-circle-outline"
-        elif "MODE" in signal_name:
-            icon = "mdi:format-list-bulleted"
-        else:
-            icon = "mdi:information-outline"
-            logger.debug(f"Unresolved signal type '{signal_type}' for signal {signal_name}")
-                
-        # Generate friendly name with device context
-        friendly_name = f"{signal_name.replace('_', ' ').title()} ({member_name.replace('_', ' ').title()})"
+        # Create discovery configuration
+        discovery_config, state_topic = create_entity_config(
+            entity_type=entity_type,
+            entity_id=entity_id,
+            name=friendly_name,
+            discovery_prefix=self.mqtt_interface.discovery_prefix,
+            base_topic=self.mqtt_interface.base_topic,
+            client_id=self.mqtt_interface.client_id,
+            device_info=self.device_info,
+            **config
+        )
         
-        # Register with Home Assistant
-        if entity_type.lower() == "sensor" and device_class != "enum":
-            success = self.register_sensor(
-                entity_id=entity_id,
-                name=friendly_name,
-                device_class=device_class,
-                state_class=state_class,
-                unit_of_measurement=unit_of_measurement,
-                icon=icon
-            )
-        elif entity_type.lower() == "binary_sensor":
-            success = self.register_binary_sensor(
-                entity_id=entity_id,
-                name=friendly_name,
-                device_class=device_class,
-                icon=icon
-            )
-        elif device_class == "sensor.enum":
-            # Check if we have mode list options
-            options_map = None
-            if "MODE" in signal_name:
-                options_map = list(MODELIST.values())
-            # Check if we have error list options
-            elif "ERROR" in signal_name:
-                options_map = list(ERRORLIST.values())
-                
-            if options_map:
-                success = self.register_sensor(
-                    entity_id=entity_id,
-                    name=friendly_name,
-                    device_class=device_class,
-                    icon=icon,
-                    attributes={"options": options_map}
-                )
-            else:
-                # No options available, register as regular sensor
-                success = self.register_sensor(
-                    entity_id=entity_id,
-                    name=friendly_name,
-                    device_class=device_class,
-                    icon=icon
-                )
-        else:
-            # Unknown type, register as generic sensor
-            permissive_info = " (permissive mode)" if permissive_signal_handling else ""
-            logger.info(f"Registering {entity_id} as generic sensor{permissive_info}")
-            
-            # In permissive mode, try to guess better defaults based on signal name
-            if permissive_signal_handling and elster_entry.type == ElsterType.ET_NONE:
-                # Add a special icon for permissive mode signals
-                if not icon:
-                    icon = "mdi:test-tube"
-                    
-                # Try to extract unit from signal name if not set
-                if not unit_of_measurement:
-                    if "TEMP" in signal_name:
-                        unit_of_measurement = "°C"
-                    elif "PERCENT" in signal_name:
-                        unit_of_measurement = "%"
-                    elif "TIME" in signal_name or "HOUR" in signal_name:
-                        unit_of_measurement = "h"
-            
-            success = self.register_sensor(
-                entity_id=entity_id,
-                name=friendly_name,
-                icon=icon,
-                unit_of_measurement=unit_of_measurement
-            )
-                
+        # Publish discovery configuration
+        discovery_topic = f"{self.mqtt_interface.discovery_prefix}/{entity_type}/{entity_id}/config"
+        success = self.mqtt_interface.publish_discovery(discovery_topic, discovery_config)
+        
         # Update entity list and register signal mapping if successful
         if success:
+            # Store entity info
+            self.entities[entity_id] = {
+                "type": entity_type,
+                "state_topic": state_topic,
+                "config": discovery_config
+            }
+            self.dyn_registered_entities.add(entity_id)
+            
             logger.info(f"Dynamically registered entity {entity_id} for signal {signal_name}")
+            
             # Register the signal mapping in SignalEntityMapper
-            # Use the member_name directly, no need to convert
             self.signal_mapper.add_mapping(signal_name, member_name, entity_id)
-                    
-            return entity_id  # Return entity_id on success (not boolean)
+            
+            return entity_id
         else:
             logger.warning(f"Failed to dynamically register entity {entity_id}")
-            return None  # Return None on failure (not boolean)
-        
+            return None
+            
+    # The _format_state_value method has been replaced by format_value from entity_rules
+
     def update_entity_state(self, entity_id: str, state: Any) -> bool:
         """
         Update the state of an entity.
@@ -531,19 +414,56 @@ class EntityRegistrationService:
             bool: True if update was successful, False otherwise
         """
         if entity_id not in self.entities:
-            logger.warning(f"Entity {entity_id} not registered, cannot update state")
+            logger.warning(f"Cannot update state for unknown entity: {entity_id}")
             return False
-        
-        entity_info = self.entities[entity_id]
-        state_topic = entity_info.get("state_topic")
-        
+
+        state_topic = self.entities[entity_id].get("state_topic")
         if not state_topic:
-            logger.warning(f"Entity {entity_id} has no state topic")
+            logger.warning(f"No state topic found for entity {entity_id}")
             return False
+
+        # Format state value based on entity type
+        entity_type = self.entities[entity_id].get("type")
+        formatted_state = format_value(state, entity_type)
+
+        # Publish state
+        success = self.mqtt_interface.publish_state(state_topic, formatted_state)
         
-        logger.info(f"Updating state for entity {entity_id} to {state}")
-        return self.mqtt_interface.publish_state(state_topic, state)
-    
+        if success:
+            logger.debug(f"Updated state for {entity_id}: {formatted_state}")
+        else:
+            logger.warning(f"Failed to update state for {entity_id}")
+            
+        return success
+        
+    def update_entity_attributes(self, entity_id: str, attributes: Dict[str, Any]) -> bool:
+        """
+        Update the attributes of an entity.
+            
+        Args:
+            entity_id: Entity ID to update
+            attributes: Dictionary of attributes to update
+            
+        Returns:
+            bool: True if update was successful, False otherwise
+        """
+        if entity_id not in self.entities:
+            logger.warning(f"Cannot update attributes for unknown entity: {entity_id}")
+            return False
+
+        # Get the attributes topic
+        attributes_topic = f"{self.mqtt_interface.base_topic}/{entity_id}/attributes"
+        
+        # Publish attributes
+        success = self.mqtt_interface.publish_state(attributes_topic, attributes)
+        
+        if success:
+            logger.debug(f"Updated attributes for {entity_id}: {attributes}")
+        else:
+            logger.warning(f"Failed to update attributes for {entity_id}")
+            
+        return success
+
     def get_entity_command_topic(self, entity_id: str) -> Optional[str]:
         """
         Get the command topic for an entity if it exists.
