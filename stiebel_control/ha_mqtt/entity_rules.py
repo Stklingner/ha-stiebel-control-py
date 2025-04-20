@@ -14,13 +14,15 @@ logger = logging.getLogger(__name__)
 
 HA_ENTITY_TYPES = {
     "sensor": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "", "state_class": ""},
-    "sensor.temperature": {"entity_type": "sensor","device_class": "temperature", "unit_of_measurement": "°C", "state_class": "measurement"},
-    "sensor.pressure": {"entity_type": "sensor","device_class": "pressure", "unit_of_measurement": "bar", "state_class": "measurement"},
-    "sensor.percent": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "%", "state_class": ""},
-    "sensor.hour": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "h", "state_class": ""},
-    "sensor.day": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "d", "state_class": ""},
-    "sensor.month": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "m", "state_class": ""},
-    "sensor.year": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "y", "state_class": ""},
+    "sensor.temperature": {"entity_type": "sensor","device_class": "temperature", "unit_of_measurement": "°C", "state_class": "measurement", "icon": "mdi:thermometer"},
+    "sensor.power": {"entity_type": "sensor","device_class": "power", "unit_of_measurement": "kW", "state_class": "measurement", "icon": "mdi:light-bulb"},
+    "sensor.energy": {"entity_type": "sensor","device_class": "energy", "unit_of_measurement": "kWh", "state_class": "total_increasing", "icon": "mdi:lightning-bolt"},
+    "sensor.pressure": {"entity_type": "sensor","device_class": "pressure", "unit_of_measurement": "bar", "state_class": "measurement", "icon": "mdi:gauge"},
+    "sensor.percent": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "%", "state_class": "", "icon": "mdi:percent"},
+    "sensor.hour": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "h", "state_class": "", "icon": "mdi:clock-outline"},
+    "sensor.day": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "d", "state_class": "", "icon": "mdi:calendar"},
+    "sensor.month": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "m", "state_class": "", "icon": "mdi:calendar-month-outline"},
+    "sensor.year": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "y", "state_class": "", "icon": "mdi:calendar-year-outline"},
     "binary_sensor": {"entity_type": "binary_sensor"}
 }
 
@@ -47,7 +49,7 @@ def classify_signal(signal_name: str, signal_type: Optional[str] = None, value: 
         signal_type = elster_entry.type
     
     # First check if we have an ha_entity_type in the Elster entry
-    if elster_entry and hasattr(elster_entry, 'ha_entity_type') and elster_entry.ha_entity_type:
+    if elster_entry and hasattr(elster_entry, 'ha_entity_type'):
         ha_type = elster_entry.ha_entity_type
         if ha_type in HA_ENTITY_TYPES:
             # Use the predefined configuration from HA_ENTITY_TYPES
@@ -58,7 +60,9 @@ def classify_signal(signal_name: str, signal_type: Optional[str] = None, value: 
             for key, value in config.items():
                 if value:  # Only add non-empty values
                     entity_config[key] = value
-                    
+            if hasattr(elster_entry, 'unit_of_measurement'):
+                entity_config['unit_of_measurement'] = elster_entry.unit_of_measurement
+
             logger.debug(f"Using ha_entity_type '{ha_type}' for signal {signal_name}")
             
         else:
