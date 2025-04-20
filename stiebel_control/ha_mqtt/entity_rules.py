@@ -12,6 +12,18 @@ from stiebel_control.heatpump.elster_table import get_elster_entry_by_english_na
 
 logger = logging.getLogger(__name__)
 
+HA_ENTITY_TYPES = {
+    "sensor": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "", "state_class": ""},
+    "sensor.temperature": {"entity_type": "sensor","device_class": "temperature", "unit_of_measurement": "°C", "state_class": "measurement"},
+    "sensor.pressure": {"entity_type": "sensor","device_class": "pressure", "unit_of_measurement": "bar", "state_class": "measurement"},
+    "sensor.percent": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "%", "state_class": ""},
+    "sensor.hour": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "h", "state_class": "total_increasing"},
+    "sensor.day": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "d", "state_class": "total_increasing"},
+    "sensor.month": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "m", "state_class": "total_increasing"},
+    "sensor.year": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "y", "state_class": "total_increasing"},
+    "binary_sensor": {"entity_type": "binary_sensor"}
+}
+
 def classify_signal(signal_name: str, signal_type: Optional[str] = None, value: Any = None) -> Dict[str, Any]:
     """
     Determine the appropriate entity type and attributes for a signal.
@@ -27,47 +39,67 @@ def classify_signal(signal_name: str, signal_type: Optional[str] = None, value: 
     entity_type = "sensor"  # Default entity type
     entity_config = {}
     
-    # If no signal type provided, try to get it from elster table
-    if not signal_type:
-        elster_entry = get_elster_entry_by_english_name(signal_name)
-        if elster_entry:
-            signal_type = elster_entry.type
+    # Get Elster entry to access ha_entity_type if available
+    elster_entry = get_elster_entry_by_english_name(signal_name)
     
-    # Classify based on signal name and type
-    if signal_type == ElsterType.ET_MODE.name or signal_type == ElsterType.ET_ERR_CODE.name:
-        # For dynamically registered entities, always use sensor with enum device_class
-        # instead of select to match existing behavior
-        entity_type = "sensor"
-        entity_config["device_class"] = "enum"
-    elif signal_type in [ElsterType.ET_BOOLEAN.name, ElsterType.ET_LITTLE_BOOL.name]:
-        entity_type = "binary_sensor"
-    elif "STATUS" in signal_name or "STATE" in signal_name:
-        # Status or state signals could be binary sensors or select entities
-        if isinstance(value, bool) or (isinstance(value, (int, float)) and (value == 0 or value == 1)):
-            entity_type = "binary_sensor"
+    # If no signal type provided, try to get it from elster table
+    if not signal_type and elster_entry:
+        signal_type = elster_entry.type
+    
+    # First check if we have an ha_entity_type in the Elster entry
+    if elster_entry and hasattr(elster_entry, 'ha_entity_type') and elster_entry.ha_entity_type:
+        ha_type = elster_entry.ha_entity_type
+        if ha_type in HA_ENTITY_TYPES:
+            # Use the predefined configuration from HA_ENTITY_TYPES
+            config = HA_ENTITY_TYPES[ha_type].copy()
+            entity_type = config.pop("entity_type")
+            
+            # Add non-empty values to entity_config
+            for key, value in config.items():
+                if value:  # Only add non-empty values
+                    entity_config[key] = value
+                    
+            logger.debug(f"Using ha_entity_type '{ha_type}' for signal {signal_name}")
+            
         else:
+            logger.warning(f"Unknown ha_entity_type '{ha_type}' for signal {signal_name}")
+    
+    # If we didn't get configuration from ha_entity_type, use rules
+    if not entity_config:
+        if signal_type == ElsterType.ET_MODE.name or signal_type == ElsterType.ET_ERR_CODE.name:
+            # For dynamically registered entities, always use sensor with enum device_class
+            # instead of select to match existing behavior
             entity_type = "sensor"
-    elif "TEMP" in signal_name:
-        entity_type = "sensor"
-        entity_config["device_class"] = "temperature"
-        entity_config["unit_of_measurement"] = "°C"
-        entity_config["state_class"] = "measurement"
-    elif "PRESSURE" in signal_name:
-        entity_type = "sensor"
-        entity_config["device_class"] = "pressure"
-        entity_config["unit_of_measurement"] = "bar"
-        entity_config["state_class"] = "measurement"
-    elif "PERCENT" in signal_name or signal_name.endswith("_PCT"):
-        entity_type = "sensor"
-        entity_config["unit_of_measurement"] = "%"
-        entity_config["state_class"] = "measurement"
-    elif "HOUR" in signal_name or "TIME" in signal_name:
-        entity_type = "sensor"
-        entity_config["unit_of_measurement"] = "h"
-        entity_config["state_class"] = "total_increasing"
-    elif "COUNT" in signal_name or "COUNTER" in signal_name:
-        entity_type = "sensor"
-        entity_config["state_class"] = "total_increasing"
+            entity_config["device_class"] = "enum"
+        elif signal_type in [ElsterType.ET_BOOLEAN.name, ElsterType.ET_LITTLE_BOOL.name]:
+            entity_type = "binary_sensor"
+        elif "STATUS" in signal_name or "STATE" in signal_name:
+            # Status or state signals could be binary sensors or select entities
+            if isinstance(value, bool) or (isinstance(value, (int, float)) and (value == 0 or value == 1)):
+                entity_type = "binary_sensor"
+            else:
+                entity_type = "sensor"
+        elif "TEMP" in signal_name:
+            entity_type = "sensor"
+            entity_config["device_class"] = "temperature"
+            entity_config["unit_of_measurement"] = "°C"
+            entity_config["state_class"] = "measurement"
+        elif "PRESSURE" in signal_name:
+            entity_type = "sensor"
+            entity_config["device_class"] = "pressure"
+            entity_config["unit_of_measurement"] = "bar"
+            entity_config["state_class"] = "measurement"
+        elif "PERCENT" in signal_name or signal_name.endswith("_PCT"):
+            entity_type = "sensor"
+            entity_config["unit_of_measurement"] = "%"
+            entity_config["state_class"] = "measurement"
+        elif "HOUR" in signal_name or "TIME" in signal_name:
+            entity_type = "sensor"
+            entity_config["unit_of_measurement"] = "h"
+            entity_config["state_class"] = "total_increasing"
+        elif "COUNT" in signal_name or "COUNTER" in signal_name:
+            entity_type = "sensor"
+            entity_config["state_class"] = "total_increasing"
     
     # Add state class for numeric values if not already set
     if entity_type == "sensor" and "state_class" not in entity_config:
