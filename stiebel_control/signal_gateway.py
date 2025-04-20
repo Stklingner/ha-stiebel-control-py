@@ -352,7 +352,7 @@ class SignalGateway:
         
     def update_entities_count(self, count: Optional[int] = None) -> None:
         """
-        Update the entities count sensor.
+        Update the entities count as an attribute of the system_status entity.
             
         Args:
             count: Number of entities or None to count automatically
@@ -362,7 +362,8 @@ class SignalGateway:
             count = len(self.entity_service.entities) + len(self.entity_service.dyn_registered_entities)
                 
         logger.debug(f"Entities count: {count}")
-        self.entity_service.update_entity_state("entities_count", count)
+        # Update as an attribute of system_status instead of a separate entity
+        self.entity_service.update_entity_attributes("system_status", {"entities_count": count})
         
     def set_signal_poller(self, signal_poller):
         """

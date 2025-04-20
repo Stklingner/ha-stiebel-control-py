@@ -117,7 +117,7 @@ class CanTransport:
                 data=data,
                 is_extended_id=is_extended_id
             )
-            self.bus.send(msg)
+            self.bus.send(msg, timeout=2.0)
             logger.debug(f"Sent CAN message: ID=0x{arbitration_id:X}, data={[hex(d) for d in data]}")
             return True
         except Exception as e:

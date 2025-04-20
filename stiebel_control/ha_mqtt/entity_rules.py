@@ -17,10 +17,10 @@ HA_ENTITY_TYPES = {
     "sensor.temperature": {"entity_type": "sensor","device_class": "temperature", "unit_of_measurement": "°C", "state_class": "measurement"},
     "sensor.pressure": {"entity_type": "sensor","device_class": "pressure", "unit_of_measurement": "bar", "state_class": "measurement"},
     "sensor.percent": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "%", "state_class": ""},
-    "sensor.hour": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "h", "state_class": "total_increasing"},
-    "sensor.day": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "d", "state_class": "total_increasing"},
-    "sensor.month": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "m", "state_class": "total_increasing"},
-    "sensor.year": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "y", "state_class": "total_increasing"},
+    "sensor.hour": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "h", "state_class": ""},
+    "sensor.day": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "d", "state_class": ""},
+    "sensor.month": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "m", "state_class": ""},
+    "sensor.year": {"entity_type": "sensor","device_class": "", "unit_of_measurement": "y", "state_class": ""},
     "binary_sensor": {"entity_type": "binary_sensor"}
 }
 
@@ -195,7 +195,7 @@ def get_icon_for_entity(entity_type: str, device_class: str, signal_name: str) -
             return "mdi:percent"
         elif "MINUTE" in signal_name or device_class == "timestamp":
             return "mdi:clock-outline"
-        elif "HOUR" in signal_name or "TIME" in signal_name or device_class == "timestamp":
+        elif "HOUR" in signal_name or device_class == "timestamp":
             return "mdi:clock-outline"
         elif "DAY" in signal_name or device_class == "date":
             return "mdi:calendar"

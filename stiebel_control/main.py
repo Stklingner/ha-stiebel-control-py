@@ -236,6 +236,7 @@ class StiebelControl:
             device_class="enum",
             state_class=None,
             unit_of_measurement=None,
+            attributes={"placeholder": True},
             options=["online", "offline", "starting", "error"]
         )
         
@@ -285,7 +286,6 @@ class StiebelControl:
         
         # Track time for different update frequencies
         last_poller_check = 0
-        last_entity_count_update = 0
         last_poller_stats_update = 0
         last_polled_signals_update = 0
         
@@ -318,7 +318,6 @@ class StiebelControl:
                     # Update attributes
                     self.entity_service.update_entity_attributes("system_status", system_attributes)
                     last_poller_stats_update = current_time
-                    last_entity_count_update = current_time  # Both are now handled together
                     
                 # Update the polled signals tracking every 15 seconds
                 # This keeps the signal gateway aware of what's been polled by the poller
@@ -327,7 +326,7 @@ class StiebelControl:
                     last_polled_signals_update = current_time
                 
                 # Short sleep to prevent CPU hogging
-                time.sleep(0.1)
+                time.sleep(0.2)
                 
             self.stop()
             
