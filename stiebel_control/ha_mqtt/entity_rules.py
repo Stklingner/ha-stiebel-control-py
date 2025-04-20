@@ -108,7 +108,7 @@ def classify_signal(signal_name: str, signal_type: Optional[str] = None, value: 
             entity_config["state_class"] = "measurement"
     
     # Add icon based on entity type
-    entity_config["icon"] = get_icon_for_entity(entity_type, signal_name)
+    entity_config["icon"] = get_icon_for_entity(entity_type, entity_config.get("device_class"), signal_name)
     
     return {
         "entity_type": entity_type,
@@ -140,12 +140,13 @@ def get_entity_id_from_signal(signal_name: str, member_name: str) -> str:
     
     return entity_id
 
-def get_icon_for_entity(entity_type: str, signal_name: str) -> str:
+def get_icon_for_entity(entity_type: str, device_class: str, signal_name: str) -> str:
     """
     Determine an appropriate icon for the entity.
     
     Args:
         entity_type: Type of entity (sensor, binary_sensor, select)
+        device_class: Device class of the entity
         signal_name: Name of the signal
         
     Returns:
@@ -161,14 +162,20 @@ def get_icon_for_entity(entity_type: str, signal_name: str) -> str:
     elif entity_type == "select":
         return "mdi:format-list-bulleted"
     elif entity_type == "sensor":
-        if "TEMP" in signal_name:
+        if "TEMP" in signal_name or device_class == "temperature":
             return "mdi:thermometer"
-        elif "PRESSURE" in signal_name:
+        elif "PRESSURE" in signal_name or device_class == "pressure":
             return "mdi:gauge"
-        elif "PERCENT" in signal_name or signal_name.endswith("_PCT"):
+        elif "PERCENT" in signal_name or signal_name.endswith("_PCT") or device_class == "enum":
             return "mdi:percent"
-        elif "HOUR" in signal_name or "TIME" in signal_name:
+        elif "HOUR" in signal_name or "TIME" in signal_name or device_class == "timestamp":
             return "mdi:clock-outline"
+        elif "DAY" in signal_name or device_class == "date":
+            return "mdi:calendar"
+        elif "MONTH" in signal_name or device_class == "month":
+            return "mdi:calendar-month-outline"
+        elif "YEAR" in signal_name or device_class == "year":
+            return "mdi:calendar-year-outline"
         elif "COUNT" in signal_name or "COUNTER" in signal_name:
             return "mdi:counter"
         else:
